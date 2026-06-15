@@ -1,0 +1,237 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}{{ 'page.profile.title'|trans }}{% endblock %}
+{% block storefront_data %}data-page="profile"{% endblock %}
+
+{% block main %}
+    <section class="profile-hero">
+        <div class="max-w-7xl mx-auto px-5 py-8 md:py-10">
+            <p class="text-xs text-text-light font-semibold mb-2">
+                <a href="{{ path('app_front_home') }}" class="hover:text-primary">{{ 'common.home'|trans }}</a>
+                <i class="fa-solid fa-chevron-right text-[8px] mx-2"></i>
+                {{ 'common.profile'|trans }}
+            </p>
+            <h1 class="font-display text-3xl md:text-4xl font-extrabold">{{ 'profile.title'|trans }}</h1>
+            <p class="text-text-light text-sm mt-2">{{ 'profile.intro'|trans }}</p>
+        </div>
+    </section>
+
+    <section class="profile-page max-w-5xl mx-auto px-5 py-10 md:py-16">
+        {% if app.user %}
+            <article class="profile-card">
+                <div class="profile-card__header">
+                    <div class="profile-card__avatar" aria-hidden="true">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div>
+                        <span class="profile-card__eyebrow">{{ 'profile.account'|trans }}</span>
+                        <h2>{{ 'profile.information'|trans }}</h2>
+                        <p>{{ user_identifier ?: 'profile.complete'|trans }}</p>
+                    </div>
+                    <span class="profile-card__status">
+                        <i class="fa-solid fa-circle-check"></i>
+                        {{ 'profile.connected'|trans }}
+                    </span>
+                </div>
+
+                <div class="profile-card__details">
+                    <div class="profile-detail">
+                        <span class="profile-detail__icon"><i class="fa-regular fa-id-card"></i></span>
+                        <div>
+                            <span>{{ 'common.last_name'|trans }}</span>
+                            <strong>{{ 'profile.not_provided'|trans }}</strong>
+                        </div>
+                    </div>
+                    <div class="profile-detail">
+                        <span class="profile-detail__icon"><i class="fa-regular fa-user"></i></span>
+                        <div>
+                            <span>{{ 'common.first_name'|trans }}</span>
+                            <strong>{{ 'profile.not_provided'|trans }}</strong>
+                        </div>
+                    </div>
+                    <div class="profile-detail profile-detail--address">
+                        <span class="profile-detail__icon"><i class="fa-solid fa-location-dot"></i></span>
+                        <div>
+                            <span>{{ 'profile.shipping_address'|trans }}</span>
+                            <strong>{{ 'profile.no_address'|trans }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% else %}
+            <div class="profile-auth" data-controller="profile-auth">
+                <div class="profile-auth__card" data-profile-auth-target="card">
+                    <article class="profile-auth__face profile-auth__face--login" data-profile-auth-target="login">
+                        <div class="profile-auth__heading">
+                            <span class="profile-auth__icon"><i class="fa-solid fa-right-to-bracket"></i></span>
+                            <div>
+                                <span class="profile-card__eyebrow">{{ 'auth.login.eyebrow'|trans }}</span>
+                                <h2>{{ 'auth.login.title'|trans }}</h2>
+                                <p>{{ 'auth.login.text'|trans }}</p>
+                            </div>
+                        </div>
+
+                        <form class="profile-auth__form" data-action="submit->profile-auth#preventSubmit">
+                            <label class="profile-auth__field">
+                                <span>{{ 'common.email'|trans }}</span>
+                                <span class="profile-auth__input">
+                                    <i class="fa-regular fa-envelope"></i>
+                                    <input type="email" name="email" autocomplete="email" required placeholder="email@example.com">
+                                </span>
+                            </label>
+                            <label class="profile-auth__field">
+                                <span>{{ 'common.password'|trans }}</span>
+                                <span class="profile-auth__input">
+                                    <i class="fa-solid fa-lock"></i>
+                                    <input type="password" name="password" autocomplete="current-password" required placeholder="••••••••">
+                                </span>
+                            </label>
+                            <button type="submit" class="profile-auth__submit">
+                                {{ 'auth.login.submit'|trans }}
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </form>
+
+                        <p class="profile-auth__switch">
+                            {{ 'auth.login.no_account'|trans }}
+                            <button type="button" data-action="profile-auth#showRegister">{{ 'auth.login.register'|trans }}</button>
+                        </p>
+                        <p class="profile-auth__notice hidden" data-profile-auth-target="notice">{{ 'auth.unavailable'|trans }}</p>
+                    </article>
+
+                    <article class="profile-auth__face profile-auth__face--register" data-profile-auth-target="register">
+                        <div class="profile-auth__heading">
+                            <span class="profile-auth__icon profile-auth__icon--register"><i class="fa-solid fa-user-plus"></i></span>
+                            <div>
+                                <span class="profile-card__eyebrow">{{ 'auth.register.eyebrow'|trans }}</span>
+                                <h2>{{ 'auth.register.title'|trans }}</h2>
+                                <p>{{ 'auth.register.text'|trans }}</p>
+                            </div>
+                        </div>
+
+                        <form class="profile-auth__form" data-action="submit->profile-auth#preventSubmit">
+                            <div class="profile-auth__grid">
+                                <label class="profile-auth__field">
+                                    <span>{{ 'common.last_name'|trans }}</span>
+                                    <span class="profile-auth__input">
+                                        <i class="fa-regular fa-id-card"></i>
+                                        <input type="text" name="last_name" autocomplete="family-name" required>
+                                    </span>
+                                </label>
+                                <label class="profile-auth__field">
+                                    <span>{{ 'common.first_name'|trans }}</span>
+                                    <span class="profile-auth__input">
+                                        <i class="fa-regular fa-user"></i>
+                                        <input type="text" name="first_name" autocomplete="given-name" required>
+                                    </span>
+                                </label>
+                            </div>
+                            <label class="profile-auth__field">
+                                <span>{{ 'common.email'|trans }}</span>
+                                <span class="profile-auth__input">
+                                    <i class="fa-regular fa-envelope"></i>
+                                    <input type="email" name="email" autocomplete="email" required placeholder="email@example.com">
+                                </span>
+                            </label>
+                            <label class="profile-auth__field">
+                                <span>{{ 'common.password'|trans }}</span>
+                                <span class="profile-auth__input">
+                                    <i class="fa-solid fa-lock"></i>
+                                    <input type="password" name="password" autocomplete="new-password" minlength="8" required placeholder="••••••••">
+                                </span>
+                            </label>
+                            <fieldset class="profile-auth__address">
+                                <legend>{{ 'auth.register.shipping_address'|trans }}</legend>
+                                <label class="profile-auth__field">
+                                    <span>{{ 'common.street'|trans }}</span>
+                                    <span class="profile-auth__input">
+                                        <i class="fa-solid fa-road"></i>
+                                        <input type="text" name="street" autocomplete="street-address" required>
+                                    </span>
+                                </label>
+                                <div class="profile-auth__grid profile-auth__grid--address">
+                                    <label class="profile-auth__field">
+                                        <span>{{ 'common.postal_code'|trans }}</span>
+                                        <span class="profile-auth__input">
+                                            <i class="fa-solid fa-location-crosshairs"></i>
+                                            <input type="text" name="postal_code" autocomplete="postal-code" inputmode="numeric" required>
+                                        </span>
+                                    </label>
+                                    <label class="profile-auth__field">
+                                        <span>{{ 'common.city'|trans }}</span>
+                                        <span class="profile-auth__input">
+                                            <i class="fa-solid fa-city"></i>
+                                            <input type="text" name="city" autocomplete="address-level2" required>
+                                        </span>
+                                    </label>
+                                </div>
+                            </fieldset>
+                            <button type="submit" class="profile-auth__submit">
+                                {{ 'auth.register.submit'|trans }}
+                                <i class="fa-solid fa-user-plus"></i>
+                            </button>
+                        </form>
+
+                        <p class="profile-auth__switch">
+                            {{ 'auth.register.has_account'|trans }}
+                            <button type="button" data-action="profile-auth#showLogin">{{ 'auth.register.login'|trans }}</button>
+                        </p>
+                        <p class="profile-auth__notice hidden" data-profile-auth-target="notice">{{ 'auth.unavailable'|trans }}</p>
+                    </article>
+                </div>
+            </div>
+        {% endif %}
+
+        <article
+            class="language-card"
+            aria-labelledby="language-title"
+            data-controller="language"
+            data-language-current-value="{{ app.request.locale }}"
+        >
+            <div class="language-card__heading">
+                <span class="language-card__icon"><i class="fa-solid fa-language"></i></span>
+                <div>
+                    <span class="profile-card__eyebrow">{{ 'profile.preferences'|trans }}</span>
+                    <h2 id="language-title">{{ 'profile.language_title'|trans }}</h2>
+                    <p>{{ 'profile.language_text'|trans }}</p>
+                </div>
+            </div>
+
+            <div class="language-selector" role="group" aria-label="{{ 'profile.language_label'|trans }}">
+                <button
+                    type="button"
+                    class="language-option {{ app.request.locale == 'fr' ? 'is-active' : '' }}"
+                    data-action="language#select"
+                    data-language-locale-param="fr"
+                    aria-pressed="{{ app.request.locale == 'fr' ? 'true' : 'false' }}"
+                >
+                    <span class="language-option__flag">
+                        <img src="{{ asset('img/languages/fr.svg') }}" alt="" aria-hidden="true">
+                    </span>
+                    <span class="language-option__label">
+                        <strong>{{ 'profile.french'|trans }}</strong>
+                        <small>{{ 'profile.france'|trans }}</small>
+                    </span>
+                    <span class="language-option__check"><i class="fa-solid fa-check"></i></span>
+                </button>
+                <button
+                    type="button"
+                    class="language-option {{ app.request.locale == 'en' ? 'is-active' : '' }}"
+                    data-action="language#select"
+                    data-language-locale-param="en"
+                    aria-pressed="{{ app.request.locale == 'en' ? 'true' : 'false' }}"
+                >
+                    <span class="language-option__flag">
+                        <img src="{{ asset('img/languages/gb.svg') }}" alt="" aria-hidden="true">
+                    </span>
+                    <span class="language-option__label">
+                        <strong>{{ 'profile.english'|trans }}</strong>
+                        <small>{{ 'profile.international'|trans }}</small>
+                    </span>
+                    <span class="language-option__check"><i class="fa-solid fa-check"></i></span>
+                </button>
+            </div>
+            <p class="language-card__notice"><i class="fa-solid fa-cookie-bite"></i> {{ 'profile.language_notice'|trans }}</p>
+        </article>
+    </section>
+{% endblock %}

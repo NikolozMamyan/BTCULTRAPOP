@@ -1,0 +1,153 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}{{ product.name }} | ULTRAPOP{% endblock %}
+{% block storefront_data %}data-page="product"{% endblock %}
+
+{% block main %}
+    <header class="product-hero" style="--product-hero-image: url('{{ product.img }}')">
+        <div class="product-hero__overlay"></div>
+        <div class="product-hero__content max-w-7xl mx-auto px-5">
+            <p>
+                <a href="{{ path('app_front_home') }}">{{ 'common.home'|trans }}</a>
+                <i class="fa-solid fa-chevron-right"></i>
+                <a href="{{ path('app_front_boutique') }}">{{ 'common.shop'|trans }}</a>
+                <i class="fa-solid fa-chevron-right"></i>
+                {{ product.name }}
+            </p>
+            <span>{{ product.cat }}</span>
+            <h1>{{ product.name }}</h1>
+        </div>
+    </header>
+
+    <main
+        class="product-page max-w-7xl mx-auto px-5"
+        data-controller="product-detail"
+    >
+        <article class="product-detail">
+            <div class="product-detail__gallery">
+                <div class="product-detail__visual">
+                    {% if product.tag %}
+                        <span class="shop-product-card__tag {{ product.tag == 'Promo' ? 'is-promo' : 'is-new' }}">
+                            {{ product.tag == 'Promo' ? 'product.tag.promo'|trans : 'product.tag.new'|trans }}
+                        </span>
+                    {% endif %}
+                    <img src="{{ product.img }}" alt="{{ product.name }}">
+                </div>
+                <button type="button" class="product-detail__thumbnail is-active" aria-label="{{ 'product.main_image'|trans }}">
+                    <img src="{{ product.img }}" alt="">
+                </button>
+            </div>
+
+            <div class="product-detail__content">
+                <div class="product-detail__badges">
+                    <span>{{ product.cat }}</span>
+                    <span class="is-stock"><i class="fa-solid fa-circle-check"></i> {{ 'product.in_stock'|trans }}</span>
+                </div>
+
+                <h2>{{ product.name }}</h2>
+
+                <div class="product-detail__rating">
+                    <span>
+                        {% set full_stars = product.rating|round(0, 'floor') %}
+                        {% for index in 1..5 %}
+                            <i class="{{ index <= full_stars ? 'fa-solid' : 'fa-regular' }} fa-star"></i>
+                        {% endfor %}
+                    </span>
+                    <strong>{{ product.rating|number_format(1, ',', ' ') }}</strong>
+                    <small>{{ 'product.popularity'|trans({'%value%': product.pop}) }}</small>
+                </div>
+
+                <div class="product-detail__price">
+                    <strong>{{ product.price|number_format(2, ',', ' ') }} €</strong>
+                    {% if product.old %}
+                        <del>{{ product.old|number_format(2, ',', ' ') }} €</del>
+                        <span>-{{ (((product.old - product.price) / product.old) * 100)|round }}%</span>
+                    {% endif %}
+                </div>
+
+                <div class="product-detail__stock">
+                    <i class="fa-solid fa-bolt"></i>
+                    <div>
+                        <strong>{{ 'product.available_now'|trans }}</strong>
+                        <span>{{ 'product.shipping_note'|trans }}</span>
+                    </div>
+                </div>
+
+                <p class="product-detail__description">{{ 'product.description'|trans({'%name%': product.name}) }}</p>
+
+                <div class="product-detail__purchase">
+                    <div class="product-quantity" aria-label="{{ 'product.quantity'|trans }}">
+                        <button type="button" data-action="product-detail#decrement" aria-label="{{ 'product.quantity_less'|trans }}">
+                            <i class="fa-solid fa-minus"></i>
+                        </button>
+                        <span data-product-detail-target="quantity">1</span>
+                        <button type="button" data-action="product-detail#increment" aria-label="{{ 'product.quantity_more'|trans }}">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                    <button type="button" class="product-detail__primary">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                        {{ 'product.add_to_cart'|trans }}
+                    </button>
+                    <button type="button" class="product-detail__secondary" aria-label="{{ 'product.add_favorite'|trans }}">
+                        <i class="fa-regular fa-heart"></i>
+                    </button>
+                </div>
+
+                <div class="product-detail__benefits">
+                    <span><i class="fa-solid fa-truck-fast"></i> {{ 'product.fast_delivery'|trans }}</span>
+                    <span><i class="fa-solid fa-lock"></i> {{ 'product.secure_payment'|trans }}</span>
+                    <span><i class="fa-solid fa-clapperboard"></i> {{ 'product.official_license'|trans }}</span>
+                </div>
+            </div>
+        </article>
+
+        <section class="product-tabs">
+            <div class="product-tabs__nav" role="tablist">
+                <button type="button" class="is-active" data-product-detail-target="tab" data-product-detail-panel-param="description" data-action="product-detail#selectTab">
+                    {{ 'product.tabs.description'|trans }}
+                </button>
+                <button type="button" data-product-detail-target="tab" data-product-detail-panel-param="specifications" data-action="product-detail#selectTab">
+                    {{ 'product.tabs.specifications'|trans }}
+                </button>
+                <button type="button" data-product-detail-target="tab" data-product-detail-panel-param="reviews" data-action="product-detail#selectTab">
+                    {{ 'product.tabs.reviews'|trans }}
+                </button>
+            </div>
+
+            <div class="product-tabs__panel is-active" data-product-detail-target="panel" data-panel="description">
+                <h3>{{ 'product.tabs.description'|trans }}</h3>
+                <p>{{ 'product.long_description'|trans({'%name%': product.name, '%category%': product.cat}) }}</p>
+            </div>
+            <div class="product-tabs__panel" data-product-detail-target="panel" data-panel="specifications" hidden>
+                <dl class="product-specifications">
+                    <div><dt>{{ 'product.spec.category'|trans }}</dt><dd>{{ product.cat }}</dd></div>
+                    <div><dt>{{ 'product.spec.rating'|trans }}</dt><dd>{{ product.rating|number_format(1, ',', ' ') }}/5</dd></div>
+                    <div><dt>{{ 'product.spec.popularity'|trans }}</dt><dd>{{ product.pop }}/100</dd></div>
+                    <div><dt>{{ 'product.spec.reference'|trans }}</dt><dd>UP-{{ '%04d'|format(product.id) }}</dd></div>
+                </dl>
+            </div>
+            <div class="product-tabs__panel" data-product-detail-target="panel" data-panel="reviews" hidden>
+                <div class="product-no-reviews">
+                    <i class="fa-regular fa-comment-dots"></i>
+                    <p>{{ 'product.no_reviews'|trans }}</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="product-related">
+            <div class="product-related__heading">
+                <div>
+                    <span>{{ 'product.related_eyebrow'|trans }}</span>
+                    <h2>{{ 'product.related'|trans }}</h2>
+                </div>
+                <a href="{{ path('app_front_boutique') }}">{{ 'common.see_all'|trans }} <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+            <div class="shop-products-grid">
+                {% for related_product in related_products %}
+                    {% include 'front/boutique/_product_card.html.twig' with {product: related_product} only %}
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+{% endblock %}

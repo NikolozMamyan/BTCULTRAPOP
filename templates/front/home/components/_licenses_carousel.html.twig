@@ -1,0 +1,56 @@
+{% set licenses = [
+    {name: 'One Piece', image: 'img/licenses/MENU_LICENCE-01.png'},
+    {name: 'Naruto Shippuden', image: 'img/licenses/MENU_LICENCE-02.png'},
+    {name: 'Dragon Ball Z', image: 'img/licenses/MENU_LICENCE-03.png'},
+    {name: 'Dragon Ball Super', image: 'img/licenses/MENU_LICENCE-04.png'},
+    {name: 'Arcane', image: 'img/licenses/MENU_LICENCE-05.png'},
+    {name: 'Demon Slayer', image: 'img/licenses/MENU_LICENCE-06.png'},
+    {name: 'Jujutsu Kaisen', image: 'img/licenses/MENU_LICENCE-07.png'}
+] %}
+
+<section
+    class="licenses-showcase mt-16 reveal"
+    aria-labelledby="licenses-showcase-title"
+    data-controller="licenses-carousel"
+>
+    <div class="max-w-7xl mx-auto px-5">
+        <div class="section-heading">
+            <div>
+                <span class="section-heading__eyebrow">{{ 'home.licenses.eyebrow'|trans }}</span>
+                <h2 id="licenses-showcase-title">{{ 'home.licenses.title'|trans }}</h2>
+                <p>{{ 'home.licenses.text'|trans }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div
+        class="licenses-carousel"
+        aria-label="{{ 'home.licenses.carousel_label'|trans }}"
+        data-licenses-carousel-target="viewport"
+        data-action="pointerdown->licenses-carousel#startDrag pointermove->licenses-carousel#drag pointerup->licenses-carousel#endDrag pointercancel->licenses-carousel#endDrag click->licenses-carousel#preventClick"
+    >
+        <div class="licenses-carousel__track">
+            {% for duplicate in 0..1 %}
+                <div
+                    class="licenses-carousel__group"
+                    {{ duplicate == 0 ? 'data-licenses-carousel-target="group"' : 'aria-hidden="true"' }}
+                >
+                    {% for license in licenses %}
+                        <a href="{{ path('app_front_licences') }}" class="license-card">
+                            <span class="license-card__visual">
+                                <img src="{{ asset(license.image) }}" alt="{{ license.name }}" draggable="false">
+                            </span>
+                            <span class="license-card__footer">
+                                <span>
+                                    <small>{{ 'home.licenses.official'|trans }}</small>
+                                    <strong>{{ license.name }}</strong>
+                                </span>
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </span>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>

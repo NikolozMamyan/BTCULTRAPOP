@@ -1,0 +1,15 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}{{ 'page.sales.title'|trans }}{% endblock %}
+{% block storefront_data %}data-page="shop"{% endblock %}
+
+{% block main %}
+    {% include 'front/boutique/_catalog.html.twig' with {
+        breadcrumb: 'common.sales',
+        title: 'common.sales',
+        icon: 'fa-solid fa-tags',
+        eyebrow: 'sales.empty_eyebrow',
+        empty_title: 'sales.empty_title',
+        empty_text: 'sales.empty_text'
+    } only %}
+{% endblock %}

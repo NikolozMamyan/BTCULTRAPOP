@@ -1,0 +1,8 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}{{ 'page.shop.title'|trans }}{% endblock %}
+{% block storefront_data %}data-page="shop"{% endblock %}
+
+{% block main %}
+    {% include 'front/boutique/_catalog.html.twig' with {products: products} only %}
+{% endblock %}

@@ -1,0 +1,193 @@
+{% set catalog_products = products|default([]) %}
+{% set catalog_breadcrumb = breadcrumb|default('shop.breadcrumb') %}
+{% set catalog_title = title|default('shop.title') %}
+
+{% if catalog_products %}
+    <section class="shop-catalog">
+        <h1 class="sr-only">{{ catalog_title|trans }}</h1>
+        <div
+            class="shop-layout max-w-7xl mx-auto px-5"
+            data-controller="shop-filters"
+            data-shop-filters-all-value="{{ 'shop.filters.all'|trans }}"
+        >
+            <button
+                type="button"
+                class="shop-filter-backdrop"
+                data-shop-filters-target="backdrop"
+                data-action="shop-filters#closeModal"
+                aria-label="{{ 'shop.filters.close'|trans }}"
+                tabindex="-1"
+            ></button>
+
+            <aside
+                id="shop-filters-modal"
+                class="shop-sidebar"
+                data-shop-filters-target="modal"
+                aria-label="{{ 'shop.filters.title'|trans }}"
+                tabindex="-1"
+            >
+                <div class="shop-filter-modal__handle" aria-hidden="true"></div>
+                <div class="shop-filter-modal__header">
+                    <div>
+                        <span>{{ 'shop.filters.mobile_eyebrow'|trans }}</span>
+                        <h2>{{ 'shop.filters.title'|trans }}</h2>
+                    </div>
+                    <div class="shop-filter-modal__header-actions">
+                        <button type="button" class="shop-filter-reset" data-action="shop-filters#reset">
+                            {{ 'shop.filters.reset'|trans }}
+                        </button>
+                        <button
+                            type="button"
+                            class="shop-filter-close"
+                            data-action="shop-filters#closeModal"
+                            aria-label="{{ 'shop.filters.close'|trans }}"
+                        >
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <section class="shop-filter-card">
+                    <h2 class="shop-filter-title">
+                        <i class="fa-solid fa-layer-group"></i>
+                        {{ 'shop.filters.categories'|trans }}
+                    </h2>
+                    <div class="shop-category-list">
+                        <button
+                            type="button"
+                            class="shop-category-button is-active"
+                            data-shop-filters-target="category"
+                            data-shop-filters-category-param="all"
+                            data-action="shop-filters#selectCategory"
+                        >{{ 'shop.filters.all'|trans }}</button>
+                        {% for category in ['Figurines', 'Mangas', 'Goodies'] %}
+                            <button
+                                type="button"
+                                class="shop-category-button"
+                                data-shop-filters-target="category"
+                                data-shop-filters-category-param="{{ category }}"
+                                data-action="shop-filters#selectCategory"
+                            >{{ category }}</button>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="shop-filter-card">
+                    <h2 class="shop-filter-title">
+                        <i class="fa-solid fa-sliders"></i>
+                        {{ 'shop.filters.max_price'|trans }}
+                    </h2>
+                    <input
+                        class="shop-price-range"
+                        type="range"
+                        min="20"
+                        max="120"
+                        value="120"
+                        step="5"
+                        data-shop-filters-target="price"
+                        data-action="input->shop-filters#filter"
+                        aria-label="{{ 'shop.filters.max_price'|trans }}"
+                    >
+                    <p class="shop-price-label">
+                        {{ 'shop.filters.up_to'|trans }}
+                        <strong><span data-shop-filters-target="priceLabel">120</span> €</strong>
+                    </p>
+                </section>
+
+                <section class="shop-filter-card">
+                    <h2 class="shop-filter-title">
+                        <i class="fa-solid fa-tag"></i>
+                        {{ 'shop.filters.quick'|trans }}
+                    </h2>
+                    <label class="shop-filter-check">
+                        <input
+                            type="checkbox"
+                            data-shop-filters-target="promo"
+                            data-action="change->shop-filters#filter"
+                        >
+                        <span>{{ 'shop.filters.promo_only'|trans }}</span>
+                    </label>
+                    <label class="shop-filter-check">
+                        <input
+                            type="checkbox"
+                            data-shop-filters-target="new"
+                            data-action="change->shop-filters#filter"
+                        >
+                        <span>{{ 'shop.filters.new_only'|trans }}</span>
+                    </label>
+                </section>
+
+                <div class="shop-filter-modal__footer">
+                    <button type="button" data-action="shop-filters#closeModal">
+                        {{ 'shop.filters.show_results'|trans }}
+                        <span data-shop-filters-target="mobileCount">{{ catalog_products|length }}</span>
+                    </button>
+                </div>
+            </aside>
+
+            <div class="shop-results">
+                <div class="shop-results-toolbar">
+                    <div class="shop-results-summary">
+                        <p>
+                            <strong data-shop-filters-target="count">{{ catalog_products|length }}</strong>
+                            {{ 'shop.products'|trans }}
+                        </p>
+                        <button
+                            type="button"
+                            class="shop-filter-trigger"
+                            data-shop-filters-target="trigger"
+                            data-action="shop-filters#openModal"
+                            aria-controls="shop-filters-modal"
+                            aria-expanded="false"
+                        >
+                            <i class="fa-solid fa-sliders"></i>
+                            {{ 'shop.filters.open'|trans }}
+                            <span data-shop-filters-target="activeCount" hidden>0</span>
+                        </button>
+                    </div>
+                    <label class="shop-sort">
+                        <span class="sr-only">{{ 'shop.sort.label'|trans }}</span>
+                        <select data-shop-filters-target="sort" data-action="change->shop-filters#filter">
+                            <option value="pop">{{ 'shop.sort.popularity'|trans }}</option>
+                            <option value="price-asc">{{ 'shop.sort.price_asc'|trans }}</option>
+                            <option value="price-desc">{{ 'shop.sort.price_desc'|trans }}</option>
+                            <option value="rating">{{ 'shop.sort.rating'|trans }}</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                    </label>
+                </div>
+
+                <div class="shop-products-grid" data-shop-filters-target="grid">
+                    {% for product in catalog_products %}
+                        {% include 'front/boutique/_product_card.html.twig' with {product: product} only %}
+                    {% endfor %}
+                </div>
+
+                <div class="shop-no-results" data-shop-filters-target="empty" hidden>
+                    <i class="fa-solid fa-box-open"></i>
+                    <p>{{ 'shop.filters.no_results'|trans }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+{% else %}
+    <section class="bg-bg-light border-b border-border-c">
+        <div class="max-w-7xl mx-auto px-5 py-8">
+            <p class="text-xs text-text-light font-semibold mb-2">
+                <a href="{{ path('app_front_home') }}" class="hover:text-primary">{{ 'common.home'|trans }}</a>
+                <i class="fa-solid fa-chevron-right text-[8px] mx-2"></i> {{ catalog_breadcrumb|trans }}
+            </p>
+            <h1 class="font-display text-3xl md:text-4xl font-extrabold">{{ catalog_title|trans }}</h1>
+        </div>
+    </section>
+    <section class="max-w-7xl mx-auto px-5 py-10 md:py-16">
+        {% include 'front/components/_catalog_empty.html.twig' with {
+            icon: icon,
+            eyebrow: eyebrow,
+            title: empty_title,
+            text: empty_text,
+            action_url: path('app_front_home'),
+            action_label: 'catalog.back_home'
+        } only %}
+    </section>
+{% endif %}

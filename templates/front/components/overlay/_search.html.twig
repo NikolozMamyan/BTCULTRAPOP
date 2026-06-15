@@ -1,0 +1,17 @@
+<div id="search-modal" class="modal-wrap fixed inset-0 z-[90] hidden">
+    <button type="button" data-action="search-close" class="absolute inset-0 bg-black/50 backdrop-blur-sm" aria-label="{{ 'overlay.close_search'|trans }}"></button>
+    <div class="modal-box relative max-w-xl mx-auto mt-24 bg-white rounded-lg-c shadow-lg-c overflow-hidden mx-4">
+        <div class="flex items-center px-5 h-16 border-b border-border-c">
+            <i class="fa-solid fa-magnifying-glass text-text-light"></i>
+            <input id="search-input" placeholder="{{ 'overlay.search_product'|trans }}" class="flex-1 px-4 outline-none text-base" disabled>
+            <button type="button" data-action="search-close" class="text-text-light hover:text-primary" aria-label="{{ 'common.close'|trans }}"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="search-results" class="max-h-80 overflow-y-auto p-3">
+            <div class="text-center text-text-light py-10">
+                <i class="fa-solid fa-magnifying-glass text-3xl opacity-20 mb-3"></i>
+                <p class="font-bold text-text-dark mb-1">{{ 'overlay.search_empty_title'|trans }}</p>
+                <p class="text-sm">{{ 'overlay.search_empty_text'|trans }}</p>
+            </div>
+        </div>
+    </div>
+</div>

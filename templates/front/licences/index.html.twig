@@ -1,0 +1,15 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}{{ 'page.licenses.title'|trans }}{% endblock %}
+{% block storefront_data %}data-page="shop"{% endblock %}
+
+{% block main %}
+    {% include 'front/boutique/_catalog.html.twig' with {
+        breadcrumb: 'common.licenses',
+        title: 'common.licenses',
+        icon: 'fa-solid fa-clapperboard',
+        eyebrow: 'licenses.empty_eyebrow',
+        empty_title: 'licenses.empty_title',
+        empty_text: 'licenses.empty_text'
+    } only %}
+{% endblock %}

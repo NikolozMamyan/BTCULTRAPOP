@@ -1,5 +1,13 @@
 import { startStimulusApp } from '@symfony/stimulus-bundle';
+import LanguageController from './controllers/language_controller.js';
+import LicensesCarouselController from './controllers/licenses_carousel_controller.js';
+import ProductDetailController from './controllers/product_detail_controller.js';
+import ProfileAuthController from './controllers/profile_auth_controller.js';
+import ShopFiltersController from './controllers/shop_filters_controller.js';
 
 const app = startStimulusApp();
-// register any custom, 3rd party controllers here
-// app.register('some_controller_name', SomeImportedController);
+app.register('language', LanguageController);
+app.register('licenses-carousel', LicensesCarouselController);
+app.register('product-detail', ProductDetailController);
+app.register('profile-auth', ProfileAuthController);
+app.register('shop-filters', ShopFiltersController);

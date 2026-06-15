@@ -1,0 +1,29 @@
+{% set current_route = app.request.attributes.get('_route') %}
+
+<nav class="mobile-app-nav lg:hidden" aria-label="{{ 'nav.mobile_label'|trans }}">
+    <div class="mobile-app-nav__inner">
+        <a href="{{ path('app_front_home') }}" class="mobile-app-nav__item {{ current_route == 'app_front_home' ? 'is-active' : '' }}">
+            <span class="mobile-app-nav__icon"><i class="fa-solid fa-house"></i></span>
+            <span>{{ 'common.home'|trans }}</span>
+        </a>
+        <a href="{{ path('app_front_licences') }}" class="mobile-app-nav__item {{ current_route == 'app_front_licences' ? 'is-active' : '' }}">
+            <span class="mobile-app-nav__icon"><i class="fa-solid fa-clapperboard"></i></span>
+            <span>{{ 'common.licenses'|trans }}</span>
+        </a>
+        <a href="{{ path('app_front_boutique') }}" class="mobile-app-nav__item mobile-app-nav__item--primary {{ current_route in ['app_front_boutique', 'app_front_product'] ? 'is-active' : '' }}">
+            <span class="mobile-app-nav__primary-icon"><i class="fa-solid fa-store"></i></span>
+            <span>{{ 'common.shop'|trans }}</span>
+        </a>
+        <a href="{{ path('app_front_favoris') }}" class="mobile-app-nav__item {{ current_route == 'app_front_favoris' ? 'is-active' : '' }}">
+            <span class="mobile-app-nav__icon"><i class="fa-regular fa-heart"></i></span>
+            <span>{{ 'common.favorites'|trans }}</span>
+        </a>
+        <a href="{{ path('app_front_cart') }}" class="mobile-app-nav__item {{ current_route == 'app_front_cart' ? 'is-active' : '' }}">
+            <span class="mobile-app-nav__icon mobile-app-nav__cart-icon">
+                <i class="fa-solid fa-bag-shopping"></i>
+                <span class="cart-count mobile-app-nav__badge">0</span>
+            </span>
+            <span>{{ 'common.cart'|trans }}</span>
+        </a>
+    </div>
+</nav>

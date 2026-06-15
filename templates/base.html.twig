@@ -1,9 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ app.request.locale }}" class="scroll-smooth">
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#203263">
+        <meta name="description" content="{% block meta_description %}{{ 'meta.description'|trans }}{% endblock %}">
+        <title>{% block title %}ULTRAPOP{% endblock %}</title>
+        <link rel="icon" type="image/x-icon" href="https://ultrapop.com/img/favicon.ico">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            primary: '#e82118',
+                            'primary-d': '#c01711',
+                            secondary: '#ffcc07',
+                            'text-dark': '#203263',
+                            'text-light': '#666',
+                            'border-c': '#e5e7eb',
+                            'bg-light': '#f9fafb',
+                            success: '#10b981',
+                        },
+                        fontFamily: {
+                            display: ['"Bricolage Grotesque"', 'sans-serif'],
+                            sans: ['Archivo', 'sans-serif'],
+                        },
+                        boxShadow: {
+                            'sm-c': '0 1px 3px rgba(0,0,0,.08)',
+                            'md-c': '0 4px 12px rgba(0,0,0,.1)',
+                            'lg-c': '0 10px 30px rgba(0,0,0,.12)',
+                        },
+                        borderRadius: {
+                            'sm-c': '8px',
+                            'md-c': '12px',
+                            'lg-c': '16px',
+                        },
+                    },
+                },
+            };
+        </script>
+
         {% block stylesheets %}
         {% endblock %}
 
@@ -13,12 +54,12 @@
 
         {% set frankenphpHotReload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
         {% if frankenphpHotReload %}
-        <meta name="frankenphp-hot-reload:url" content="{{ frankenphpHotReload }}">
-        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
-        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
+            <meta name="frankenphp-hot-reload:url" content="{{ frankenphpHotReload }}">
+            <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
+            <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
         {% endif %}
     </head>
-    <body>
+    <body class="{% block body_class %}{% endblock %}">
         {% block body %}{% endblock %}
     </body>
 </html>

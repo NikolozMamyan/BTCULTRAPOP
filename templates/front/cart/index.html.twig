@@ -1,0 +1,27 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}{{ 'page.cart.title'|trans }}{% endblock %}
+{% block storefront_data %}data-page="cart"{% endblock %}
+
+{% block main %}
+    <section class="bg-bg-light border-b border-border-c">
+        <div class="max-w-7xl mx-auto px-5 py-8">
+            <p class="text-xs text-text-light font-semibold mb-2">
+                <a href="{{ path('app_front_home') }}" class="hover:text-primary">{{ 'common.home'|trans }}</a>
+                <i class="fa-solid fa-chevron-right text-[8px] mx-2"></i> {{ 'common.cart'|trans }}
+            </p>
+            <h1 class="font-display text-3xl md:text-4xl font-extrabold">{{ 'cart.title'|trans }}</h1>
+        </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-5 py-10 md:py-16">
+        {% include 'front/components/_catalog_empty.html.twig' with {
+            icon: 'fa-solid fa-bag-shopping',
+            eyebrow: 'cart.empty_eyebrow',
+            title: 'cart.empty_title',
+            text: 'cart.empty_text',
+            action_url: path('app_front_boutique'),
+            action_label: 'overlay.discover_shop'
+        } only %}
+    </section>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block body_class %}font-sans antialiased overflow-x-hidden{% endblock %}
+
+{% block body %}
+    <div
+        id="storefront-app"
+        {% block storefront_data %}data-page="home"{% endblock %}
+        data-home-url="{{ path('app_front_home') }}"
+        data-shop-url="{{ path('app_front_boutique') }}"
+        data-wishlist-url="{{ path('app_front_favoris') }}"
+        data-cart-shipping-empty="{{ 'overlay.shipping_empty'|trans }}"
+        data-cart-empty-title="{{ 'overlay.cart_empty_title'|trans }}"
+        data-cart-empty-text="{{ 'overlay.cart_empty_text'|trans }}"
+        data-carousel-go-to="{{ 'home.carousel.go_to'|trans }}"
+    >
+        {% include 'front/components/navigation/_announcement.html.twig' %}
+        {% include 'front/components/navigation/_header.html.twig' %}
+
+        <main class="relative">
+            {% block main %}{% endblock %}
+        </main>
+
+        {% include 'front/components/overlay/_search.html.twig' %}
+        {% include 'front/components/overlay/_cart_drawer.html.twig' %}
+        {% include 'front/components/overlay/_toast.html.twig' %}
+        {% include 'front/components/overlay/_back_to_top.html.twig' %}
+        {% include 'front/components/_footer.html.twig' %}
+        {% include 'front/components/navigation/_mobile.html.twig' %}
+    </div>
+{% endblock %}

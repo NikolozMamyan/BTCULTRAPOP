@@ -1,0 +1,16 @@
+<div class="catalog-empty">
+    <div class="catalog-empty__visual" aria-hidden="true">
+        <span class="catalog-empty__orb catalog-empty__orb--yellow"></span>
+        <span class="catalog-empty__orb catalog-empty__orb--red"></span>
+        <i class="{{ icon|default('fa-solid fa-box-open') }}"></i>
+    </div>
+    <span class="catalog-empty__eyebrow">{{ (eyebrow|default('catalog.default_eyebrow'))|trans }}</span>
+    <h2>{{ (title|default('catalog.default_title'))|trans }}</h2>
+    <p>{{ (text|default('catalog.default_text'))|trans }}</p>
+    {% if action_url|default(null) %}
+        <a href="{{ action_url }}" class="catalog-empty__action">
+            {{ (action_label|default('catalog.back_home'))|trans }}
+            <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    {% endif %}
+</div>

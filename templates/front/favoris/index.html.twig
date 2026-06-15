@@ -1,0 +1,28 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}{{ 'page.favorites.title'|trans }}{% endblock %}
+{% block storefront_data %}data-page="wishlist"{% endblock %}
+
+{% block main %}
+    <section class="bg-bg-light border-b border-border-c">
+        <div class="max-w-7xl mx-auto px-5 py-8">
+            <p class="text-xs text-text-light font-semibold mb-2">
+                <a href="{{ path('app_front_home') }}" class="hover:text-primary">{{ 'common.home'|trans }}</a>
+                <i class="fa-solid fa-chevron-right text-[8px] mx-2"></i>
+                {{ 'common.favorites'|trans }}
+            </p>
+            <h1 class="font-display text-3xl md:text-4xl font-extrabold">{{ 'favorites.title'|trans }}</h1>
+        </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-5 py-8">
+        {% include 'front/components/_catalog_empty.html.twig' with {
+            icon: 'fa-regular fa-heart',
+            eyebrow: 'common.favorites',
+            title: 'favorites.empty_title',
+            text: 'favorites.empty_text',
+            action_url: path('app_front_boutique'),
+            action_label: 'favorites.view_shop'
+        } only %}
+    </section>
+{% endblock %}

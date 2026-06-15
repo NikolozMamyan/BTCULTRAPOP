@@ -1,0 +1,17 @@
+<section class="max-w-7xl mx-auto px-5 mt-16 reveal">
+    <div class="flex items-end justify-between mb-7">
+        <div>
+            <span class="text-primary font-bold text-xs tracking-widest uppercase">{{ 'home.popular.eyebrow'|trans }}</span>
+            <h2 class="font-display text-3xl md:text-4xl font-extrabold mt-1">{{ 'home.popular.title'|trans }}</h2>
+        </div>
+        <a href="{{ path('app_front_boutique') }}" class="hidden sm:inline-flex items-center gap-2 text-sm font-bold text-text-dark hover:text-primary transition-colors">{{ 'common.see_all'|trans }} <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    {% include 'front/components/_catalog_empty.html.twig' with {
+        icon: 'fa-solid fa-box-open',
+        eyebrow: 'home.popular.empty_eyebrow',
+        title: 'home.popular.empty_title',
+        text: 'home.popular.empty_text',
+        action_url: path('app_front_licences'),
+        action_label: 'home.popular.discover_licenses'
+    } only %}
+</section>

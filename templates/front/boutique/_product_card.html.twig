@@ -1,0 +1,57 @@
+<article
+    class="shop-product-card"
+    data-shop-filters-target="card"
+    data-category="{{ product.cat }}"
+    data-price="{{ product.price }}"
+    data-popularity="{{ product.pop }}"
+    data-rating="{{ product.rating }}"
+    data-tag="{{ product.tag|default('') }}"
+>
+    <div class="shop-product-card__visual">
+        {% if product.tag %}
+            <span class="shop-product-card__tag {{ product.tag == 'Promo' ? 'is-promo' : 'is-new' }}">
+                {{ product.tag == 'Promo' ? 'product.tag.promo'|trans : 'product.tag.new'|trans }}
+            </span>
+        {% endif %}
+
+        <div class="shop-product-card__actions">
+            <button type="button" aria-label="{{ 'product.add_favorite'|trans }}">
+                <i class="fa-regular fa-heart"></i>
+            </button>
+            <a href="{{ path('app_front_product', {id: product.id}) }}" aria-label="{{ 'product.view'|trans({'%name%': product.name}) }}">
+                <i class="fa-solid fa-eye"></i>
+            </a>
+        </div>
+
+        <a href="{{ path('app_front_product', {id: product.id}) }}" class="shop-product-card__image-link">
+            <img src="{{ product.img }}" alt="{{ product.name }}" loading="lazy">
+        </a>
+    </div>
+
+    <div class="shop-product-card__body">
+        <span class="shop-product-card__category">{{ product.cat }}</span>
+        <h2><a href="{{ path('app_front_product', {id: product.id}) }}">{{ product.name }}</a></h2>
+
+        <div class="shop-product-card__rating" aria-label="{{ product.rating|number_format(1, ',', ' ') }}/5">
+            <span>
+                {% set full_stars = product.rating|round(0, 'floor') %}
+                {% for index in 1..5 %}
+                    <i class="{{ index <= full_stars ? 'fa-solid' : 'fa-regular' }} fa-star"></i>
+                {% endfor %}
+            </span>
+            <small>{{ product.rating|number_format(1, ',', ' ') }}</small>
+        </div>
+
+        <div class="shop-product-card__price">
+            <strong>{{ product.price|number_format(2, ',', ' ') }} €</strong>
+            {% if product.old %}
+                <del>{{ product.old|number_format(2, ',', ' ') }} €</del>
+            {% endif %}
+        </div>
+    </div>
+
+    <button type="button" class="shop-product-card__add">
+        <i class="fa-solid fa-bag-shopping"></i>
+        {{ 'product.add'|trans }}
+    </button>
+</article>

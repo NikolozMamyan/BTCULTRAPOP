@@ -1,0 +1,42 @@
+<section class="max-w-7xl mx-auto px-5 mt-16 reveal">
+    <div class="section-heading">
+        <div>
+            <span class="section-heading__eyebrow">{{ 'home.spotlight.section_eyebrow'|trans }}</span>
+            <h2>{{ 'home.spotlight.section_title'|trans }}</h2>
+        </div>
+        <a href="{{ path('app_front_licences') }}" class="section-heading__link">
+            {{ 'home.spotlight.all_licenses'|trans }}
+            <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <article class="licence-spotlight">
+        <div class="licence-spotlight__media">
+            <img
+                src="{{ asset('img/licenses/MENU_LICENCE-01.png') }}"
+                alt="{{ 'home.spotlight.image_alt'|trans }}"
+            >
+            <span class="licence-spotlight__media-badge">
+                <i class="fa-solid fa-fire"></i>
+                {{ 'home.spotlight.best_seller'|trans }}
+            </span>
+        </div>
+
+        <div class="licence-spotlight__content">
+            <div class="licence-spotlight__icon" aria-hidden="true">
+                <i class="fa-solid fa-skull-crossbones"></i>
+            </div>
+            <p class="licence-spotlight__eyebrow">{{ 'home.spotlight.official_license'|trans }}</p>
+            <h3>{{ 'home.spotlight.title'|trans }}</h3>
+            <p class="licence-spotlight__text">{{ 'home.spotlight.text'|trans }}</p>
+            <div class="licence-spotlight__tags" aria-label="{{ 'home.spotlight.tags_label'|trans }}">
+                <span><i class="fa-solid fa-circle-check"></i> {{ 'common.official'|trans }}</span>
+                <span><i class="fa-solid fa-star"></i> {{ 'home.spotlight.fan_choice'|trans }}</span>
+            </div>
+            <a href="{{ path('app_front_licences') }}" class="licence-spotlight__action">
+                {{ 'home.spotlight.action'|trans }}
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+    </article>
+</section>
