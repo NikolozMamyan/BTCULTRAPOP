@@ -50,6 +50,37 @@ final class CartOrderManagerTest extends TestCase
         $cartManager->addProduct($cart, $this->createProduct());
     }
 
+    public function testCartManagerMergesSourceCartIntoCanonicalCart(): void
+    {
+        $cartManager = new CartManager();
+        $canonical = $cartManager->createCart(token: 'canonical-cart');
+        $source = $cartManager->createCart(token: 'device-cart');
+        $firstProduct = $this->createProduct()
+            ->setPriceTaxExcluded('49.916667')
+            ->setPriceTaxIncluded('59.900000');
+        $secondProduct = $this->createProduct()
+            ->setName('Statuette Premium One Piece')
+            ->setReference('ULTRA-002')
+            ->setEan('9876543210987')
+            ->setPriceTaxExcluded('74.916667')
+            ->setPriceTaxIncluded('89.900000');
+
+        $cartManager->addProduct($canonical, $firstProduct, 1);
+        $cartManager->addProduct($source, $firstProduct, 2);
+        $cartManager->addProduct($source, $secondProduct, 1);
+
+        $cartManager->merge($source, $canonical);
+
+        self::assertSame(CartStatus::ACTIVE, $canonical->getStatus());
+        self::assertSame(CartStatus::ABANDONED, $source->getStatus());
+        self::assertSame(0, $source->getItems()->count());
+        self::assertSame(2, $canonical->getItems()->count());
+        self::assertSame(4, $canonical->getTotalQuantity());
+        self::assertSame(26960, $canonical->getTotalTaxIncludedCents());
+        self::assertSame(3, $canonical->getItemForProduct($firstProduct)?->getQuantity());
+        self::assertSame(1, $canonical->getItemForProduct($secondProduct)?->getQuantity());
+    }
+
     public function testOrderManagerCreatesSnapshotAndMarksPayment(): void
     {
         $user = (new User())

@@ -110,6 +110,17 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorCount(0, '.product-formats');
     }
 
+    public function testCartPageDisplaysTheCartLayout(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/cart');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('#cart-page-items');
+        self::assertSelectorExists('.cart-page__summary');
+        self::assertSelectorTextContains('.cart-page__summary', 'Résumé');
+    }
+
     public function testUnknownProductReturnsNotFound(): void
     {
         $client = static::createClient();

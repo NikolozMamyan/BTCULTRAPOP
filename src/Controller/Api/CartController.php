@@ -26,8 +26,14 @@ final class CartController extends AbstractController
         Request $request,
         CartResolver $cartResolver,
         CartViewBuilder $cartViewBuilder,
+        EntityManagerInterface $entityManager,
     ): JsonResponse {
         $cart = $cartResolver->resolve($request, $this->getAuthenticatedUser());
+
+        if ($cart instanceof Cart) {
+            $entityManager->flush();
+        }
+
         $response = $this->json(['cart' => $cartViewBuilder->build($cart)]);
 
         if ($cart instanceof Cart) {

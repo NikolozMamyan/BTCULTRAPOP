@@ -50,6 +50,43 @@ final class CartManager
         $cart->removeItem($item);
     }
 
+    public function merge(Cart $source, Cart $target): void
+    {
+        if ($source === $target) {
+            return;
+        }
+
+        if (!$source->isActive() || !$target->isActive()) {
+            throw new \InvalidArgumentException('cart.error.not_active');
+        }
+
+        foreach ($source->getItems()->toArray() as $sourceItem) {
+            $product = $sourceItem->getProduct();
+
+            if (null === $product) {
+                $source->removeItem($sourceItem);
+                continue;
+            }
+
+            $targetItem = $target->getItemForProduct($product);
+
+            if ($targetItem instanceof CartItem) {
+                $targetItem->incrementQuantity($sourceItem->getQuantity());
+                $source->removeItem($sourceItem);
+                continue;
+            }
+
+            $target->addItem((new CartItem())
+                ->setProduct($product)
+                ->setQuantity($sourceItem->getQuantity())
+                ->setUnitPriceTaxExcludedCents($sourceItem->getUnitPriceTaxExcludedCents())
+                ->setUnitPriceTaxIncludedCents($sourceItem->getUnitPriceTaxIncludedCents()));
+            $source->removeItem($sourceItem);
+        }
+
+        $source->abandon();
+    }
+
     private function generateToken(): string
     {
         return bin2hex(random_bytes(32));

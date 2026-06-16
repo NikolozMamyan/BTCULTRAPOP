@@ -15,8 +15,10 @@
         data-cart-csrf-value="{{ csrf_token('cart_api') }}"
         data-cart-error-value="{{ 'cart.flash.error'|trans }}"
         data-cart-shipping-empty="{{ 'overlay.shipping_empty'|trans }}"
+        data-cart-empty-eyebrow="{{ 'cart.empty_eyebrow'|trans }}"
         data-cart-empty-title="{{ 'overlay.cart_empty_title'|trans }}"
         data-cart-empty-text="{{ 'overlay.cart_empty_text'|trans }}"
+        data-cart-empty-action="{{ 'overlay.discover_shop'|trans }}"
         data-carousel-go-to="{{ 'home.carousel.go_to'|trans }}"
     >
         {% include 'front/components/navigation/_announcement.html.twig' %}

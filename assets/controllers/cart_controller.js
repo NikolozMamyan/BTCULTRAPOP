@@ -132,8 +132,21 @@ export default class extends Controller {
             cartItems.innerHTML = cart.empty ? this.emptyTemplate() : cart.items.map((item) => this.itemTemplate(item)).join('');
         }
 
-        document.getElementById('cart-subtotal').textContent = cart.subtotalFormatted;
-        document.getElementById('cart-total').textContent = cart.totalFormatted;
+        const cartPageItems = document.getElementById('cart-page-items');
+        if (cartPageItems) {
+            cartPageItems.innerHTML = cart.empty ? this.pageEmptyTemplate() : cart.items.map((item) => this.itemTemplate(item)).join('');
+        }
+
+        this.setText('cart-subtotal', cart.subtotalFormatted);
+        this.setText('cart-total', cart.totalFormatted);
+        this.setText('cart-page-subtotal', cart.subtotalFormatted);
+        this.setText('cart-page-total', cart.totalFormatted);
+        this.setText('cart-page-ship-msg', cart.shippingMessage);
+
+        const cartPageShippingBar = document.getElementById('cart-page-ship-bar');
+        if (cartPageShippingBar) {
+            cartPageShippingBar.style.width = `${cart.shippingProgress}%`;
+        }
     }
 
     emptyTemplate() {
@@ -142,6 +155,25 @@ export default class extends Controller {
                 <i class="fa-solid fa-bag-shopping text-4xl opacity-20 mb-4"></i>
                 <p class="font-bold text-text-dark mb-1">${this.escape(this.element.dataset.cartEmptyTitle)}</p>
                 <p class="text-sm">${this.escape(this.element.dataset.cartEmptyText)}</p>
+            </div>
+        `;
+    }
+
+    pageEmptyTemplate() {
+        return `
+            <div class="catalog-empty">
+                <div class="catalog-empty__visual" aria-hidden="true">
+                    <span class="catalog-empty__orb catalog-empty__orb--yellow"></span>
+                    <span class="catalog-empty__orb catalog-empty__orb--red"></span>
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </div>
+                <span class="catalog-empty__eyebrow">${this.escape(this.element.dataset.cartEmptyEyebrow)}</span>
+                <h2>${this.escape(this.element.dataset.cartEmptyTitle)}</h2>
+                <p>${this.escape(this.element.dataset.cartEmptyText)}</p>
+                <a href="${this.escapeAttribute(this.element.dataset.shopUrl)}" class="catalog-empty__action">
+                    ${this.escape(this.element.dataset.cartEmptyAction)}
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
             </div>
         `;
     }
@@ -205,6 +237,14 @@ export default class extends Controller {
         button.disabled = busy;
         button.classList.toggle('is-loading', busy);
         button.setAttribute('aria-busy', String(busy));
+    }
+
+    setText(id, value) {
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.textContent = value;
+        }
     }
 
     escape(value) {

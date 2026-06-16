@@ -14,14 +14,89 @@
         </div>
     </section>
 
-    <section class="max-w-7xl mx-auto px-5 py-10 md:py-16">
-        {% include 'front/components/_catalog_empty.html.twig' with {
-            icon: 'fa-solid fa-bag-shopping',
-            eyebrow: 'cart.empty_eyebrow',
-            title: 'cart.empty_title',
-            text: 'cart.empty_text',
-            action_url: path('app_front_boutique'),
-            action_label: 'overlay.discover_shop'
-        } only %}
+    <section class="cart-page max-w-7xl mx-auto px-5 py-10 md:py-16">
+        <div class="cart-page__layout">
+            <section class="cart-page__panel" aria-label="{{ 'cart.title'|trans }}">
+                <div class="cart-page__panel-head">
+                    <div>
+                        <span>{{ 'cart.items'|trans }}</span>
+                        <strong class="cart-count">{{ cart.totalQuantity }}</strong>
+                    </div>
+                    <a href="{{ path('app_front_boutique') }}">{{ 'overlay.discover_shop'|trans }}</a>
+                </div>
+
+                <div id="cart-page-items" class="cart-page__items">
+                    {% if cart.empty %}
+                        {% include 'front/components/_catalog_empty.html.twig' with {
+                            icon: 'fa-solid fa-bag-shopping',
+                            eyebrow: 'cart.empty_eyebrow',
+                            title: 'cart.empty_title',
+                            text: 'cart.empty_text',
+                            action_url: path('app_front_boutique'),
+                            action_label: 'overlay.discover_shop'
+                        } only %}
+                    {% else %}
+                        {% for item in cart.items %}
+                            <article class="cart-line">
+                                <a class="cart-line__media" href="{{ item.productUrl ?: '#' }}">
+                                    {% if item.image %}
+                                        <img src="{{ item.image }}" alt="">
+                                    {% else %}
+                                        <i class="fa-solid fa-box"></i>
+                                    {% endif %}
+                                </a>
+                                <div class="cart-line__content">
+                                    <div class="cart-line__top">
+                                        <a href="{{ item.productUrl ?: '#' }}">{{ item.name }}</a>
+                                        <button type="button" class="cart-line__remove" data-action="cart#remove" data-cart-url-param="{{ item.removeUrl }}" aria-label="{{ 'cart.remove_item'|trans }}">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                    <span>{{ item.unitPriceFormatted }}</span>
+                                    <div class="cart-line__bottom">
+                                        <div class="cart-line__quantity">
+                                            <button type="button" data-action="cart#decrement" data-cart-url-param="{{ item.updateUrl }}" data-cart-quantity-param="{{ item.quantity }}" aria-label="-">
+                                                <i class="fa-solid fa-minus"></i>
+                                            </button>
+                                            <strong>{{ item.quantity }}</strong>
+                                            <button type="button" data-action="cart#increment" data-cart-url-param="{{ item.updateUrl }}" data-cart-quantity-param="{{ item.quantity }}" aria-label="+">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+                                        </div>
+                                        <strong>{{ item.totalFormatted }}</strong>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </section>
+
+            <aside class="cart-page__summary" aria-label="{{ 'cart.summary'|trans }}">
+                <h2>{{ 'cart.summary'|trans }}</h2>
+                <div class="cart-page__shipping">
+                    <p id="cart-page-ship-msg">{{ cart.shippingMessage }}</p>
+                    <div><span id="cart-page-ship-bar" style="width: {{ cart.shippingProgress }}%"></span></div>
+                </div>
+                <dl>
+                    <div>
+                        <dt>{{ 'overlay.subtotal'|trans }}</dt>
+                        <dd id="cart-page-subtotal">{{ cart.subtotalFormatted }}</dd>
+                    </div>
+                    <div>
+                        <dt>{{ 'overlay.delivery'|trans }}</dt>
+                        <dd class="is-free">{{ 'overlay.free'|trans }}</dd>
+                    </div>
+                    <div class="cart-page__summary-total">
+                        <dt>{{ 'overlay.total'|trans }}</dt>
+                        <dd id="cart-page-total">{{ cart.totalFormatted }}</dd>
+                    </div>
+                </dl>
+                <button type="button" class="cart-page__checkout" disabled>
+                    {{ 'cart.checkout_soon'|trans }}
+                    <i class="fa-solid fa-lock"></i>
+                </button>
+            </aside>
+        </div>
     </section>
 {% endblock %}

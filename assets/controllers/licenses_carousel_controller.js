@@ -4,7 +4,7 @@ export default class extends Controller {
     static targets = ['viewport', 'group'];
 
     connect() {
-        this.speed = 20;
+        this.speed = 32;
         this.paused = false;
         this.dragging = false;
         this.suppressClick = false;

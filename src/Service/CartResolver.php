@@ -23,39 +23,77 @@ final readonly class CartResolver
 
     public function resolve(Request $request, ?User $user = null, bool $create = false): ?Cart
     {
-        $token = $request->cookies->getString(self::COOKIE_NAME);
-        $cart = '' === $token ? null : $this->carts->findOneBy([
-            'token' => $token,
-            'status' => CartStatus::ACTIVE,
-        ]);
-
-        if ($cart instanceof Cart) {
-            if ($user instanceof User && null === $cart->getUser()) {
-                $cart->setUser($user);
-            }
-
-            return $cart;
-        }
+        $tokenCart = $this->resolveTokenCart($request);
 
         if ($user instanceof User) {
-            $cart = $this->carts->findOneBy([
-                'user' => $user,
-                'status' => CartStatus::ACTIVE,
-            ]);
+            $userCart = $this->resolveUserCart($user);
 
-            if ($cart instanceof Cart) {
-                return $cart;
+            if ($userCart instanceof Cart) {
+                if ($this->canUseTokenCartForUser($tokenCart, $user) && $tokenCart !== $userCart) {
+                    $this->cartManager->merge($tokenCart, $userCart);
+                }
+
+                return $userCart;
             }
+
+            if ($this->canUseTokenCartForUser($tokenCart, $user)) {
+                $tokenCart->setUser($user);
+
+                return $tokenCart;
+            }
+
+            return $create ? $this->createCart($user) : null;
         }
 
-        if (!$create) {
-            return null;
+        if ($tokenCart instanceof Cart && null === $tokenCart->getUser()) {
+            return $tokenCart;
         }
 
+        return $create ? $this->createCart() : null;
+    }
+
+    private function createCart(?User $user = null): Cart
+    {
         $cart = $this->cartManager->createCart($user);
         $this->entityManager->persist($cart);
 
         return $cart;
+    }
+
+    private function resolveTokenCart(Request $request): ?Cart
+    {
+        $token = $request->cookies->getString(self::COOKIE_NAME);
+
+        if ('' === $token) {
+            return null;
+        }
+
+        return $this->carts->findOneBy([
+            'token' => $token,
+            'status' => CartStatus::ACTIVE,
+        ]);
+    }
+
+    private function resolveUserCart(User $user): ?Cart
+    {
+        return $this->carts->findOneBy([
+            'user' => $user,
+            'status' => CartStatus::ACTIVE,
+        ], [
+            'updatedAt' => 'DESC',
+            'id' => 'DESC',
+        ]);
+    }
+
+    private function canUseTokenCartForUser(?Cart $cart, User $user): bool
+    {
+        if (!$cart instanceof Cart) {
+            return false;
+        }
+
+        $cartUser = $cart->getUser();
+
+        return null === $cartUser || $cartUser->getId() === $user->getId();
     }
 
     public function createCookie(Cart $cart, Request $request): Cookie
