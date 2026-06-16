@@ -29,17 +29,50 @@
         {% if app.user %}
             <article class="profile-card">
                 <div class="profile-card__header">
-                    <div class="profile-card__avatar" aria-hidden="true">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
+                    <form
+                        class="profile-avatar-upload"
+                        action="{{ path('app_front_profile_avatar_upload') }}"
+                        method="post"
+                        enctype="multipart/form-data"
+                        data-controller="avatar-upload"
+                    >
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('profile_avatar_upload') }}">
+                        <label class="profile-card__avatar" for="profile-avatar-input">
+                            {% if app.user.avatarPath %}
+                                <img src="{{ asset(app.user.avatarPath) }}" alt="{{ 'profile.avatar.current'|trans }}" data-avatar-upload-target="preview">
+                                <span class="profile-card__avatar-fallback is-hidden" data-avatar-upload-target="fallback">
+                                    <i class="fa-solid fa-user"></i>
+                                </span>
+                            {% else %}
+                                <img class="is-hidden" src="" alt="{{ 'profile.avatar.preview'|trans }}" data-avatar-upload-target="preview">
+                                <span class="profile-card__avatar-fallback" data-avatar-upload-target="fallback">
+                                    <i class="fa-solid fa-user"></i>
+                                </span>
+                            {% endif %}
+                            <span class="profile-avatar-upload__button" aria-hidden="true">
+                                <i class="fa-solid fa-camera"></i>
+                            </span>
+                            <span class="sr-only">{{ 'profile.avatar.upload'|trans }}</span>
+                        </label>
+                        <input
+                            id="profile-avatar-input"
+                            class="sr-only"
+                            type="file"
+                            name="avatar"
+                            accept="image/jpeg,image/png,image/webp"
+                            data-avatar-upload-target="input"
+                            data-action="avatar-upload#submit"
+                        >
+                    </form>
                     <div>
                         <span class="profile-card__eyebrow">{{ 'profile.account'|trans }}</span>
                         <h2>{{ 'profile.information'|trans }}</h2>
                         <p>{{ app.user.fullName ?: user_identifier ?: 'profile.complete'|trans }}</p>
                     </div>
-                    <span class="profile-card__status">
-                        <i class="fa-solid fa-circle-check"></i>
-                        {{ 'profile.connected'|trans }}
+                    <span class="profile-card__points" aria-label="{{ 'profile.points_label'|trans({'%count%': app.user.loyaltyPoints}) }}">
+                        <i class="fa-solid fa-star"></i>
+                        <strong>{{ app.user.loyaltyPoints }}</strong>
+                        <span>{{ 'profile.points'|trans }}</span>
                     </span>
                     <form action="{{ path('app_auth_logout') }}" method="post" class="profile-card__logout">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('auth_logout') }}">

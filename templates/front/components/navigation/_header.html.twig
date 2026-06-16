@@ -26,8 +26,12 @@
             <a href="{{ path('app_front_favoris') }}" class="hidden lg:flex w-10 h-10 rounded-full hover:bg-bg-light items-center justify-center text-text-dark transition-colors relative" aria-label="{{ 'nav.favorites_label'|trans }}">
                 <i class="fa-regular fa-heart"></i>
             </a>
-            <a href="{{ path('app_front_profil') }}" class="flex w-10 h-10 rounded-full hover:bg-bg-light items-center justify-center text-text-dark transition-colors {{ current_route == 'app_front_profil' ? 'bg-bg-light text-primary' : '' }}" aria-label="{{ 'nav.profile_label'|trans }}">
-                <i class="fa-regular fa-user"></i>
+            <a href="{{ path('app_front_profil') }}" class="header-profile-link flex w-10 h-10 rounded-full hover:bg-bg-light items-center justify-center text-text-dark transition-colors {{ current_route == 'app_front_profil' ? 'bg-bg-light text-primary' : '' }}" aria-label="{{ 'nav.profile_label'|trans }}">
+                {% if app.user and app.user.avatarPath %}
+                    <img class="header-profile-link__avatar" src="{{ asset(app.user.avatarPath) }}" alt="">
+                {% else %}
+                    <i class="fa-regular fa-user"></i>
+                {% endif %}
             </a>
             <button type="button" data-action="cart-open" class="hidden lg:flex w-10 h-10 rounded-full bg-primary hover:bg-primary-d text-white items-center justify-center transition-colors relative shadow-md-c" aria-label="{{ 'nav.open_cart'|trans }}">
                 <i class="fa-solid fa-bag-shopping"></i>

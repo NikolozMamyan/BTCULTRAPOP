@@ -30,6 +30,24 @@ final class UserTest extends TestCase
         self::assertSame('Nikoloz Ultrapop', $user->getFullName());
     }
 
+    public function testAvatarPathAndLoyaltyPointsAreManagedByUser(): void
+    {
+        $user = (new User())
+            ->setAvatarFilename(' avatar.webp ')
+            ->setLoyaltyPoints(-20)
+            ->addLoyaltyPoints(12)
+            ->addLoyaltyPointsFromPurchaseCents(5990);
+
+        self::assertSame('avatar.webp', $user->getAvatarFilename());
+        self::assertSame('uploads/avatars/avatar.webp', $user->getAvatarPath());
+        self::assertSame(71, $user->getLoyaltyPoints());
+
+        $user->setAvatarFilename('');
+
+        self::assertNull($user->getAvatarFilename());
+        self::assertNull($user->getAvatarPath());
+    }
+
     public function testRoleUserIsAlwaysPresent(): void
     {
         $user = (new User())->setRoles(['ROLE_ADMIN', 'ROLE_ADMIN']);

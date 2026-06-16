@@ -5,9 +5,11 @@ namespace App\Controller\Front;
 use App\Entity\Address;
 use App\Entity\User;
 use App\Repository\AddressRepository;
+use App\Service\UserAvatarUploader;
 use App\Service\UserAddressManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -98,6 +100,45 @@ final class ProfilController extends AbstractController
 
         $entityManager->flush();
         $this->addFlash('success', 'profile.address.flash.updated');
+
+        return $this->redirectToRoute('app_front_profil');
+    }
+
+    #[Route('/profil/avatar', name: 'app_front_profile_avatar_upload', methods: ['POST'])]
+    public function uploadAvatar(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserAvatarUploader $avatarUploader,
+    ): RedirectResponse {
+        $user = $this->getAuthenticatedUser();
+
+        if (!$user instanceof User) {
+            $this->addFlash('error', 'profile.avatar.flash.login_required');
+
+            return $this->redirectToRoute('app_front_profil');
+        }
+
+        if (!$this->isCsrfTokenValid('profile_avatar_upload', $request->request->getString('_csrf_token'))) {
+            $this->addFlash('error', 'auth.flash.invalid_csrf');
+
+            return $this->redirectToRoute('app_front_profil');
+        }
+
+        $avatar = $request->files->get('avatar');
+
+        if (!$avatar instanceof UploadedFile) {
+            $this->addFlash('error', 'profile.avatar.flash.missing');
+
+            return $this->redirectToRoute('app_front_profil');
+        }
+
+        try {
+            $avatarUploader->upload($user, $avatar);
+            $entityManager->flush();
+            $this->addFlash('success', 'profile.avatar.flash.updated');
+        } catch (\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
 
         return $this->redirectToRoute('app_front_profil');
     }

@@ -52,6 +52,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Length(max: 30)]
     private ?string $phone = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    private ?string $avatarFilename = null;
+
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private int $loyaltyPoints = 0;
+
     #[ORM\Column(length: 5, options: ['default' => 'fr'])]
     #[Assert\Choice(choices: ['fr', 'en'])]
     private string $preferredLocale = 'fr';
@@ -201,6 +209,56 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->phone = null === $phone ? null : trim($phone);
 
         return $this;
+    }
+
+    public function getAvatarFilename(): ?string
+    {
+        return $this->avatarFilename;
+    }
+
+    public function setAvatarFilename(?string $avatarFilename): self
+    {
+        $avatarFilename = null === $avatarFilename ? null : trim($avatarFilename);
+        $this->avatarFilename = '' === $avatarFilename ? null : $avatarFilename;
+
+        return $this;
+    }
+
+    public function getAvatarPath(): ?string
+    {
+        if (null === $this->avatarFilename) {
+            return null;
+        }
+
+        return sprintf('uploads/avatars/%s', $this->avatarFilename);
+    }
+
+    public function getLoyaltyPoints(): int
+    {
+        return $this->loyaltyPoints;
+    }
+
+    public function setLoyaltyPoints(int $loyaltyPoints): self
+    {
+        $this->loyaltyPoints = max(0, $loyaltyPoints);
+
+        return $this;
+    }
+
+    public function addLoyaltyPoints(int $points): self
+    {
+        if ($points <= 0) {
+            return $this;
+        }
+
+        $this->loyaltyPoints += $points;
+
+        return $this;
+    }
+
+    public function addLoyaltyPointsFromPurchaseCents(int $totalCents): self
+    {
+        return $this->addLoyaltyPoints(intdiv(max(0, $totalCents), 100));
     }
 
     public function getPreferredLocale(): string
