@@ -50,7 +50,13 @@
         </div>
     </div>
 
-    <button type="button" class="shop-product-card__add">
+    <button
+        type="button"
+        class="shop-product-card__add"
+        data-action="cart#add"
+        data-cart-product-id-param="{{ product.id }}"
+        data-cart-quantity-param="1"
+    >
         <i class="fa-solid fa-bag-shopping"></i>
         {{ 'product.add'|trans }}
     </button>

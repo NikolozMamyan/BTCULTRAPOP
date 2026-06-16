@@ -5,10 +5,15 @@
 {% block body %}
     <div
         id="storefront-app"
+        data-controller="cart"
         {% block storefront_data %}data-page="home"{% endblock %}
         data-home-url="{{ path('app_front_home') }}"
         data-shop-url="{{ path('app_front_boutique') }}"
         data-wishlist-url="{{ path('app_front_favoris') }}"
+        data-cart-url-value="{{ path('app_api_cart_show') }}"
+        data-cart-add-url-value="{{ path('app_api_cart_item_add') }}"
+        data-cart-csrf-value="{{ csrf_token('cart_api') }}"
+        data-cart-error-value="{{ 'cart.flash.error'|trans }}"
         data-cart-shipping-empty="{{ 'overlay.shipping_empty'|trans }}"
         data-cart-empty-title="{{ 'overlay.cart_empty_title'|trans }}"
         data-cart-empty-text="{{ 'overlay.cart_empty_text'|trans }}"

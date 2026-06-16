@@ -13,9 +13,6 @@ function initializeStorefront() {
     let toastTimer;
     let slideIndex = 0;
 
-    localStorage.removeItem('ultrapop_cart');
-    localStorage.removeItem('ultrapop_wishlist');
-
     const on = (target, eventName, listener, options = {}) => {
         target?.addEventListener(eventName, listener, { ...options, signal });
     };
@@ -217,7 +214,6 @@ function initializeStorefront() {
     }, { passive: true });
 
     bindFallbacks();
-    resetCart();
     renderCarouselDots();
     resetCarouselTimer();
     tickCountdown();
