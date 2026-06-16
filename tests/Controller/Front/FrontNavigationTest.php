@@ -48,6 +48,7 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorTextContains('.profile-auth__face--register', 'Inscription');
         self::assertSelectorExists('input[name="last_name"]');
         self::assertSelectorExists('input[name="first_name"]');
+        self::assertSelectorExists('input[name="address_name"]');
         self::assertSelectorExists('input[name="street"]');
         self::assertSelectorExists('input[name="postal_code"]');
         self::assertSelectorExists('input[name="city"]');

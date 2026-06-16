@@ -26,7 +26,7 @@
                     <div>
                         <span class="profile-card__eyebrow">{{ 'profile.account'|trans }}</span>
                         <h2>{{ 'profile.information'|trans }}</h2>
-                        <p>{{ user_identifier ?: 'profile.complete'|trans }}</p>
+                        <p>{{ app.user.fullName ?: user_identifier ?: 'profile.complete'|trans }}</p>
                     </div>
                     <span class="profile-card__status">
                         <i class="fa-solid fa-circle-check"></i>
@@ -36,24 +36,29 @@
 
                 <div class="profile-card__details">
                     <div class="profile-detail">
-                        <span class="profile-detail__icon"><i class="fa-regular fa-id-card"></i></span>
+                        <span class="profile-detail__icon"><i class="fa-regular fa-user"></i></span>
                         <div>
-                            <span>{{ 'common.last_name'|trans }}</span>
-                            <strong>{{ 'profile.not_provided'|trans }}</strong>
+                            <span>{{ 'common.full_name'|trans }}</span>
+                            <strong>{{ app.user.fullName ?: 'profile.not_provided'|trans }}</strong>
                         </div>
                     </div>
                     <div class="profile-detail">
-                        <span class="profile-detail__icon"><i class="fa-regular fa-user"></i></span>
+                        <span class="profile-detail__icon"><i class="fa-regular fa-envelope"></i></span>
                         <div>
-                            <span>{{ 'common.first_name'|trans }}</span>
-                            <strong>{{ 'profile.not_provided'|trans }}</strong>
+                            <span>{{ 'common.email'|trans }}</span>
+                            <strong>{{ app.user.email }}</strong>
                         </div>
                     </div>
                     <div class="profile-detail profile-detail--address">
                         <span class="profile-detail__icon"><i class="fa-solid fa-location-dot"></i></span>
                         <div>
                             <span>{{ 'profile.shipping_address'|trans }}</span>
-                            <strong>{{ 'profile.no_address'|trans }}</strong>
+                            {% set default_address = app.user.defaultAddress %}
+                            {% if default_address %}
+                                <strong>{{ default_address.name }} · {{ default_address.street }}, {{ default_address.postalCode }} {{ default_address.city }}</strong>
+                            {% else %}
+                                <strong>{{ 'profile.no_address'|trans }}</strong>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -72,6 +77,22 @@
                         </div>
 
                         <form class="profile-auth__form" data-action="submit->profile-auth#preventSubmit">
+                            <div class="profile-auth__grid">
+                                <label class="profile-auth__field">
+                                    <span>{{ 'common.last_name'|trans }}</span>
+                                    <span class="profile-auth__input">
+                                        <i class="fa-regular fa-id-card"></i>
+                                        <input type="text" name="last_name" autocomplete="family-name" required>
+                                    </span>
+                                </label>
+                                <label class="profile-auth__field">
+                                    <span>{{ 'common.first_name'|trans }}</span>
+                                    <span class="profile-auth__input">
+                                        <i class="fa-regular fa-user"></i>
+                                        <input type="text" name="first_name" autocomplete="given-name" required>
+                                    </span>
+                                </label>
+                            </div>
                             <label class="profile-auth__field">
                                 <span>{{ 'common.email'|trans }}</span>
                                 <span class="profile-auth__input">
@@ -110,22 +131,6 @@
                         </div>
 
                         <form class="profile-auth__form" data-action="submit->profile-auth#preventSubmit">
-                            <div class="profile-auth__grid">
-                                <label class="profile-auth__field">
-                                    <span>{{ 'common.last_name'|trans }}</span>
-                                    <span class="profile-auth__input">
-                                        <i class="fa-regular fa-id-card"></i>
-                                        <input type="text" name="last_name" autocomplete="family-name" required>
-                                    </span>
-                                </label>
-                                <label class="profile-auth__field">
-                                    <span>{{ 'common.first_name'|trans }}</span>
-                                    <span class="profile-auth__input">
-                                        <i class="fa-regular fa-user"></i>
-                                        <input type="text" name="first_name" autocomplete="given-name" required>
-                                    </span>
-                                </label>
-                            </div>
                             <label class="profile-auth__field">
                                 <span>{{ 'common.email'|trans }}</span>
                                 <span class="profile-auth__input">
@@ -142,6 +147,13 @@
                             </label>
                             <fieldset class="profile-auth__address">
                                 <legend>{{ 'auth.register.shipping_address'|trans }}</legend>
+                                <label class="profile-auth__field">
+                                    <span>{{ 'common.address_name'|trans }}</span>
+                                    <span class="profile-auth__input">
+                                        <i class="fa-solid fa-house"></i>
+                                        <input type="text" name="address_name" autocomplete="off" required placeholder="{{ 'auth.register.address_name_placeholder'|trans }}">
+                                    </span>
+                                </label>
                                 <label class="profile-auth__field">
                                     <span>{{ 'common.street'|trans }}</span>
                                     <span class="profile-auth__input">
