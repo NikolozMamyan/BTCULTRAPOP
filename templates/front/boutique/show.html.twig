@@ -28,8 +28,10 @@
             <div class="product-detail__gallery">
                 <div class="product-detail__visual">
                     {% if product.tag %}
-                        <span class="shop-product-card__tag {{ product.tag == 'Promo' ? 'is-promo' : 'is-new' }}">
-                            {{ product.tag == 'Promo' ? 'product.tag.promo'|trans : 'product.tag.new'|trans }}
+                        {% set tag_class = product.tag == 'Promo' ? 'is-promo' : (product.tag == 'Nouveau' ? 'is-new' : 'is-bestseller') %}
+                        {% set tag_label = product.tag == 'Promo' ? 'product.tag.promo' : (product.tag == 'Nouveau' ? 'product.tag.new' : 'product.tag.bestseller') %}
+                        <span class="shop-product-card__tag {{ tag_class }}">
+                            {{ tag_label|trans }}
                         </span>
                     {% endif %}
                     <img src="{{ product.img }}" alt="{{ product.name }}">
@@ -42,20 +44,17 @@
             <div class="product-detail__content">
                 <div class="product-detail__badges">
                     <span>{{ product.cat }}</span>
-                    <span class="is-stock"><i class="fa-solid fa-circle-check"></i> {{ 'product.in_stock'|trans }}</span>
+                    <span class="{{ product.in_stock ? 'is-stock' : 'is-out-of-stock' }}">
+                        <i class="fa-solid {{ product.in_stock ? 'fa-circle-check' : 'fa-circle-xmark' }}"></i>
+                        {{ product.in_stock ? 'product.in_stock'|trans : 'product.out_of_stock'|trans }}
+                    </span>
                 </div>
 
                 <h2>{{ product.name }}</h2>
 
-                <div class="product-detail__rating">
-                    <span>
-                        {% set full_stars = product.rating|round(0, 'floor') %}
-                        {% for index in 1..5 %}
-                            <i class="{{ index <= full_stars ? 'fa-solid' : 'fa-regular' }} fa-star"></i>
-                        {% endfor %}
-                    </span>
-                    <strong>{{ product.rating|number_format(1, ',', ' ') }}</strong>
-                    <small>{{ 'product.popularity'|trans({'%value%': product.pop}) }}</small>
+                <div class="product-detail__meta">
+                    <span><i class="fa-solid fa-clapperboard"></i> {{ product.license }}</span>
+                    <span><i class="fa-solid fa-barcode"></i> {{ product.reference }}</span>
                 </div>
 
                 <div class="product-detail__price">
@@ -66,15 +65,15 @@
                     {% endif %}
                 </div>
 
-                <div class="product-detail__stock">
-                    <i class="fa-solid fa-bolt"></i>
+                <div class="product-detail__stock {{ product.in_stock ? 'is-in-stock' : 'is-out-of-stock' }}">
+                    <i class="fa-solid {{ product.in_stock ? 'fa-bolt' : 'fa-circle-xmark' }}"></i>
                     <div>
-                        <strong>{{ 'product.available_now'|trans }}</strong>
-                        <span>{{ 'product.shipping_note'|trans }}</span>
+                        <strong>{{ product.in_stock ? 'product.available_now'|trans : 'product.unavailable_now'|trans }}</strong>
+                        <span>{{ product.in_stock ? 'product.shipping_note'|trans : 'product.unavailable_note'|trans }}</span>
                     </div>
                 </div>
 
-                <p class="product-detail__description">{{ 'product.description'|trans({'%name%': product.name}) }}</p>
+                <p class="product-detail__description">{{ product.description ?: 'product.description'|trans({'%name%': product.name}) }}</p>
 
                 <div class="product-detail__purchase">
                     <div class="product-quantity" aria-label="{{ 'product.quantity'|trans }}">
@@ -86,7 +85,7 @@
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
-                    <button type="button" class="product-detail__primary" data-action="product-detail#addToCart">
+                    <button type="button" class="product-detail__primary" data-action="product-detail#addToCart" {{ product.in_stock ? '' : 'disabled' }}>
                         <i class="fa-solid fa-bag-shopping"></i>
                         {{ 'product.add_to_cart'|trans }}
                     </button>
@@ -118,14 +117,14 @@
 
             <div class="product-tabs__panel is-active" data-product-detail-target="panel" data-panel="description">
                 <h3>{{ 'product.tabs.description'|trans }}</h3>
-                <p>{{ 'product.long_description'|trans({'%name%': product.name, '%category%': product.cat}) }}</p>
+                <p>{{ product.description ?: 'product.long_description'|trans({'%name%': product.name, '%category%': product.cat}) }}</p>
             </div>
             <div class="product-tabs__panel" data-product-detail-target="panel" data-panel="specifications" hidden>
                 <dl class="product-specifications">
                     <div><dt>{{ 'product.spec.category'|trans }}</dt><dd>{{ product.cat }}</dd></div>
-                    <div><dt>{{ 'product.spec.rating'|trans }}</dt><dd>{{ product.rating|number_format(1, ',', ' ') }}/5</dd></div>
-                    <div><dt>{{ 'product.spec.popularity'|trans }}</dt><dd>{{ product.pop }}/100</dd></div>
-                    <div><dt>{{ 'product.spec.reference'|trans }}</dt><dd>UP-{{ '%04d'|format(product.id) }}</dd></div>
+                    <div><dt>{{ 'product.spec.license'|trans }}</dt><dd>{{ product.license }}</dd></div>
+                    <div><dt>{{ 'product.spec.quantity'|trans }}</dt><dd>{{ product.quantity }}</dd></div>
+                    <div><dt>{{ 'product.spec.reference'|trans }}</dt><dd>{{ product.reference }}</dd></div>
                 </dl>
             </div>
             <div class="product-tabs__panel" data-product-detail-target="panel" data-panel="reviews" hidden>

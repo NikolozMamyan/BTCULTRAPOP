@@ -5,6 +5,9 @@
 
 {% block main %}
     {% include 'front/boutique/_catalog.html.twig' with {
+        products: products,
+        categories: categories,
+        max_price: max_price,
         breadcrumb: 'common.sales',
         title: 'common.sales',
         icon: 'fa-solid fa-tags',

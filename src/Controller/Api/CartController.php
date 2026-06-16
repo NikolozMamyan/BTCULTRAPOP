@@ -6,10 +6,10 @@ use App\Entity\Cart;
 use App\Entity\CartItem;
 use App\Entity\User;
 use App\Repository\CartItemRepository;
+use App\Repository\ProductRepository;
 use App\Service\CartManager;
 use App\Service\CartResolver;
 use App\Service\CartViewBuilder;
-use App\Service\TemporaryCatalog;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -49,7 +49,7 @@ final class CartController extends AbstractController
         CartResolver $cartResolver,
         CartManager $cartManager,
         CartViewBuilder $cartViewBuilder,
-        TemporaryCatalog $catalog,
+        ProductRepository $products,
         EntityManagerInterface $entityManager,
         TranslatorInterface $translator,
     ): JsonResponse {
@@ -60,12 +60,17 @@ final class CartController extends AbstractController
         $payload = $this->jsonPayload($request);
         $productId = (int) ($payload['productId'] ?? 0);
         $quantity = max(1, min(99, (int) ($payload['quantity'] ?? 1)));
-        $product = $catalog->ensureProduct($productId);
+        $product = $products->find($productId);
 
         if (null === $product) {
             return $this->error('cart.flash.product_not_found', $translator, Response::HTTP_NOT_FOUND);
         }
 
+        if ($product->getQuantity() <= 0) {
+            return $this->error('cart.flash.product_unavailable', $translator, Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $quantity = min($quantity, $product->getQuantity());
         $cart = $cartResolver->resolve($request, $this->getAuthenticatedUser(), true);
         \assert($cart instanceof Cart);
 

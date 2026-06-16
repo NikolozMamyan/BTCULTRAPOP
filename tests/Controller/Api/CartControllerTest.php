@@ -11,6 +11,7 @@ final class CartControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $this->skipIfDatabaseIsUnavailable();
+        $this->skipIfStorefrontCatalogIsUnavailable();
         $crawler = $client->request('GET', '/boutique');
         $csrfToken = $crawler->filter('#storefront-app')->attr('data-cart-csrf-value');
 
@@ -21,14 +22,14 @@ final class CartControllerTest extends WebTestCase
                 'CONTENT_TYPE' => 'application/json',
                 'HTTP_X_CSRF_TOKEN' => $csrfToken,
             ],
-            content: json_encode(['productId' => 1, 'quantity' => 2], \JSON_THROW_ON_ERROR),
+            content: json_encode(['productId' => 1648, 'quantity' => 2], \JSON_THROW_ON_ERROR),
         );
 
         self::assertResponseIsSuccessful();
         $payload = $this->jsonResponse($client->getResponse()->getContent());
         self::assertSame(2, $payload['cart']['totalQuantity']);
-        self::assertSame('119,80 €', $payload['cart']['subtotalFormatted']);
-        self::assertSame('Figurine Collector Arcane', $payload['cart']['items'][0]['name']);
+        self::assertSame('2,62 €', $payload['cart']['subtotalFormatted']);
+        self::assertSame('ULTRA ICE TEA - Vegeta - Dragon Ball Z - Ice Tea Pêche 33cL', $payload['cart']['items'][0]['name']);
         self::assertNotNull($client->getCookieJar()->get('ultrapop_cart'));
 
         $updateUrl = $payload['cart']['items'][0]['updateUrl'];
@@ -46,7 +47,7 @@ final class CartControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         $payload = $this->jsonResponse($client->getResponse()->getContent());
         self::assertSame(3, $payload['cart']['totalQuantity']);
-        self::assertSame('179,70 €', $payload['cart']['totalFormatted']);
+        self::assertSame('3,93 €', $payload['cart']['totalFormatted']);
 
         $removeUrl = $payload['cart']['items'][0]['removeUrl'];
 
@@ -81,6 +82,16 @@ final class CartControllerTest extends WebTestCase
             $connection->executeQuery('SELECT 1');
         } catch (\Throwable $exception) {
             self::markTestSkipped(sprintf('Database connection is unavailable in test env: %s', $exception->getMessage()));
+        }
+    }
+
+    private function skipIfStorefrontCatalogIsUnavailable(): void
+    {
+        $connection = static::getContainer()->get(Connection::class);
+        \assert($connection instanceof Connection);
+
+        if ((int) $connection->fetchOne("SELECT COUNT(*) FROM product WHERE reference = '28989'") < 1) {
+            self::markTestSkipped('Storefront product catalog is not loaded in the test database.');
         }
     }
 }

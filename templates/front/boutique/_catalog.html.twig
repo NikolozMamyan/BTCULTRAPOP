@@ -1,4 +1,6 @@
 {% set catalog_products = products|default([]) %}
+{% set catalog_categories = categories|default([]) %}
+{% set catalog_max_price = max_price|default(120) %}
 {% set catalog_breadcrumb = breadcrumb|default('shop.breadcrumb') %}
 {% set catalog_title = title|default('shop.title') %}
 
@@ -60,7 +62,7 @@
                             data-shop-filters-category-param="all"
                             data-action="shop-filters#selectCategory"
                         >{{ 'shop.filters.all'|trans }}</button>
-                        {% for category in ['Figurines', 'Mangas', 'Goodies'] %}
+                        {% for category in catalog_categories %}
                             <button
                                 type="button"
                                 class="shop-category-button"
@@ -80,17 +82,17 @@
                     <input
                         class="shop-price-range"
                         type="range"
-                        min="20"
-                        max="120"
-                        value="120"
-                        step="5"
+                        min="0"
+                        max="{{ catalog_max_price }}"
+                        value="{{ catalog_max_price }}"
+                        step="1"
                         data-shop-filters-target="price"
                         data-action="input->shop-filters#filter"
                         aria-label="{{ 'shop.filters.max_price'|trans }}"
                     >
                     <p class="shop-price-label">
                         {{ 'shop.filters.up_to'|trans }}
-                        <strong><span data-shop-filters-target="priceLabel">120</span> €</strong>
+                        <strong><span data-shop-filters-target="priceLabel">{{ catalog_max_price }}</span> €</strong>
                     </p>
                 </section>
 
@@ -151,7 +153,6 @@
                             <option value="pop">{{ 'shop.sort.popularity'|trans }}</option>
                             <option value="price-asc">{{ 'shop.sort.price_asc'|trans }}</option>
                             <option value="price-desc">{{ 'shop.sort.price_desc'|trans }}</option>
-                            <option value="rating">{{ 'shop.sort.rating'|trans }}</option>
                         </select>
                         <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
                     </label>

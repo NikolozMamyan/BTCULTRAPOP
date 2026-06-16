@@ -4,13 +4,15 @@
     data-category="{{ product.cat }}"
     data-price="{{ product.price }}"
     data-popularity="{{ product.pop }}"
-    data-rating="{{ product.rating }}"
+    data-rating="{{ product.rating|default(0) ?: 0 }}"
     data-tag="{{ product.tag|default('') }}"
 >
     <div class="shop-product-card__visual">
         {% if product.tag %}
-            <span class="shop-product-card__tag {{ product.tag == 'Promo' ? 'is-promo' : 'is-new' }}">
-                {{ product.tag == 'Promo' ? 'product.tag.promo'|trans : 'product.tag.new'|trans }}
+            {% set tag_class = product.tag == 'Promo' ? 'is-promo' : (product.tag == 'Nouveau' ? 'is-new' : 'is-bestseller') %}
+            {% set tag_label = product.tag == 'Promo' ? 'product.tag.promo' : (product.tag == 'Nouveau' ? 'product.tag.new' : 'product.tag.bestseller') %}
+            <span class="shop-product-card__tag {{ tag_class }}">
+                {{ tag_label|trans }}
             </span>
         {% endif %}
 
@@ -32,14 +34,9 @@
         <span class="shop-product-card__category">{{ product.cat }}</span>
         <h2><a href="{{ path('app_front_product', {id: product.id}) }}">{{ product.name }}</a></h2>
 
-        <div class="shop-product-card__rating" aria-label="{{ product.rating|number_format(1, ',', ' ') }}/5">
-            <span>
-                {% set full_stars = product.rating|round(0, 'floor') %}
-                {% for index in 1..5 %}
-                    <i class="{{ index <= full_stars ? 'fa-solid' : 'fa-regular' }} fa-star"></i>
-                {% endfor %}
-            </span>
-            <small>{{ product.rating|number_format(1, ',', ' ') }}</small>
+        <div class="shop-product-card__stock {{ product.in_stock ? 'is-in-stock' : 'is-out-of-stock' }}">
+            <i class="fa-solid {{ product.in_stock ? 'fa-circle-check' : 'fa-circle-xmark' }}"></i>
+            <small>{{ product.in_stock ? 'product.in_stock'|trans : 'product.out_of_stock'|trans }}</small>
         </div>
 
         <div class="shop-product-card__price">
@@ -56,6 +53,7 @@
         data-action="cart#add"
         data-cart-product-id-param="{{ product.id }}"
         data-cart-quantity-param="1"
+        {{ product.in_stock ? '' : 'disabled' }}
     >
         <i class="fa-solid fa-bag-shopping"></i>
         {{ 'product.add'|trans }}

@@ -2,6 +2,7 @@
 
 namespace App\Tests\Controller\Front;
 
+use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -12,6 +13,11 @@ final class FrontNavigationTest extends WebTestCase
     public function testFrontPageRendersStorefront(string $path, string $title, string $page): void
     {
         $client = static::createClient();
+
+        if ($this->requiresCatalogDatabase($path)) {
+            $this->skipIfStorefrontCatalogIsUnavailable();
+        }
+
         $client->request('GET', $path);
 
         self::assertResponseIsSuccessful();
@@ -31,7 +37,7 @@ final class FrontNavigationTest extends WebTestCase
         yield 'shop' => ['/boutique', 'Toute la boutique', 'shop'];
         yield 'licences' => ['/licences', 'Licences', 'shop'];
         yield 'sales' => ['/soldes', 'Soldes', 'shop'];
-        yield 'product' => ['/boutique/product/1', 'Figurine Collector Arcane', 'product'];
+        yield 'product' => ['/boutique/product/1648', 'ULTRA ICE TEA - Vegeta', 'product'];
         yield 'wishlist' => ['/favoris', 'Mes favoris', 'wishlist'];
         yield 'profile' => ['/profil', 'Mon profil', 'profile'];
         yield 'cart' => ['/cart', 'Mon panier', 'cart'];
@@ -79,16 +85,17 @@ final class FrontNavigationTest extends WebTestCase
         self::assertStringNotContainsString('Goodies & Accessoires', $crawler->html());
     }
 
-    public function testShopDisplaysTheTemporaryPhpProducts(): void
+    public function testShopDisplaysImportedProducts(): void
     {
         $client = static::createClient();
+        $this->skipIfStorefrontCatalogIsUnavailable();
         $client->request('GET', '/boutique');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorCount(8, '.shop-product-card');
-        self::assertSelectorTextContains('.shop-product-card:first-child', 'Figurine Collector Arcane');
-        self::assertSelectorExists('.shop-product-card a[href="/boutique/product/1"]');
-        self::assertSelectorTextContains('.shop-product-card:first-child', '59,90 €');
+        self::assertSelectorCount(84, '.shop-product-card');
+        self::assertSelectorTextContains('.shop-product-card:first-child', 'ULTRA ICE TEA - Vegeta');
+        self::assertSelectorExists('.shop-product-card a[href="/boutique/product/1648"]');
+        self::assertSelectorTextContains('.shop-product-card:first-child', '1,31 €');
         self::assertSelectorCount(3, '.shop-filter-card');
         self::assertSelectorExists('[data-controller="shop-filters"]');
         self::assertSelectorExists('.shop-filter-trigger[aria-controls="shop-filters-modal"]');
@@ -99,12 +106,13 @@ final class FrontNavigationTest extends WebTestCase
     public function testProductPageDisplaysTheSelectedProduct(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/boutique/product/2');
+        $this->skipIfStorefrontCatalogIsUnavailable();
+        $client->request('GET', '/boutique/product/1648');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Statuette Premium One Piece');
-        self::assertSelectorTextContains('.product-detail__price', '89,90 €');
-        self::assertSelectorExists('.product-detail__visual img[src="https://ultrapop.com/img/p/1/6/7/167.jpg"]');
+        self::assertSelectorTextContains('h1', 'ULTRA ICE TEA - Vegeta');
+        self::assertSelectorTextContains('.product-detail__price', '1,31 €');
+        self::assertSelectorExists('.product-detail__visual img[src="https://ultrapop.com/img/p/1/6/4/164-large_default.jpg"]');
         self::assertSelectorExists('[data-controller="product-detail"]');
         self::assertSelectorCount(3, '.product-tabs__nav button');
         self::assertSelectorCount(0, '.product-formats');
@@ -124,6 +132,7 @@ final class FrontNavigationTest extends WebTestCase
     public function testUnknownProductReturnsNotFound(): void
     {
         $client = static::createClient();
+        $this->skipIfDatabaseIsUnavailable();
         $client->request('GET', '/boutique/product/999');
 
         self::assertResponseStatusCodeSame(404);
@@ -152,6 +161,11 @@ final class FrontNavigationTest extends WebTestCase
     {
         $client = static::createClient();
         $client->getCookieJar()->set(new Cookie('ultrapop_locale', 'en'));
+
+        if ($this->requiresCatalogDatabase($path)) {
+            $this->skipIfStorefrontCatalogIsUnavailable();
+        }
+
         $client->request('GET', $path);
 
         self::assertResponseIsSuccessful();
@@ -165,9 +179,39 @@ final class FrontNavigationTest extends WebTestCase
         yield 'shop' => ['/boutique', 'The entire shop'];
         yield 'licenses' => ['/licences', 'Licenses'];
         yield 'sales' => ['/soldes', 'Sales'];
-        yield 'product' => ['/boutique/product/1', 'Figurine Collector Arcane'];
+        yield 'product' => ['/boutique/product/1648', 'ULTRA ICE TEA - Vegeta'];
         yield 'favorites' => ['/favoris', 'My favorites'];
         yield 'profile' => ['/profil', 'My profile'];
         yield 'cart' => ['/cart', 'My cart'];
+    }
+
+    private function skipIfStorefrontCatalogIsUnavailable(): void
+    {
+        $this->skipIfDatabaseIsUnavailable();
+
+        $connection = static::getContainer()->get(Connection::class);
+        \assert($connection instanceof Connection);
+
+        if ((int) $connection->fetchOne("SELECT COUNT(*) FROM product WHERE reference = '28989'") < 1) {
+            self::markTestSkipped('Storefront product catalog is not loaded in the test database.');
+        }
+    }
+
+    private function requiresCatalogDatabase(string $path): bool
+    {
+        return str_starts_with($path, '/boutique')
+            || str_starts_with($path, '/licences')
+            || str_starts_with($path, '/soldes');
+    }
+
+    private function skipIfDatabaseIsUnavailable(): void
+    {
+        try {
+            $connection = static::getContainer()->get(Connection::class);
+            \assert($connection instanceof Connection);
+            $connection->executeQuery('SELECT 1');
+        } catch (\Throwable $exception) {
+            self::markTestSkipped(sprintf('Database connection is unavailable in test env: %s', $exception->getMessage()));
+        }
     }
 }

@@ -12,7 +12,6 @@ final readonly class CartViewBuilder
     private const FREE_SHIPPING_THRESHOLD_CENTS = 4900;
 
     public function __construct(
-        private TemporaryCatalog $catalog,
         private TranslatorInterface $translator,
         private UrlGeneratorInterface $urlGenerator,
     ) {
@@ -66,17 +65,17 @@ final readonly class CartViewBuilder
     private function item(CartItem $item): array
     {
         $product = $item->getProduct();
-        $temporaryId = null === $product ? null : $this->catalog->temporaryIdForProduct($product);
+        $productId = $product?->getId();
 
         return [
             'id' => $item->getId(),
-            'productId' => $temporaryId ?? $product?->getId(),
+            'productId' => $productId,
             'name' => $product?->getName() ?? '',
             'image' => $product?->getCoverImage()?->getPath(),
             'quantity' => $item->getQuantity(),
             'unitPriceFormatted' => $this->formatCents($item->getUnitPriceTaxIncludedCents()),
             'totalFormatted' => $this->formatCents($item->getTotalTaxIncludedCents()),
-            'productUrl' => null === $temporaryId ? null : $this->urlGenerator->generate('app_front_product', ['id' => $temporaryId]),
+            'productUrl' => null === $productId ? null : $this->urlGenerator->generate('app_front_product', ['id' => $productId]),
             'updateUrl' => $this->urlGenerator->generate('app_api_cart_item_update', ['id' => $item->getId()]),
             'removeUrl' => $this->urlGenerator->generate('app_api_cart_item_remove', ['id' => $item->getId()]),
         ];
