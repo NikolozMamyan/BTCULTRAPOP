@@ -1,3 +1,4 @@
 {
-    "user.email.unique": "An account already uses this email address."
+    "user.email.unique": "An account already uses this email address.",
+    "product.ean.digits": "The EAN must contain digits only."
 }

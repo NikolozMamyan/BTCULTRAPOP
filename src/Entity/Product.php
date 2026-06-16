@@ -42,6 +42,11 @@ class Product
     #[Assert\Length(max: 64)]
     private string $reference = '';
 
+    #[ORM\Column(length: 13, nullable: true)]
+    #[Assert\Length(max: 13)]
+    #[Assert\Regex(pattern: '/^\d+$/', message: 'product.ean.digits')]
+    private ?string $ean = null;
+
     #[ORM\ManyToOne(inversedBy: 'products')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
@@ -171,6 +176,18 @@ class Product
     public function setReference(string $reference): self
     {
         $this->reference = trim($reference);
+
+        return $this;
+    }
+
+    public function getEan(): ?string
+    {
+        return $this->ean;
+    }
+
+    public function setEan(?string $ean): self
+    {
+        $this->ean = null === $ean ? null : trim($ean);
 
         return $this;
     }

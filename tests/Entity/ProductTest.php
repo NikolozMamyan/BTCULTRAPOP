@@ -54,6 +54,17 @@ final class ProductTest extends TestCase
         self::assertSame($license, $product->getLicense());
     }
 
+    public function testEanCanBeStoredAsAnOptionalString(): void
+    {
+        $product = (new Product())->setEan(' 0123456789012 ');
+
+        self::assertSame('0123456789012', $product->getEan());
+
+        $product->setEan(null);
+
+        self::assertNull($product->getEan());
+    }
+
     public function testImagesAndCoverAreManagedByTheProduct(): void
     {
         $firstImage = (new ProductImage())
