@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['card', 'login', 'register', 'notice'];
+    static targets = ['card', 'login', 'register'];
 
     connect() {
         this.resizeHandler = () => this.updateHeight();
@@ -23,17 +23,7 @@ export default class extends Controller {
 
     show(face) {
         this.cardTarget.classList.toggle('is-register', face === 'register');
-        this.clearNotice();
         this.updateHeight(face);
-    }
-
-    preventSubmit(event) {
-        event.preventDefault();
-        this.noticeTargets.forEach((notice) => notice.classList.remove('hidden'));
-    }
-
-    clearNotice() {
-        this.noticeTargets.forEach((notice) => notice.classList.add('hidden'));
     }
 
     updateHeight(face = this.cardTarget.classList.contains('is-register') ? 'register' : 'login') {

@@ -17,6 +17,15 @@
     </section>
 
     <section class="profile-page max-w-5xl mx-auto px-5 py-10 md:py-16">
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="profile-flash profile-flash--{{ type }}">
+                    <i class="fa-solid {{ type == 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation' }}"></i>
+                    <span>{{ message|trans }}</span>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
         {% if app.user %}
             <article class="profile-card">
                 <div class="profile-card__header">
@@ -32,6 +41,13 @@
                         <i class="fa-solid fa-circle-check"></i>
                         {{ 'profile.connected'|trans }}
                     </span>
+                    <form action="{{ path('app_auth_logout') }}" method="post" class="profile-card__logout">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('auth_logout') }}">
+                        <button type="submit">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            {{ 'auth.logout.submit'|trans }}
+                        </button>
+                    </form>
                 </div>
 
                 <div class="profile-card__details">
@@ -62,6 +78,128 @@
                         </div>
                     </div>
                 </div>
+
+                <section class="profile-addresses" aria-labelledby="profile-addresses-title">
+                    <div class="profile-addresses__heading">
+                        <div>
+                            <span class="profile-card__eyebrow">{{ 'profile.addresses_eyebrow'|trans }}</span>
+                            <h3 id="profile-addresses-title">{{ 'profile.addresses_title'|trans }}</h3>
+                            <p>{{ 'profile.addresses_text'|trans }}</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-addresses__list">
+                        {% for address in app.user.addresses %}
+                            <details class="profile-address-card">
+                                <summary class="profile-address-card__summary">
+                                    <span class="profile-address-card__icon">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                    </span>
+                                    <span class="profile-address-card__content">
+                                        <strong class="profile-address-card__name">{{ address.name }}</strong>
+                                        <span class="profile-address-card__line">{{ address.street }}</span>
+                                        <span class="profile-address-card__meta">{{ address.postalCode }} {{ address.city }}{% if address.phone %} · {{ address.phone }}{% endif %}</span>
+                                    </span>
+                                    <span class="profile-address-card__badges">
+                                        {% if address.defaultAddress %}
+                                            <em>{{ 'profile.address.default'|trans }}</em>
+                                        {% endif %}
+                                    </span>
+                                    <span class="profile-address-card__edit" title="{{ 'profile.address.edit'|trans }}">
+                                        <i class="fa-solid fa-pen"></i>
+                                        <span class="sr-only">{{ 'profile.address.edit'|trans }}</span>
+                                    </span>
+                                </summary>
+
+                                <form class="profile-address-form profile-address-form--edit" action="{{ path('app_front_profile_address_update', {id: address.id}) }}" method="post">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('profile_address_update_' ~ address.id) }}">
+                                    <input type="hidden" name="country_code" value="{{ address.countryCode }}">
+
+                                    <div class="profile-address-form__grid">
+                                        <label class="profile-address-form__field">
+                                            <span>{{ 'common.address_name'|trans }}</span>
+                                            <input type="text" name="address_name" value="{{ address.name }}" placeholder="{{ 'auth.register.address_name_placeholder'|trans }}">
+                                        </label>
+                                        <label class="profile-address-form__field">
+                                            <span>{{ 'common.street'|trans }}</span>
+                                            <input type="text" name="street" value="{{ address.street }}" autocomplete="street-address" required>
+                                        </label>
+                                        <label class="profile-address-form__field">
+                                            <span>{{ 'common.postal_code'|trans }}</span>
+                                            <input type="text" name="postal_code" value="{{ address.postalCode }}" autocomplete="postal-code" inputmode="numeric" required>
+                                        </label>
+                                        <label class="profile-address-form__field">
+                                            <span>{{ 'common.city'|trans }}</span>
+                                            <input type="text" name="city" value="{{ address.city }}" autocomplete="address-level2" required>
+                                        </label>
+                                        <label class="profile-address-form__field">
+                                            <span>{{ 'common.phone'|trans }}</span>
+                                            <input type="tel" name="phone" value="{{ address.phone }}" autocomplete="tel">
+                                        </label>
+                                    </div>
+
+                                    <div class="profile-address-form__actions">
+                                        <label class="profile-address-form__check">
+                                            <input type="checkbox" name="default_address" value="1" {{ address.defaultAddress ? 'checked' : '' }}>
+                                            <span>{{ 'profile.address.set_default'|trans }}</span>
+                                        </label>
+                                        <button type="submit">
+                                            <i class="fa-solid fa-floppy-disk"></i>
+                                            {{ 'profile.address.save'|trans }}
+                                        </button>
+                                    </div>
+                                </form>
+                            </details>
+                        {% else %}
+                            <p class="profile-addresses__empty">{{ 'profile.no_address'|trans }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <details class="profile-address-add">
+                        <summary>
+                            <span><i class="fa-solid fa-plus"></i> {{ 'profile.address.add'|trans }}</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </summary>
+                        <form class="profile-address-form profile-address-form--new" action="{{ path('app_front_profile_address_add') }}" method="post">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('profile_address_add') }}">
+                            <input type="hidden" name="country_code" value="FR">
+
+                            <div class="profile-address-form__grid">
+                                <label class="profile-address-form__field">
+                                    <span>{{ 'common.address_name'|trans }}</span>
+                                    <input type="text" name="address_name" placeholder="{{ 'auth.register.address_name_placeholder'|trans }}">
+                                </label>
+                                <label class="profile-address-form__field">
+                                    <span>{{ 'common.street'|trans }}</span>
+                                    <input type="text" name="street" autocomplete="street-address" required>
+                                </label>
+                                <label class="profile-address-form__field">
+                                    <span>{{ 'common.postal_code'|trans }}</span>
+                                    <input type="text" name="postal_code" autocomplete="postal-code" inputmode="numeric" required>
+                                </label>
+                                <label class="profile-address-form__field">
+                                    <span>{{ 'common.city'|trans }}</span>
+                                    <input type="text" name="city" autocomplete="address-level2" required>
+                                </label>
+                                <label class="profile-address-form__field">
+                                    <span>{{ 'common.phone'|trans }}</span>
+                                    <input type="tel" name="phone" autocomplete="tel">
+                                </label>
+                            </div>
+
+                            <div class="profile-address-form__actions">
+                                <label class="profile-address-form__check">
+                                    <input type="checkbox" name="default_address" value="1">
+                                    <span>{{ 'profile.address.set_default'|trans }}</span>
+                                </label>
+                                <button type="submit">
+                                    <i class="fa-solid fa-plus"></i>
+                                    {{ 'profile.address.add_submit'|trans }}
+                                </button>
+                            </div>
+                        </form>
+                    </details>
+                </section>
             </article>
         {% else %}
             <div class="profile-auth" data-controller="profile-auth">
@@ -76,7 +214,46 @@
                             </div>
                         </div>
 
-                        <form class="profile-auth__form" data-action="submit->profile-auth#preventSubmit">
+                        <form class="profile-auth__form" action="{{ path('app_auth_login') }}" method="post">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('auth_login') }}">
+                            <label class="profile-auth__field">
+                                <span>{{ 'common.email'|trans }}</span>
+                                <span class="profile-auth__input">
+                                    <i class="fa-regular fa-envelope"></i>
+                                    <input type="email" name="email" autocomplete="email" required placeholder="email@example.com">
+                                </span>
+                            </label>
+                            <label class="profile-auth__field">
+                                <span>{{ 'common.password'|trans }}</span>
+                                <span class="profile-auth__input">
+                                    <i class="fa-solid fa-lock"></i>
+                                    <input type="password" name="password" autocomplete="current-password" required placeholder="••••••••">
+                                </span>
+                            </label>
+                            <button type="submit" class="profile-auth__submit">
+                                {{ 'auth.login.submit'|trans }}
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </form>
+
+                        <p class="profile-auth__switch">
+                            {{ 'auth.login.no_account'|trans }}
+                            <button type="button" data-action="profile-auth#showRegister">{{ 'auth.login.register'|trans }}</button>
+                        </p>
+                    </article>
+
+                    <article class="profile-auth__face profile-auth__face--register" data-profile-auth-target="register">
+                        <div class="profile-auth__heading">
+                            <span class="profile-auth__icon profile-auth__icon--register"><i class="fa-solid fa-user-plus"></i></span>
+                            <div>
+                                <span class="profile-card__eyebrow">{{ 'auth.register.eyebrow'|trans }}</span>
+                                <h2>{{ 'auth.register.title'|trans }}</h2>
+                                <p>{{ 'auth.register.text'|trans }}</p>
+                            </div>
+                        </div>
+
+                        <form class="profile-auth__form" action="{{ path('app_auth_register') }}" method="post">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('auth_register') }}">
                             <div class="profile-auth__grid">
                                 <label class="profile-auth__field">
                                     <span>{{ 'common.last_name'|trans }}</span>
@@ -104,44 +281,6 @@
                                 <span>{{ 'common.password'|trans }}</span>
                                 <span class="profile-auth__input">
                                     <i class="fa-solid fa-lock"></i>
-                                    <input type="password" name="password" autocomplete="current-password" required placeholder="••••••••">
-                                </span>
-                            </label>
-                            <button type="submit" class="profile-auth__submit">
-                                {{ 'auth.login.submit'|trans }}
-                                <i class="fa-solid fa-arrow-right"></i>
-                            </button>
-                        </form>
-
-                        <p class="profile-auth__switch">
-                            {{ 'auth.login.no_account'|trans }}
-                            <button type="button" data-action="profile-auth#showRegister">{{ 'auth.login.register'|trans }}</button>
-                        </p>
-                        <p class="profile-auth__notice hidden" data-profile-auth-target="notice">{{ 'auth.unavailable'|trans }}</p>
-                    </article>
-
-                    <article class="profile-auth__face profile-auth__face--register" data-profile-auth-target="register">
-                        <div class="profile-auth__heading">
-                            <span class="profile-auth__icon profile-auth__icon--register"><i class="fa-solid fa-user-plus"></i></span>
-                            <div>
-                                <span class="profile-card__eyebrow">{{ 'auth.register.eyebrow'|trans }}</span>
-                                <h2>{{ 'auth.register.title'|trans }}</h2>
-                                <p>{{ 'auth.register.text'|trans }}</p>
-                            </div>
-                        </div>
-
-                        <form class="profile-auth__form" data-action="submit->profile-auth#preventSubmit">
-                            <label class="profile-auth__field">
-                                <span>{{ 'common.email'|trans }}</span>
-                                <span class="profile-auth__input">
-                                    <i class="fa-regular fa-envelope"></i>
-                                    <input type="email" name="email" autocomplete="email" required placeholder="email@example.com">
-                                </span>
-                            </label>
-                            <label class="profile-auth__field">
-                                <span>{{ 'common.password'|trans }}</span>
-                                <span class="profile-auth__input">
-                                    <i class="fa-solid fa-lock"></i>
                                     <input type="password" name="password" autocomplete="new-password" minlength="8" required placeholder="••••••••">
                                 </span>
                             </label>
@@ -151,7 +290,7 @@
                                     <span>{{ 'common.address_name'|trans }}</span>
                                     <span class="profile-auth__input">
                                         <i class="fa-solid fa-house"></i>
-                                        <input type="text" name="address_name" autocomplete="off" required placeholder="{{ 'auth.register.address_name_placeholder'|trans }}">
+                                        <input type="text" name="address_name" autocomplete="off" placeholder="{{ 'auth.register.address_name_placeholder'|trans }}">
                                     </span>
                                 </label>
                                 <label class="profile-auth__field">
@@ -188,7 +327,6 @@
                             {{ 'auth.register.has_account'|trans }}
                             <button type="button" data-action="profile-auth#showLogin">{{ 'auth.register.login'|trans }}</button>
                         </p>
-                        <p class="profile-auth__notice hidden" data-profile-auth-target="notice">{{ 'auth.unavailable'|trans }}</p>
                     </article>
                 </div>
             </div>

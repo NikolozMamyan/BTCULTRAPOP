@@ -49,6 +49,9 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('input[name="last_name"]');
         self::assertSelectorExists('input[name="first_name"]');
         self::assertSelectorExists('input[name="address_name"]');
+        self::assertSelectorNotExists('input[name="address_name"][required]');
+        self::assertSelectorExists('form[action="/auth/login"][method="post"] input[name="_csrf_token"]');
+        self::assertSelectorExists('form[action="/auth/register"][method="post"] input[name="_csrf_token"]');
         self::assertSelectorExists('input[name="street"]');
         self::assertSelectorExists('input[name="postal_code"]');
         self::assertSelectorExists('input[name="city"]');

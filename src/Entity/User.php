@@ -66,6 +66,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeImmutable $lastLoginAt = null;
 
     /**
+     * @var Collection<int, UserSession>
+     */
+    #[ORM\OneToMany(
+        targetEntity: UserSession::class,
+        mappedBy: 'user',
+        cascade: ['remove'],
+        orphanRemoval: true,
+    )]
+    #[ORM\OrderBy(['lastSeenAt' => 'DESC'])]
+    private Collection $sessions;
+
+    /**
      * @var Collection<int, Address>
      */
     #[ORM\OneToMany(
@@ -85,6 +97,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
+        $this->sessions = new ArrayCollection();
         $this->addresses = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = $this->createdAt;
@@ -234,6 +247,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastLoginAt(?\DateTimeImmutable $lastLoginAt): self
     {
         $this->lastLoginAt = $lastLoginAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserSession>
+     */
+    public function getSessions(): Collection
+    {
+        return $this->sessions;
+    }
+
+    public function addSession(UserSession $session): self
+    {
+        if (!$this->sessions->contains($session)) {
+            $this->sessions->add($session);
+            $session->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSession(UserSession $session): self
+    {
+        if ($this->sessions->removeElement($session) && $session->getUser() === $this) {
+            $session->setUser(null);
+        }
 
         return $this;
     }
