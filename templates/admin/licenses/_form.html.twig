@@ -1,0 +1,47 @@
+{{ form_start(form, {attr: {class: 'admin-category-form'}}) }}
+    <article class="admin-panel admin-form-card">
+        <div class="admin-form-card__heading">
+            <span><i class="fa-solid fa-clapperboard"></i></span>
+            <div>
+                <strong>{{ 'admin.license.form.identity_title'|trans }}</strong>
+                <small>{{ 'admin.license.form.identity_text'|trans }}</small>
+            </div>
+        </div>
+
+        {{ form_errors(form) }}
+
+        <div class="admin-form-grid admin-form-grid--two">
+            <div class="admin-field">
+                {{ form_label(form.name) }}
+                {{ form_widget(form.name) }}
+                {{ form_errors(form.name) }}
+            </div>
+            <div class="admin-field admin-field--switch">
+                {{ form_widget(form.active) }}
+                {{ form_label(form.active) }}
+                {{ form_errors(form.active) }}
+            </div>
+        </div>
+
+        <div class="admin-field admin-field--full">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description) }}
+            {{ form_errors(form.description) }}
+        </div>
+
+        <div class="admin-category-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>{{ 'admin.license.form.deactivation_notice'|trans }}</span>
+        </div>
+
+        <div class="admin-product-form__actions">
+            <button type="submit" class="admin-action-button">
+                <i class="fa-solid fa-floppy-disk"></i>
+                {{ submit_label|trans }}
+            </button>
+            <a href="{{ path('app_admin_licenses_index') }}" class="admin-secondary-button">
+                {{ 'admin.license.form.cancel'|trans }}
+            </a>
+        </div>
+    </article>
+{{ form_end(form) }}

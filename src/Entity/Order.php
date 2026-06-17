@@ -12,6 +12,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: 'customer_order')]
+#[ORM\Index(name: 'IDX_ORDER_STRIPE_INTENT', columns: ['stripe_payment_intent_id'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_ORDER_STRIPE_SESSION', columns: ['stripe_checkout_session_id'])]
 #[ORM\HasLifecycleCallbacks]
 class Order
 {
@@ -60,11 +62,10 @@ class Order
     #[Assert\PositiveOrZero]
     private int $loyaltyPointsEarned = 0;
 
-    #[ORM\Column(length: 180)]
-    #[Assert\NotBlank]
+    #[ORM\Column(length: 180, nullable: true)]
     #[Assert\Email]
     #[Assert\Length(max: 180)]
-    private string $customerEmail = '';
+    private ?string $customerEmail = null;
 
     #[ORM\Column(length: 201)]
     #[Assert\NotBlank]
@@ -99,6 +100,22 @@ class Order
     #[ORM\Column(length: 30, nullable: true)]
     #[Assert\Length(max: 30)]
     private ?string $shippingPhone = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    private ?string $stripeCheckoutSessionId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    private ?string $stripePaymentIntentId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    private ?string $stripeCustomerId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    private ?string $paymentFailureReason = null;
 
     /**
      * @var Collection<int, OrderItem>
@@ -255,14 +272,15 @@ class Order
         return $this;
     }
 
-    public function getCustomerEmail(): string
+    public function getCustomerEmail(): ?string
     {
         return $this->customerEmail;
     }
 
-    public function setCustomerEmail(string $customerEmail): self
+    public function setCustomerEmail(?string $customerEmail): self
     {
-        $this->customerEmail = mb_strtolower(trim($customerEmail));
+        $customerEmail = null === $customerEmail ? null : mb_strtolower(trim($customerEmail));
+        $this->customerEmail = '' === $customerEmail ? null : $customerEmail;
 
         return $this;
     }
@@ -352,6 +370,60 @@ class Order
         return $this;
     }
 
+    public function getStripeCheckoutSessionId(): ?string
+    {
+        return $this->stripeCheckoutSessionId;
+    }
+
+    public function setStripeCheckoutSessionId(?string $stripeCheckoutSessionId): self
+    {
+        $stripeCheckoutSessionId = null === $stripeCheckoutSessionId ? null : trim($stripeCheckoutSessionId);
+        $this->stripeCheckoutSessionId = '' === $stripeCheckoutSessionId ? null : $stripeCheckoutSessionId;
+
+        return $this;
+    }
+
+    public function getStripePaymentIntentId(): ?string
+    {
+        return $this->stripePaymentIntentId;
+    }
+
+    public function setStripePaymentIntentId(?string $stripePaymentIntentId): self
+    {
+        $stripePaymentIntentId = null === $stripePaymentIntentId ? null : trim($stripePaymentIntentId);
+        $this->stripePaymentIntentId = '' === $stripePaymentIntentId ? null : $stripePaymentIntentId;
+
+        return $this;
+    }
+
+    public function getStripeCustomerId(): ?string
+    {
+        return $this->stripeCustomerId;
+    }
+
+    public function setStripeCustomerId(?string $stripeCustomerId): self
+    {
+        $stripeCustomerId = null === $stripeCustomerId ? null : trim($stripeCustomerId);
+        $this->stripeCustomerId = '' === $stripeCustomerId ? null : $stripeCustomerId;
+
+        return $this;
+    }
+
+    public function getPaymentFailureReason(): ?string
+    {
+        return $this->paymentFailureReason;
+    }
+
+    public function setPaymentFailureReason(?string $paymentFailureReason): self
+    {
+        $paymentFailureReason = null === $paymentFailureReason ? null : trim($paymentFailureReason);
+        $this->paymentFailureReason = null === $paymentFailureReason || '' === $paymentFailureReason
+            ? null
+            : mb_substr($paymentFailureReason, 0, 255);
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, OrderItem>
      */
@@ -406,7 +478,26 @@ class Order
     {
         $this->status = OrderStatus::PAID;
         $this->paymentStatus = PaymentStatus::PAID;
+        $this->paymentFailureReason = null;
         $this->paidAt = $paidAt ?? new \DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function markPaymentProcessing(): self
+    {
+        $this->status = OrderStatus::PENDING_PAYMENT;
+        $this->paymentStatus = PaymentStatus::PROCESSING;
+        $this->paymentFailureReason = null;
+
+        return $this;
+    }
+
+    public function markPaymentFailed(?string $reason = null): self
+    {
+        $this->status = OrderStatus::PENDING_PAYMENT;
+        $this->paymentStatus = PaymentStatus::FAILED;
+        $this->setPaymentFailureReason($reason);
 
         return $this;
     }
@@ -414,6 +505,7 @@ class Order
     public function cancel(?\DateTimeImmutable $cancelledAt = null): self
     {
         $this->status = OrderStatus::CANCELLED;
+        $this->paymentStatus = PaymentStatus::FAILED;
         $this->cancelledAt = $cancelledAt ?? new \DateTimeImmutable();
 
         return $this;

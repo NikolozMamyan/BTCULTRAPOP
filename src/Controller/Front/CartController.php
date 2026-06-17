@@ -4,6 +4,8 @@ namespace App\Controller\Front;
 
 use App\Entity\Cart;
 use App\Entity\User;
+use App\Form\CheckoutAddressType;
+use App\Model\CheckoutAddress;
 use App\Service\CartResolver;
 use App\Service\CartViewBuilder;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,6 +32,9 @@ final class CartController extends AbstractController
 
         $response = $this->render('front/cart/index.html.twig', [
             'cart' => $cartViewBuilder->build($cart),
+            'checkout_form' => $this->createForm(CheckoutAddressType::class, CheckoutAddress::fromUser($this->getAuthenticatedUser()), [
+                'action' => $this->generateUrl('app_checkout_stripe_create'),
+            ])->createView(),
         ]);
 
         if ($cart instanceof Cart) {

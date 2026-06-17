@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Form\Admin;
+
+use App\Entity\License;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
+final class LicenseType extends AbstractType
+{
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        $builder
+            ->add('name', TextType::class, [
+                'label' => 'admin.license.form.name',
+                'attr' => [
+                    'autocomplete' => 'off',
+                    'placeholder' => 'admin.license.form.name_placeholder',
+                ],
+            ])
+            ->add('description', TextareaType::class, [
+                'label' => 'admin.license.form.description',
+                'required' => false,
+                'attr' => [
+                    'rows' => 6,
+                    'placeholder' => 'admin.license.form.description_placeholder',
+                ],
+            ])
+            ->add('active', CheckboxType::class, [
+                'label' => 'admin.license.form.active',
+                'required' => false,
+            ]);
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            'data_class' => License::class,
+        ]);
+    }
+}

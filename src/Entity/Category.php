@@ -26,6 +26,9 @@ class Category
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\Column(options: ['default' => true])]
+    private bool $active = true;
+
     /**
      * @var Collection<int, Product>
      */
@@ -70,6 +73,18 @@ class Category
     public function setDescription(?string $description): self
     {
         $this->description = null === $description ? null : trim($description);
+
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->active;
+    }
+
+    public function setActive(bool $active): self
+    {
+        $this->active = $active;
 
         return $this;
     }

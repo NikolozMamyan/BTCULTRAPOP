@@ -86,6 +86,10 @@ export default class extends Controller {
     }
 
     handleKeydown(event) {
+        if (!this.hasScannerTarget) {
+            return;
+        }
+
         if (event.key === 'Escape' && !this.scannerTarget.classList.contains('is-hidden')) {
             this.closeScanner();
         }

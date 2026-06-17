@@ -1,0 +1,34 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}{{ 'checkout.cancel.page_title'|trans }}{% endblock %}
+{% block storefront_data %}data-page="checkout-cancel"{% endblock %}
+
+{% block main %}
+    <section class="checkout-result">
+        <article class="checkout-result__card checkout-result__card--cancel">
+            <span class="checkout-result__icon">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </span>
+            <p class="checkout-result__eyebrow">{{ 'checkout.cancel.eyebrow'|trans }}</p>
+            <h1>{{ 'checkout.cancel.title'|trans }}</h1>
+            <p>{{ 'checkout.cancel.text'|trans }}</p>
+
+            {% if order %}
+                <div class="checkout-result__order">
+                    <span>{{ 'checkout.order_number'|trans }}</span>
+                    <strong>{{ order.orderNumber }}</strong>
+                </div>
+            {% endif %}
+
+            <div class="checkout-result__actions">
+                <a href="{{ path('app_front_cart') }}" class="checkout-result__primary">
+                    {{ 'common.cart'|trans }}
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="{{ path('app_front_boutique') }}" class="checkout-result__secondary">
+                    {{ 'common.shop'|trans }}
+                </a>
+            </div>
+        </article>
+    </section>
+{% endblock %}

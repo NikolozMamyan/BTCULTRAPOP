@@ -10,6 +10,7 @@ use App\Entity\OrderItem;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Enum\PaymentStatus;
+use App\Model\CheckoutAddress;
 
 final class OrderManager
 {
@@ -44,6 +45,47 @@ final class OrderManager
             ->setShippingCity($shippingAddress->getCity())
             ->setShippingCountryCode($shippingAddress->getCountryCode())
             ->setShippingPhone($shippingAddress->getPhone())
+            ->setShippingAmountTaxIncludedCents($shippingAmountTaxIncludedCents)
+            ->setDiscountAmountTaxIncludedCents($discountAmountTaxIncludedCents);
+
+        foreach ($cart->getItems() as $cartItem) {
+            $order->addItem($this->createOrderItem($cartItem));
+        }
+
+        $order->refreshTotals();
+        $cart->markConverted();
+
+        return $order;
+    }
+
+    public function createGuestFromCart(
+        Cart $cart,
+        CheckoutAddress $shippingAddress,
+        ?User $user = null,
+        int $shippingAmountTaxIncludedCents = 0,
+        int $discountAmountTaxIncludedCents = 0,
+        ?string $customerEmail = null,
+        ?string $orderNumber = null,
+    ): Order {
+        if (!$cart->isActive()) {
+            throw new \InvalidArgumentException('order.error.cart_not_active');
+        }
+
+        if (0 === $cart->getItems()->count()) {
+            throw new \InvalidArgumentException('order.error.empty_cart');
+        }
+
+        $order = (new Order())
+            ->setOrderNumber($orderNumber ?? $this->generateOrderNumber())
+            ->setUser($user)
+            ->setCustomerEmail($customerEmail ?? $user?->getEmail())
+            ->setCustomerName($shippingAddress->name)
+            ->setShippingName($shippingAddress->name)
+            ->setShippingStreet($shippingAddress->street)
+            ->setShippingPostalCode($shippingAddress->postalCode)
+            ->setShippingCity($shippingAddress->city)
+            ->setShippingCountryCode($shippingAddress->countryCode)
+            ->setShippingPhone($shippingAddress->phone)
             ->setShippingAmountTaxIncludedCents($shippingAmountTaxIncludedCents)
             ->setDiscountAmountTaxIncludedCents($discountAmountTaxIncludedCents);
 

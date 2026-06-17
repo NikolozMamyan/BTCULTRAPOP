@@ -1,0 +1,25 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.category.new.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-category-editor">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.category.new.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.category.new.title'|trans }}</h1>
+                <p>{{ 'admin.category.new.subtitle'|trans }}</p>
+            </div>
+            <a href="{{ path('app_admin_categories_index') }}" class="admin-secondary-button">
+                <i class="fa-solid fa-arrow-left"></i>
+                {{ 'admin.category.back_to_list'|trans }}
+            </a>
+        </div>
+
+        {% include 'admin/categories/_form.html.twig' with {
+            form: form,
+            category: category,
+            submit_label: 'admin.category.form.create_submit'
+        } only %}
+    </section>
+{% endblock %}

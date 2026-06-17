@@ -162,6 +162,8 @@ final class FrontNavigationTest extends WebTestCase
         $client->request('GET', '/boutique/product/999');
 
         self::assertResponseStatusCodeSame(404);
+        self::assertSelectorTextContains('.catalog-empty', 'Ce produit n’est pas disponible');
+        self::assertSelectorExists('.catalog-empty__action[href="/boutique"]');
     }
 
     public function testLocaleCookieRendersTheStorefrontInEnglish(): void

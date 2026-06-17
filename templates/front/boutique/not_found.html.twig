@@ -1,0 +1,17 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}{{ 'page.product.title'|trans }}{% endblock %}
+{% block storefront_data %}data-page="product"{% endblock %}
+
+{% block main %}
+    <section class="product-unavailable-page max-w-7xl mx-auto px-5">
+        {% include 'front/components/_catalog_empty.html.twig' with {
+            icon: 'fa-solid fa-magnifying-glass',
+            eyebrow: 'product.empty_eyebrow',
+            title: 'product.empty_title',
+            text: 'product.empty_text',
+            action_url: path('app_front_boutique'),
+            action_label: 'product.back_shop'
+        } only %}
+    </section>
+{% endblock %}

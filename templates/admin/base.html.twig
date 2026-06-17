@@ -26,6 +26,18 @@
                     <i class="fa-solid fa-boxes-stacked"></i>
                     <span>{{ 'admin.nav.products'|trans }}</span>
                 </a>
+                <a href="{{ path('app_admin_categories_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_categories' ? 'is-active' : '' }}">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>{{ 'admin.nav.categories'|trans }}</span>
+                </a>
+                <a href="{{ path('app_admin_licenses_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_licenses' ? 'is-active' : '' }}">
+                    <i class="fa-solid fa-clapperboard"></i>
+                    <span>{{ 'admin.nav.licenses'|trans }}</span>
+                </a>
+                <a href="{{ path('app_admin_payments_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_payments' ? 'is-active' : '' }}">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <span>{{ 'admin.nav.payments'|trans }}</span>
+                </a>
                 <span class="admin-sidebar__link is-disabled">
                     <i class="fa-solid fa-receipt"></i>
                     <span>{{ 'admin.nav.orders'|trans }}</span>

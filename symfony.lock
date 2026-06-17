@@ -50,6 +50,9 @@
             "./bin/phpunit"
         ]
     },
+    "stripe/stripe-php": {
+        "version": "v20.2.1"
+    },
     "symfony/asset-mapper": {
         "version": "7.2",
         "recipe": {

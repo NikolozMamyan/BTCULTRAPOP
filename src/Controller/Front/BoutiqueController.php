@@ -28,7 +28,7 @@ final class BoutiqueController extends AbstractController
         $product = $catalog->findEntity($id);
 
         if (null === $product) {
-            throw $this->createNotFoundException(sprintf('Product %d was not found.', $id));
+            return $this->render('front/boutique/not_found.html.twig', [], new Response('', Response::HTTP_NOT_FOUND));
         }
 
         return $this->render('front/boutique/show.html.twig', [

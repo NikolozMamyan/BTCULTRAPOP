@@ -92,10 +92,64 @@
                         <dd id="cart-page-total">{{ cart.totalFormatted }}</dd>
                     </div>
                 </dl>
-                <button type="button" class="cart-page__checkout" disabled>
-                    {{ 'cart.checkout_soon'|trans }}
-                    <i class="fa-solid fa-lock"></i>
-                </button>
+                {% if not cart.empty and checkout_form is defined %}
+                    {{ form_start(checkout_form, {attr: {class: 'checkout-address-form'}}) }}
+                        <div class="checkout-address-form__heading">
+                            <span><i class="fa-solid fa-truck-fast"></i></span>
+                            <div>
+                                <strong>{{ 'checkout.address.title'|trans }}</strong>
+                                <small>{{ 'checkout.address.text'|trans }}</small>
+                            </div>
+                        </div>
+
+                        {{ form_errors(checkout_form) }}
+
+                        <div class="checkout-address-form__field checkout-address-form__field--wide">
+                            {{ form_label(checkout_form.name) }}
+                            {{ form_widget(checkout_form.name, {attr: {placeholder: 'checkout.address.name_placeholder'|trans}}) }}
+                            {{ form_errors(checkout_form.name) }}
+                        </div>
+                        <div class="checkout-address-form__field checkout-address-form__field--wide">
+                            {{ form_label(checkout_form.street) }}
+                            {{ form_widget(checkout_form.street, {attr: {placeholder: 'checkout.address.street_placeholder'|trans}}) }}
+                            {{ form_errors(checkout_form.street) }}
+                        </div>
+                        <div class="checkout-address-form__grid">
+                            <div class="checkout-address-form__field">
+                                {{ form_label(checkout_form.postalCode) }}
+                                {{ form_widget(checkout_form.postalCode) }}
+                                {{ form_errors(checkout_form.postalCode) }}
+                            </div>
+                            <div class="checkout-address-form__field">
+                                {{ form_label(checkout_form.city) }}
+                                {{ form_widget(checkout_form.city) }}
+                                {{ form_errors(checkout_form.city) }}
+                            </div>
+                        </div>
+                        <div class="checkout-address-form__field checkout-address-form__field--wide">
+                            {{ form_label(checkout_form.phone) }}
+                            {{ form_widget(checkout_form.phone, {attr: {placeholder: 'checkout.address.phone_placeholder'|trans}}) }}
+                            {{ form_errors(checkout_form.phone) }}
+                        </div>
+
+                        {{ form_widget(checkout_form.countryCode) }}
+                        {{ form_rest(checkout_form) }}
+
+                        <button type="submit" class="cart-page__checkout cart-page__checkout--enabled">
+                            {{ 'checkout.pay_with_stripe'|trans }}
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <p class="checkout-address-form__secure">
+                            <i class="fa-solid fa-lock"></i>
+                            {{ 'checkout.secure_note'|trans }}
+                        </p>
+                    {{ form_end(checkout_form) }}
+                {% else %}
+                    <a href="{{ path('app_front_boutique') }}" class="cart-page__checkout cart-page__checkout--enabled">
+                        {{ 'overlay.discover_shop'|trans }}
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                {% endif %}
             </aside>
         </div>
     </section>

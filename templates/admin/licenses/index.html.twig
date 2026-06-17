@@ -1,0 +1,109 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.license.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section
+        class="admin-licenses"
+        data-controller="admin-products"
+        data-admin-products-enabled-text-value="{{ 'admin.license.active.enabled'|trans }}"
+        data-admin-products-disabled-text-value="{{ 'admin.license.active.disabled'|trans }}"
+    >
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.license.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.license.index.title'|trans }}</h1>
+                <p>{{ 'admin.license.index.subtitle'|trans }}</p>
+            </div>
+            <a href="{{ path('app_admin_licenses_new') }}" class="admin-action-button">
+                <i class="fa-solid fa-plus"></i>
+                {{ 'admin.license.index.new'|trans }}
+            </a>
+        </div>
+
+        <form class="admin-search-bar" method="get" action="{{ path('app_admin_licenses_index') }}">
+            <label for="admin-license-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span>{{ 'admin.license.index.search_label'|trans }}</span>
+            </label>
+            <input
+                id="admin-license-search"
+                type="search"
+                name="q"
+                value="{{ search }}"
+                placeholder="{{ 'admin.license.index.search_placeholder'|trans }}"
+            >
+            <button type="submit">{{ 'admin.license.index.search_submit'|trans }}</button>
+            {% if search %}
+                <a href="{{ path('app_admin_licenses_index') }}">{{ 'admin.license.index.reset'|trans }}</a>
+            {% endif %}
+        </form>
+
+        <article class="admin-panel admin-categories-panel">
+            <div class="admin-panel__heading">
+                <div>
+                    <span>{{ 'admin.license.index.list_eyebrow'|trans }}</span>
+                    <h2>{{ 'admin.license.index.list_title'|trans({'%count%': licenses|length}) }}</h2>
+                </div>
+            </div>
+
+            {% if licenses %}
+                <div class="admin-category-grid">
+                    {% for license in licenses %}
+                        {% set activeProducts = license.products|filter(product => product.active)|length %}
+
+                        <article class="admin-category-card">
+                            <a href="{{ path('app_admin_licenses_edit', {id: license.id}) }}" class="admin-category-card__main">
+                                <span class="admin-category-card__icon admin-category-card__icon--license">
+                                    <i class="fa-solid fa-clapperboard"></i>
+                                </span>
+                                <span>
+                                    <strong>{{ license.name }}</strong>
+                                    <small>{{ license.description ?: 'admin.license.table.no_description'|trans }}</small>
+                                </span>
+                            </a>
+
+                            <div class="admin-category-card__stats">
+                                <span>
+                                    <strong>{{ license.products|length }}</strong>
+                                    {{ 'admin.license.table.products'|trans }}
+                                </span>
+                                <span>
+                                    <strong>{{ activeProducts }}</strong>
+                                    {{ 'admin.license.table.active_products'|trans }}
+                                </span>
+                            </div>
+
+                            <div class="admin-category-card__footer">
+                                <button
+                                    type="button"
+                                    class="admin-active-switch {{ license.active ? 'is-active' : '' }}"
+                                    data-action="admin-products#toggleActive"
+                                    data-admin-products-url-param="{{ path('app_admin_licenses_toggle', {id: license.id}) }}"
+                                    data-admin-products-token-param="{{ csrf_token('admin_license_toggle_' ~ license.id) }}"
+                                    aria-pressed="{{ license.active ? 'true' : 'false' }}"
+                                >
+                                    <span></span>
+                                    <em>{{ license.active ? 'admin.license.active.enabled'|trans : 'admin.license.active.disabled'|trans }}</em>
+                                </button>
+                                <a href="{{ path('app_admin_licenses_edit', {id: license.id}) }}" class="admin-secondary-button">
+                                    <i class="fa-solid fa-pen"></i>
+                                    {{ 'admin.license.action.edit'|trans }}
+                                </a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="admin-empty-state">
+                    <i class="fa-solid fa-clapperboard"></i>
+                    <p>{{ search ? 'admin.license.index.no_search_results'|trans : 'admin.license.index.empty'|trans }}</p>
+                    <a href="{{ path('app_admin_licenses_new') }}" class="admin-action-button">
+                        <i class="fa-solid fa-plus"></i>
+                        {{ 'admin.license.index.new'|trans }}
+                    </a>
+                </div>
+            {% endif %}
+        </article>
+    </section>
+{% endblock %}

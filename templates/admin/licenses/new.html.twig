@@ -1,0 +1,25 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.license.new.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-license-editor">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.license.new.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.license.new.title'|trans }}</h1>
+                <p>{{ 'admin.license.new.subtitle'|trans }}</p>
+            </div>
+            <a href="{{ path('app_admin_licenses_index') }}" class="admin-secondary-button">
+                <i class="fa-solid fa-arrow-left"></i>
+                {{ 'admin.license.back_to_list'|trans }}
+            </a>
+        </div>
+
+        {% include 'admin/licenses/_form.html.twig' with {
+            form: form,
+            license: license,
+            submit_label: 'admin.license.form.create_submit'
+        } only %}
+    </section>
+{% endblock %}

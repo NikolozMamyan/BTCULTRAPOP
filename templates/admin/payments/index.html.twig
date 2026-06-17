@@ -1,0 +1,72 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.payment.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-payments">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.payment.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.payment.index.title'|trans }}</h1>
+                <p>{{ 'admin.payment.index.subtitle'|trans }}</p>
+            </div>
+        </div>
+
+        <div class="admin-payment-grid">
+            {% for mode in ['sandbox', 'live'] %}
+                {% set is_active = settings.stripeMode == mode %}
+                {% set secret_ready = configured_modes[mode] ?? false %}
+                {% set webhook_ready = configured_webhooks[mode] ?? false %}
+
+                <article class="admin-payment-card {{ is_active ? 'is-active' : '' }}">
+                    <div class="admin-payment-card__head">
+                        <span class="admin-payment-card__icon {{ mode == 'live' ? 'admin-payment-card__icon--live' : '' }}">
+                            <i class="fa-solid {{ mode == 'live' ? 'fa-bolt' : 'fa-flask' }}"></i>
+                        </span>
+                        <div>
+                            <strong>{{ ('admin.payment.mode.' ~ mode)|trans }}</strong>
+                            <small>{{ ('admin.payment.mode.' ~ mode ~ '_text')|trans }}</small>
+                        </div>
+                        {% if is_active %}
+                            <em>{{ 'admin.payment.mode.active'|trans }}</em>
+                        {% endif %}
+                    </div>
+
+                    <div class="admin-payment-status-list">
+                        <span class="{{ secret_ready ? 'is-ready' : 'is-missing' }}">
+                            <i class="fa-solid {{ secret_ready ? 'fa-circle-check' : 'fa-circle-xmark' }}"></i>
+                            {{ secret_ready ? 'admin.payment.secret_ready'|trans : 'admin.payment.secret_missing'|trans }}
+                        </span>
+                        <span class="{{ webhook_ready ? 'is-ready' : 'is-missing' }}">
+                            <i class="fa-solid {{ webhook_ready ? 'fa-circle-check' : 'fa-circle-xmark' }}"></i>
+                            {{ webhook_ready ? 'admin.payment.webhook_ready'|trans : 'admin.payment.webhook_missing'|trans }}
+                        </span>
+                    </div>
+
+                    <form
+                        method="post"
+                        action="{{ path('app_admin_payments_stripe_mode') }}"
+                        {% if mode == 'live' %}onsubmit="return confirm('{{ 'admin.payment.live_confirm'|trans|e('js') }}');"{% endif %}
+                    >
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_payment_mode') }}">
+                        <input type="hidden" name="mode" value="{{ mode }}">
+                        <button type="submit" class="{{ is_active ? 'admin-secondary-button' : 'admin-action-button' }}" {{ is_active ? 'disabled' : '' }}>
+                            {{ is_active ? 'admin.payment.mode.current'|trans : 'admin.payment.mode.use'|trans }}
+                        </button>
+                    </form>
+                </article>
+            {% endfor %}
+        </div>
+
+        <article class="admin-panel admin-payment-help">
+            <div class="admin-panel__heading">
+                <div>
+                    <span>{{ 'admin.payment.help.eyebrow'|trans }}</span>
+                    <h2>{{ 'admin.payment.help.title'|trans }}</h2>
+                </div>
+            </div>
+            <p>{{ 'admin.payment.help.text'|trans }}</p>
+            <code>/stripe/webhook</code>
+        </article>
+    </section>
+{% endblock %}

@@ -11,6 +11,7 @@ use App\Entity\User;
 use App\Enum\CartStatus;
 use App\Enum\OrderStatus;
 use App\Enum\PaymentStatus;
+use App\Model\CheckoutAddress;
 use App\Service\CartManager;
 use App\Service\OrderManager;
 use PHPUnit\Framework\TestCase;
@@ -146,6 +147,39 @@ final class CartOrderManagerTest extends TestCase
 
         self::assertSame(27, $user->getLoyaltyPoints());
         self::assertSame(3, $product->getQuantity());
+    }
+
+    public function testOrderManagerCreatesGuestOrderWithoutCustomerEmail(): void
+    {
+        $address = new CheckoutAddress();
+        $address->name = 'Client Invite';
+        $address->street = '20 rue de Lyon';
+        $address->postalCode = '69001';
+        $address->city = 'Lyon';
+        $address->countryCode = 'FR';
+        $address->phone = null;
+
+        $product = $this->createProduct()
+            ->setPriceTaxExcluded('20.000000')
+            ->setPriceTaxIncluded('24.000000')
+            ->setQuantity(4);
+        $cartManager = new CartManager();
+        $cart = $cartManager->createCart(token: 'guest-checkout-token');
+        $cartManager->addProduct($cart, $product, 1);
+
+        $order = (new OrderManager())->createGuestFromCart(
+            cart: $cart,
+            shippingAddress: $address,
+            orderNumber: 'UP-TEST-GUEST',
+        );
+
+        self::assertSame(CartStatus::CONVERTED, $cart->getStatus());
+        self::assertNull($order->getUser());
+        self::assertNull($order->getCustomerEmail());
+        self::assertSame('Client Invite', $order->getCustomerName());
+        self::assertSame('20 rue de Lyon', $order->getShippingStreet());
+        self::assertSame(2400, $order->getTotalTaxIncludedCents());
+        self::assertSame(PaymentStatus::PENDING, $order->getPaymentStatus());
     }
 
     private function createProduct(): Product

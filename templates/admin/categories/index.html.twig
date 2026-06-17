@@ -1,0 +1,109 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.category.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section
+        class="admin-categories"
+        data-controller="admin-products"
+        data-admin-products-enabled-text-value="{{ 'admin.category.active.enabled'|trans }}"
+        data-admin-products-disabled-text-value="{{ 'admin.category.active.disabled'|trans }}"
+    >
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.category.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.category.index.title'|trans }}</h1>
+                <p>{{ 'admin.category.index.subtitle'|trans }}</p>
+            </div>
+            <a href="{{ path('app_admin_categories_new') }}" class="admin-action-button">
+                <i class="fa-solid fa-plus"></i>
+                {{ 'admin.category.index.new'|trans }}
+            </a>
+        </div>
+
+        <form class="admin-search-bar" method="get" action="{{ path('app_admin_categories_index') }}">
+            <label for="admin-category-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span>{{ 'admin.category.index.search_label'|trans }}</span>
+            </label>
+            <input
+                id="admin-category-search"
+                type="search"
+                name="q"
+                value="{{ search }}"
+                placeholder="{{ 'admin.category.index.search_placeholder'|trans }}"
+            >
+            <button type="submit">{{ 'admin.category.index.search_submit'|trans }}</button>
+            {% if search %}
+                <a href="{{ path('app_admin_categories_index') }}">{{ 'admin.category.index.reset'|trans }}</a>
+            {% endif %}
+        </form>
+
+        <article class="admin-panel admin-categories-panel">
+            <div class="admin-panel__heading">
+                <div>
+                    <span>{{ 'admin.category.index.list_eyebrow'|trans }}</span>
+                    <h2>{{ 'admin.category.index.list_title'|trans({'%count%': categories|length}) }}</h2>
+                </div>
+            </div>
+
+            {% if categories %}
+                <div class="admin-category-grid">
+                    {% for category in categories %}
+                        {% set activeProducts = category.products|filter(product => product.active)|length %}
+
+                        <article class="admin-category-card">
+                            <a href="{{ path('app_admin_categories_edit', {id: category.id}) }}" class="admin-category-card__main">
+                                <span class="admin-category-card__icon">
+                                    <i class="fa-solid fa-layer-group"></i>
+                                </span>
+                                <span>
+                                    <strong>{{ category.name }}</strong>
+                                    <small>{{ category.description ?: 'admin.category.table.no_description'|trans }}</small>
+                                </span>
+                            </a>
+
+                            <div class="admin-category-card__stats">
+                                <span>
+                                    <strong>{{ category.products|length }}</strong>
+                                    {{ 'admin.category.table.products'|trans }}
+                                </span>
+                                <span>
+                                    <strong>{{ activeProducts }}</strong>
+                                    {{ 'admin.category.table.active_products'|trans }}
+                                </span>
+                            </div>
+
+                            <div class="admin-category-card__footer">
+                                <button
+                                    type="button"
+                                    class="admin-active-switch {{ category.active ? 'is-active' : '' }}"
+                                    data-action="admin-products#toggleActive"
+                                    data-admin-products-url-param="{{ path('app_admin_categories_toggle', {id: category.id}) }}"
+                                    data-admin-products-token-param="{{ csrf_token('admin_category_toggle_' ~ category.id) }}"
+                                    aria-pressed="{{ category.active ? 'true' : 'false' }}"
+                                >
+                                    <span></span>
+                                    <em>{{ category.active ? 'admin.category.active.enabled'|trans : 'admin.category.active.disabled'|trans }}</em>
+                                </button>
+                                <a href="{{ path('app_admin_categories_edit', {id: category.id}) }}" class="admin-secondary-button">
+                                    <i class="fa-solid fa-pen"></i>
+                                    {{ 'admin.category.action.edit'|trans }}
+                                </a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="admin-empty-state">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <p>{{ search ? 'admin.category.index.no_search_results'|trans : 'admin.category.index.empty'|trans }}</p>
+                    <a href="{{ path('app_admin_categories_new') }}" class="admin-action-button">
+                        <i class="fa-solid fa-plus"></i>
+                        {{ 'admin.category.index.new'|trans }}
+                    </a>
+                </div>
+            {% endif %}
+        </article>
+    </section>
+{% endblock %}
