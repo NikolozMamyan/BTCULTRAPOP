@@ -85,7 +85,7 @@
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
-                    <button type="button" class="product-detail__primary" data-action="product-detail#addToCart" {{ product.in_stock ? '' : 'disabled' }}>
+                    <button type="button" class="product-detail__primary cart-add-button" data-action="product-detail#addToCart" {{ product.in_stock ? '' : 'disabled' }}>
                         <i class="fa-solid fa-bag-shopping"></i>
                         {{ 'product.add_to_cart'|trans }}
                     </button>

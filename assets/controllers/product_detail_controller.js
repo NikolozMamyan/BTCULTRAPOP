@@ -29,11 +29,12 @@ export default class extends Controller {
         });
     }
 
-    addToCart() {
+    addToCart(event) {
         window.dispatchEvent(new CustomEvent('cart:add', {
             detail: {
                 productId: this.productIdValue,
                 quantity: this.quantity,
+                button: event.currentTarget,
             },
         }));
     }

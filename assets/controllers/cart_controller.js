@@ -58,6 +58,8 @@ export default class extends Controller {
             return;
         }
 
+        this.animateAdd(button);
+
         await this.mutate('POST', this.addUrlValue, {
             productId: Number(productId),
             quantity: Number(quantity) || 1,
@@ -237,6 +239,25 @@ export default class extends Controller {
         button.disabled = busy;
         button.classList.toggle('is-loading', busy);
         button.setAttribute('aria-busy', String(busy));
+    }
+
+    animateAdd(button) {
+        if (!button) {
+            return;
+        }
+
+        const targets = new Set([
+            button,
+            button.closest('.shop-product-card'),
+        ].filter(Boolean));
+
+        targets.forEach((target) => target.classList.remove('is-cart-bursting'));
+        requestAnimationFrame(() => {
+            targets.forEach((target) => target.classList.add('is-cart-bursting'));
+            window.setTimeout(() => {
+                targets.forEach((target) => target.classList.remove('is-cart-bursting'));
+            }, 720);
+        });
     }
 
     setText(id, value) {
