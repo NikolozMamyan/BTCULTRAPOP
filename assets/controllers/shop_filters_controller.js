@@ -1,6 +1,10 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
+    static values = {
+        filterField: String,
+    };
+
     static targets = [
         'activeCount',
         'backdrop',
@@ -20,14 +24,17 @@ export default class extends Controller {
     ];
 
     connect() {
-        this.selectedCategory = 'all';
+        const searchParams = new URLSearchParams(window.location.search);
+
+        this.selectedCategory = this.initialSelectedCategory(searchParams);
         this.handleKeydown = this.handleKeydown.bind(this);
         document.addEventListener('keydown', this.handleKeydown);
 
-        if (new URLSearchParams(window.location.search).get('filter') === 'nouveautes') {
+        if (searchParams.get('filter') === 'nouveautes') {
             this.newTarget.checked = true;
         }
 
+        this.syncCategoryButtons();
         this.filter();
     }
 
@@ -86,6 +93,7 @@ export default class extends Controller {
         const promoOnly = this.promoTarget.checked;
         const newOnly = this.newTarget.checked;
         const requestedTags = [];
+        const filterField = this.currentFilterField();
 
         if (promoOnly) {
             requestedTags.push('Promo');
@@ -99,7 +107,7 @@ export default class extends Controller {
 
         const visibleCards = this.cardTargets.filter((card) => {
             const matchesCategory = this.selectedCategory === 'all'
-                || card.dataset.category === this.selectedCategory;
+                || card.dataset[filterField] === this.selectedCategory;
             const matchesPrice = Number(card.dataset.price) <= maximumPrice;
             const matchesTag = requestedTags.length === 0
                 || requestedTags.includes(card.dataset.tag);
@@ -151,5 +159,24 @@ export default class extends Controller {
         });
 
         cards.forEach((card) => this.gridTarget.append(card));
+    }
+
+    currentFilterField() {
+        return this.hasFilterFieldValue ? this.filterFieldValue : 'category';
+    }
+
+    initialSelectedCategory(searchParams) {
+        const requestedCategory = searchParams.get(this.currentFilterField());
+
+        return requestedCategory && requestedCategory.trim() !== '' ? requestedCategory : 'all';
+    }
+
+    syncCategoryButtons() {
+        this.categoryTargets.forEach((button) => {
+            button.classList.toggle(
+                'is-active',
+                button.dataset.shopFiltersCategoryParam === this.selectedCategory,
+            );
+        });
     }
 }

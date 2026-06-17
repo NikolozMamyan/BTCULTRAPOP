@@ -1,0 +1,19 @@
+<div id="product-preview" class="product-preview hidden" aria-hidden="true">
+    <button type="button" class="product-preview__backdrop" data-action="product-preview-close" aria-label="{{ 'common.close'|trans }}"></button>
+    <div class="product-preview__dialog" role="dialog" aria-modal="true" aria-labelledby="product-preview-title">
+        <button type="button" class="product-preview__close" data-action="product-preview-close" aria-label="{{ 'common.close'|trans }}">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="product-preview__media">
+            <img id="product-preview-image" src="" alt="">
+        </div>
+        <div class="product-preview__content">
+            <span>{{ 'product.preview_eyebrow'|trans }}</span>
+            <h2 id="product-preview-title"></h2>
+            <a id="product-preview-link" href="#" class="product-preview__link">
+                {{ 'product.view_product'|trans }}
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>

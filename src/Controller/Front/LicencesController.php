@@ -16,7 +16,7 @@ final class LicencesController extends AbstractController
 
         return $this->render('front/licences/index.html.twig', [
             'products' => $products,
-            'categories' => $catalog->categoriesFor($products),
+            'licenses' => $catalog->licensesFor($products),
             'max_price' => $catalog->maxPriceFor($products),
         ]);
     }

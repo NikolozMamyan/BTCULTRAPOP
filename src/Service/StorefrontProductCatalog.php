@@ -86,13 +86,17 @@ final readonly class StorefrontProductCatalog
      */
     public function categoriesFor(array $products): array
     {
-        $categories = array_values(array_unique(array_map(
-            static fn (array $product): string => (string) $product['cat'],
-            $products,
-        )));
-        sort($categories);
+        return $this->uniqueSortedValuesFor($products, 'cat');
+    }
 
-        return $categories;
+    /**
+     * @param list<array<string, mixed>> $products
+     *
+     * @return list<string>
+     */
+    public function licensesFor(array $products): array
+    {
+        return $this->uniqueSortedValuesFor($products, 'license');
     }
 
     /**
@@ -129,5 +133,25 @@ final readonly class StorefrontProductCatalog
             ProductStatus::BESTSELLER => 'Bestseller',
             ProductStatus::STANDARD => null,
         };
+    }
+
+    /**
+     * @param list<array<string, mixed>> $products
+     *
+     * @return list<string>
+     */
+    private function uniqueSortedValuesFor(array $products, string $key): array
+    {
+        $values = array_values(array_unique(array_filter(
+            array_map(
+                static fn (array $product): string => trim((string) ($product[$key] ?? '')),
+                $products,
+            ),
+            static fn (string $value): bool => '' !== $value,
+        )));
+
+        sort($values, SORT_NATURAL | SORT_FLAG_CASE);
+
+        return $values;
     }
 }

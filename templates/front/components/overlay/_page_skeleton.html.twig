@@ -1,0 +1,64 @@
+<div id="page-transition-skeleton" class="page-transition-skeleton" data-turbo-permanent aria-hidden="true">
+    <div class="page-transition-skeleton__screen" role="status" aria-live="polite" aria-label="{{ 'common.loading'|trans }}">
+        <header class="page-transition-skeleton__header">
+            <div class="page-transition-skeleton__logo">
+                <span>ULTRA</span><strong>POP</strong>
+            </div>
+            <div class="page-transition-skeleton__nav">
+                <span class="skeleton-shimmer"></span>
+                <span class="skeleton-shimmer"></span>
+                <span class="skeleton-shimmer"></span>
+            </div>
+            <div class="page-transition-skeleton__actions">
+                <span class="skeleton-shimmer"></span>
+                <span class="skeleton-shimmer"></span>
+            </div>
+        </header>
+
+        <div class="page-transition-skeleton__hero">
+            <span class="skeleton-shimmer"></span>
+            <strong class="skeleton-shimmer"></strong>
+            <em class="skeleton-shimmer"></em>
+        </div>
+
+        <div class="page-transition-skeleton__toolbar">
+            <div>
+                <span class="skeleton-shimmer"></span>
+                <strong class="skeleton-shimmer"></strong>
+            </div>
+            <span class="skeleton-shimmer"></span>
+        </div>
+
+        <div class="page-transition-skeleton__catalog">
+            <aside class="page-transition-skeleton__filters">
+                <span class="skeleton-shimmer"></span>
+                <span class="skeleton-shimmer"></span>
+                <span class="skeleton-shimmer"></span>
+                <span class="skeleton-shimmer"></span>
+            </aside>
+
+            <div class="page-transition-skeleton__products">
+                {% for index in 1..6 %}
+                    <article class="page-transition-skeleton__product">
+                        <div class="page-transition-skeleton__product-visual skeleton-shimmer"></div>
+                        <div class="page-transition-skeleton__product-body">
+                            <span class="skeleton-shimmer"></span>
+                            <strong class="skeleton-shimmer"></strong>
+                            <em class="skeleton-shimmer"></em>
+                            <i class="skeleton-shimmer"></i>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="page-transition-skeleton__mobile-nav">
+            {% for index in 1..4 %}
+                <div>
+                    <span class="skeleton-shimmer"></span>
+                    <em class="skeleton-shimmer"></em>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

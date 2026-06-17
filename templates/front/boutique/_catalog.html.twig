@@ -1,5 +1,9 @@
 {% set catalog_products = products|default([]) %}
 {% set catalog_categories = categories|default([]) %}
+{% set catalog_filter_items = filter_items|default(catalog_categories) %}
+{% set catalog_filter_label = filter_label|default('shop.filters.categories') %}
+{% set catalog_filter_icon = filter_icon|default('fa-solid fa-layer-group') %}
+{% set catalog_filter_field = filter_field|default('category') %}
 {% set catalog_max_price = max_price|default(120) %}
 {% set catalog_breadcrumb = breadcrumb|default('shop.breadcrumb') %}
 {% set catalog_title = title|default('shop.title') %}
@@ -11,6 +15,7 @@
             class="shop-layout max-w-7xl mx-auto px-5"
             data-controller="shop-filters"
             data-shop-filters-all-value="{{ 'shop.filters.all'|trans }}"
+            data-shop-filters-filter-field-value="{{ catalog_filter_field }}"
         >
             <button
                 type="button"
@@ -51,8 +56,8 @@
 
                 <section class="shop-filter-card">
                     <h2 class="shop-filter-title">
-                        <i class="fa-solid fa-layer-group"></i>
-                        {{ 'shop.filters.categories'|trans }}
+                        <i class="{{ catalog_filter_icon }}"></i>
+                        {{ catalog_filter_label|trans }}
                     </h2>
                     <div class="shop-category-list">
                         <button
@@ -62,14 +67,14 @@
                             data-shop-filters-category-param="all"
                             data-action="shop-filters#selectCategory"
                         >{{ 'shop.filters.all'|trans }}</button>
-                        {% for category in catalog_categories %}
+                        {% for filter_item in catalog_filter_items %}
                             <button
                                 type="button"
                                 class="shop-category-button"
                                 data-shop-filters-target="category"
-                                data-shop-filters-category-param="{{ category }}"
+                                data-shop-filters-category-param="{{ filter_item }}"
                                 data-action="shop-filters#selectCategory"
-                            >{{ category }}</button>
+                            >{{ filter_item }}</button>
                         {% endfor %}
                     </div>
                 </section>

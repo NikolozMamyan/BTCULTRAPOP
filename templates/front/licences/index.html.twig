@@ -6,7 +6,10 @@
 {% block main %}
     {% include 'front/boutique/_catalog.html.twig' with {
         products: products,
-        categories: categories,
+        filter_items: licenses,
+        filter_label: 'common.licenses',
+        filter_icon: 'fa-solid fa-clapperboard',
+        filter_field: 'license',
         max_price: max_price,
         breadcrumb: 'common.licenses',
         title: 'common.licenses',

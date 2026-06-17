@@ -2,10 +2,13 @@
     class="shop-product-card"
     data-shop-filters-target="card"
     data-category="{{ product.cat }}"
+    data-license="{{ product.license }}"
     data-price="{{ product.price }}"
     data-popularity="{{ product.pop }}"
     data-rating="{{ product.rating|default(0) ?: 0 }}"
     data-tag="{{ product.tag|default('') }}"
+    data-product-url="{{ path('app_front_product', {id: product.id}) }}"
+    tabindex="0"
 >
     <div class="shop-product-card__visual">
         {% if product.tag %}
@@ -20,9 +23,16 @@
             <button type="button" aria-label="{{ 'product.add_favorite'|trans }}">
                 <i class="fa-regular fa-heart"></i>
             </button>
-            <a href="{{ path('app_front_product', {id: product.id}) }}" aria-label="{{ 'product.view'|trans({'%name%': product.name}) }}">
-                <i class="fa-solid fa-eye"></i>
-            </a>
+            <button
+                type="button"
+                data-action="product-preview-open"
+                data-product-preview-image="{{ product.img }}"
+                data-product-preview-title="{{ product.name }}"
+                data-product-preview-url="{{ path('app_front_product', {id: product.id}) }}"
+                aria-label="{{ 'product.preview'|trans({'%name%': product.name}) }}"
+            >
+                <i class="fa-solid fa-magnifying-glass-plus"></i>
+            </button>
         </div>
 
         <a href="{{ path('app_front_product', {id: product.id}) }}" class="shop-product-card__image-link">

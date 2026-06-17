@@ -27,6 +27,8 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('footer');
         self::assertSelectorExists('#search-modal');
         self::assertSelectorExists('#cart-drawer');
+        self::assertSelectorExists('#page-transition-skeleton');
+        self::assertSelectorExists('#product-preview');
         self::assertSelectorExists('.mobile-app-nav');
         self::assertSelectorExists('link[rel="stylesheet"][href*="styles/app"]');
     }
@@ -81,6 +83,8 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('.licence-spotlight img[src*="MENU_LICENCE-01"]');
         self::assertSelectorCount(1, '.licenses-carousel');
         self::assertSelectorCount(14, '.license-card');
+        self::assertSelectorExists('a.license-card[href*="/licences?license=One"]');
+        self::assertSelectorExists('a.license-card[href="/licences?license=Naruto"]');
         self::assertStringNotContainsString('Retour 30 jours', $crawler->html());
         self::assertStringNotContainsString('Goodies & Accessoires', $crawler->html());
     }
@@ -89,18 +93,35 @@ final class FrontNavigationTest extends WebTestCase
     {
         $client = static::createClient();
         $this->skipIfStorefrontCatalogIsUnavailable();
-        $client->request('GET', '/boutique');
+        $crawler = $client->request('GET', '/boutique');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorCount(84, '.shop-product-card');
         self::assertSelectorTextContains('.shop-product-card:first-child', 'ULTRA ICE TEA - Vegeta');
         self::assertSelectorExists('.shop-product-card a[href="/boutique/product/1648"]');
+        self::assertSelectorExists('.shop-product-card button[data-action="product-preview-open"] .fa-magnifying-glass-plus');
         self::assertSelectorTextContains('.shop-product-card:first-child', '1,31 €');
         self::assertSelectorCount(3, '.shop-filter-card');
         self::assertSelectorExists('[data-controller="shop-filters"]');
+        self::assertSelectorExists('.shop-layout[data-shop-filters-filter-field-value="category"]');
+        self::assertGreaterThan(1, $crawler->filter('.shop-category-button')->count());
         self::assertSelectorExists('.shop-filter-trigger[aria-controls="shop-filters-modal"]');
         self::assertSelectorExists('.shop-filter-modal__footer');
         self::assertSelectorExists('.shop-sort select');
+    }
+
+    public function testLicensesPageFiltersByLicense(): void
+    {
+        $client = static::createClient();
+        $this->skipIfStorefrontCatalogIsUnavailable();
+        $crawler = $client->request('GET', '/licences');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('.shop-layout[data-shop-filters-filter-field-value="license"]');
+        self::assertSelectorTextContains('.shop-filter-title', 'Licences');
+        self::assertSelectorExists('.shop-filter-title .fa-clapperboard');
+        self::assertSelectorExists('.shop-product-card[data-license]');
+        self::assertGreaterThan(1, $crawler->filter('.shop-category-button')->count());
     }
 
     public function testProductPageDisplaysTheSelectedProduct(): void

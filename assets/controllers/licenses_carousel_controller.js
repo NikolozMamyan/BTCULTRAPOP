@@ -6,6 +6,7 @@ export default class extends Controller {
     connect() {
         this.speed = 32;
         this.paused = false;
+        this.pressed = false;
         this.dragging = false;
         this.suppressClick = false;
         this.position = this.hasViewportTarget ? this.viewportTarget.scrollLeft : 0;
@@ -37,35 +38,48 @@ export default class extends Controller {
         }
 
         window.clearTimeout(this.resumeTimer);
-        this.dragging = true;
+        this.pressed = true;
+        this.dragging = false;
         this.suppressClick = false;
         this.dragStartX = event.clientX;
         this.dragStartScrollLeft = this.viewportTarget.scrollLeft;
-        this.viewportTarget.setPointerCapture(event.pointerId);
-        this.viewportTarget.classList.add('is-dragging');
         this.pause();
     }
 
     drag(event) {
-        if (!this.dragging) {
+        if (!this.pressed) {
             return;
         }
 
         const distance = event.clientX - this.dragStartX;
-        if (Math.abs(distance) > 5) {
-            this.suppressClick = true;
-            event.preventDefault();
+
+        if (Math.abs(distance) <= 5) {
+            return;
         }
 
+        if (!this.dragging) {
+            this.dragging = true;
+            this.suppressClick = true;
+
+            if (!this.viewportTarget.hasPointerCapture(event.pointerId)) {
+                this.viewportTarget.setPointerCapture(event.pointerId);
+            }
+
+            this.viewportTarget.classList.add('is-dragging');
+        }
+
+        event.preventDefault();
         this.position = this.dragStartScrollLeft - distance;
         this.viewportTarget.scrollLeft = this.position;
     }
 
     endDrag(event) {
-        if (!this.dragging) {
+        if (!this.pressed && !this.dragging) {
             return;
         }
 
+        const wasDragging = this.dragging;
+        this.pressed = false;
         this.dragging = false;
         this.viewportTarget.classList.remove('is-dragging');
 
@@ -73,7 +87,7 @@ export default class extends Controller {
             this.viewportTarget.releasePointerCapture(event.pointerId);
         }
 
-        this.resumeTimer = window.setTimeout(() => this.resume(), 800);
+        this.resumeTimer = window.setTimeout(() => this.resume(), wasDragging ? 800 : 120);
     }
 
     preventClick(event) {

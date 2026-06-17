@@ -1,6 +1,6 @@
 {% set licenses = [
     {name: 'One Piece', image: 'img/licenses/MENU_LICENCE-01.png'},
-    {name: 'Naruto Shippuden', image: 'img/licenses/MENU_LICENCE-02.png'},
+    {name: 'Naruto Shippuden', filter: 'Naruto', image: 'img/licenses/MENU_LICENCE-02.png'},
     {name: 'Dragon Ball Z', image: 'img/licenses/MENU_LICENCE-03.png'},
     {name: 'Dragon Ball Super', image: 'img/licenses/MENU_LICENCE-04.png'},
     {name: 'Arcane', image: 'img/licenses/MENU_LICENCE-05.png'},
@@ -36,7 +36,7 @@
                     {{ duplicate == 0 ? 'data-licenses-carousel-target="group"' : 'aria-hidden="true"' }}
                 >
                     {% for license in licenses %}
-                        <a href="{{ path('app_front_licences') }}" class="license-card">
+                        <a href="{{ path('app_front_licences', {license: license.filter|default(license.name)}) }}" class="license-card">
                             <span class="license-card__visual">
                                 <img src="{{ asset(license.image) }}" alt="{{ license.name }}" draggable="false">
                             </span>

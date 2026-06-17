@@ -4,5 +4,9 @@
 {% block storefront_data %}data-page="shop"{% endblock %}
 
 {% block main %}
-    {% include 'front/boutique/_catalog.html.twig' with {products: products} only %}
+    {% include 'front/boutique/_catalog.html.twig' with {
+        products: products,
+        categories: categories,
+        max_price: max_price
+    } only %}
 {% endblock %}
