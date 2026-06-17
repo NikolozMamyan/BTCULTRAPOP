@@ -1,4 +1,5 @@
 import { startStimulusApp } from '@symfony/stimulus-bundle';
+import AdminProductsController from './controllers/admin_products_controller.js';
 import AvatarUploadController from './controllers/avatar_upload_controller.js';
 import CartController from './controllers/cart_controller.js';
 import FavoritesController from './controllers/favorites_controller.js';
@@ -9,6 +10,7 @@ import ProfileAuthController from './controllers/profile_auth_controller.js';
 import ShopFiltersController from './controllers/shop_filters_controller.js';
 
 const app = startStimulusApp();
+app.register('admin-products', AdminProductsController);
 app.register('avatar-upload', AvatarUploadController);
 app.register('cart', CartController);
 app.register('favorites', FavoritesController);

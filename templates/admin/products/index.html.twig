@@ -1,0 +1,178 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.product.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section
+        class="admin-products"
+        data-controller="admin-products"
+        data-admin-products-scan-url-value="{{ path('app_admin_products_scan') }}"
+        data-admin-products-scan-token-value="{{ csrf_token('admin_product_scan') }}"
+        data-admin-products-found-text-value="{{ 'admin.product.scanner.found'|trans }}"
+        data-admin-products-missing-text-value="{{ 'admin.product.scanner.missing'|trans }}"
+        data-admin-products-invalid-text-value="{{ 'admin.product.scanner.invalid_code'|trans }}"
+        data-admin-products-camera-error-text-value="{{ 'admin.product.scanner.camera_error'|trans }}"
+        data-admin-products-manual-text-value="{{ 'admin.product.scanner.manual_fallback'|trans }}"
+        data-admin-products-searching-text-value="{{ 'admin.product.scanner.searching'|trans }}"
+        data-admin-products-open-product-text-value="{{ 'admin.product.scanner.open_product'|trans }}"
+        data-admin-products-create-product-text-value="{{ 'admin.product.scanner.create_product'|trans }}"
+        data-admin-products-enabled-text-value="{{ 'admin.product.active.enabled'|trans }}"
+        data-admin-products-disabled-text-value="{{ 'admin.product.active.disabled'|trans }}"
+    >
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.product.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.product.index.title'|trans }}</h1>
+                <p>{{ 'admin.product.index.subtitle'|trans }}</p>
+            </div>
+            <div class="admin-heading-actions">
+                <button type="button" class="admin-secondary-button" data-action="admin-products#openScanner">
+                    <i class="fa-solid fa-barcode"></i>
+                    {{ 'admin.product.scanner.open'|trans }}
+                </button>
+                <a href="{{ path('app_admin_products_new') }}" class="admin-action-button">
+                    <i class="fa-solid fa-plus"></i>
+                    {{ 'admin.product.index.new'|trans }}
+                </a>
+            </div>
+        </div>
+
+        <form class="admin-search-bar" method="get" action="{{ path('app_admin_products_index') }}">
+            <label for="admin-product-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span>{{ 'admin.product.index.search_label'|trans }}</span>
+            </label>
+            <input
+                id="admin-product-search"
+                type="search"
+                name="q"
+                value="{{ search }}"
+                placeholder="{{ 'admin.product.index.search_placeholder'|trans }}"
+            >
+            <button type="submit">{{ 'admin.product.index.search_submit'|trans }}</button>
+            {% if search %}
+                <a href="{{ path('app_admin_products_index') }}">{{ 'admin.product.index.reset'|trans }}</a>
+            {% endif %}
+        </form>
+
+        <article class="admin-panel admin-products-panel">
+            <div class="admin-panel__heading">
+                <div>
+                    <span>{{ 'admin.product.index.list_eyebrow'|trans }}</span>
+                    <h2>{{ 'admin.product.index.list_title'|trans({'%count%': products|length}) }}</h2>
+                </div>
+            </div>
+
+            {% if products %}
+                <div class="admin-product-table">
+                    <div class="admin-product-table__row admin-product-table__row--head">
+                        <span>{{ 'admin.product.table.product'|trans }}</span>
+                        <span>{{ 'admin.product.table.category'|trans }}</span>
+                        <span>{{ 'admin.product.table.license'|trans }}</span>
+                        <span>{{ 'admin.product.table.price'|trans }}</span>
+                        <span>{{ 'admin.product.table.stock'|trans }}</span>
+                        <span>{{ 'admin.product.table.active'|trans }}</span>
+                        <span>{{ 'admin.product.table.status'|trans }}</span>
+                        <span>{{ 'admin.product.table.actions'|trans }}</span>
+                    </div>
+
+                    {% for product in products %}
+                        {% set cover = product.coverImage %}
+                        <div class="admin-product-table__row">
+                            <a href="{{ path('app_admin_products_edit', {id: product.id}) }}" class="admin-product-cell">
+                                <span class="admin-product-thumb">
+                                    {% if cover %}
+                                        <img src="{{ cover.path }}" alt="{{ cover.alt ?: product.name }}">
+                                    {% else %}
+                                        <i class="fa-solid fa-image"></i>
+                                    {% endif %}
+                                </span>
+                                <span>
+                                    <strong>{{ product.name }}</strong>
+                                    <small>{{ 'admin.product.table.reference'|trans }} {{ product.reference }}</small>
+                                </span>
+                            </a>
+                            <span>{{ product.category.name }}</span>
+                            <span>{{ product.license.name }}</span>
+                            <strong>{{ product.priceTaxIncluded|number_format(2, ',', ' ') }} €</strong>
+                            <span class="{{ product.quantity <= 5 ? 'admin-stock admin-stock--low' : 'admin-stock' }}">
+                                {{ product.quantity }}
+                            </span>
+                            <button
+                                type="button"
+                                class="admin-active-switch {{ product.active ? 'is-active' : '' }}"
+                                data-action="admin-products#toggleActive"
+                                data-admin-products-url-param="{{ path('app_admin_products_toggle', {id: product.id}) }}"
+                                data-admin-products-token-param="{{ csrf_token('admin_product_toggle_' ~ product.id) }}"
+                                aria-pressed="{{ product.active ? 'true' : 'false' }}"
+                            >
+                                <span></span>
+                                <em>{{ product.active ? 'admin.product.active.enabled'|trans : 'admin.product.active.disabled'|trans }}</em>
+                            </button>
+                            <span class="admin-product-status admin-product-status--{{ product.status.value }}">
+                                {{ ('admin.product.status.' ~ product.status.value)|trans }}
+                            </span>
+                            <div class="admin-product-actions">
+                                <a href="{{ path('app_front_product', {id: product.id}) }}" target="_blank" rel="noreferrer" title="{{ 'admin.product.action.view_front'|trans }}">
+                                    <i class="fa-solid fa-up-right-from-square"></i>
+                                </a>
+                                <a href="{{ path('app_admin_products_edit', {id: product.id}) }}" title="{{ 'admin.product.action.edit'|trans }}">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <form action="{{ path('app_admin_products_delete', {id: product.id}) }}" method="post" onsubmit="return confirm('{{ 'admin.product.delete_confirm'|trans|e('js') }}');">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_product_delete_' ~ product.id) }}">
+                                    <button type="submit" title="{{ 'admin.product.action.delete'|trans }}">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="admin-empty-state">
+                    <i class="fa-solid fa-box-open"></i>
+                    <p>{{ search ? 'admin.product.index.no_search_results'|trans : 'admin.product.index.empty'|trans }}</p>
+                    <a href="{{ path('app_admin_products_new') }}" class="admin-action-button">
+                        <i class="fa-solid fa-plus"></i>
+                        {{ 'admin.product.index.new'|trans }}
+                    </a>
+                </div>
+            {% endif %}
+        </article>
+
+        <div class="admin-scanner-modal is-hidden" data-admin-products-target="scanner" aria-hidden="true">
+            <div class="admin-scanner-modal__backdrop" data-action="click->admin-products#closeScanner"></div>
+            <div class="admin-scanner-modal__panel" role="dialog" aria-modal="true" aria-labelledby="admin-scanner-title">
+                <button type="button" class="admin-scanner-modal__close" data-action="admin-products#closeScanner" aria-label="{{ 'common.close'|trans }}">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+                <div class="admin-scanner-modal__heading">
+                    <span><i class="fa-solid fa-barcode"></i></span>
+                    <div>
+                        <strong id="admin-scanner-title">{{ 'admin.product.scanner.title'|trans }}</strong>
+                        <small>{{ 'admin.product.scanner.subtitle'|trans }}</small>
+                    </div>
+                </div>
+
+                <div class="admin-scanner-video">
+                    <video data-admin-products-target="video" playsinline muted></video>
+                    <div class="admin-scanner-video__frame"></div>
+                </div>
+
+                <p class="admin-scanner-status" data-admin-products-target="status">{{ 'admin.product.scanner.ready'|trans }}</p>
+
+                <form class="admin-scanner-manual" data-action="submit->admin-products#submitManual">
+                    <label for="admin-scanner-manual">{{ 'admin.product.scanner.manual_label'|trans }}</label>
+                    <div>
+                        <input id="admin-scanner-manual" data-admin-products-target="manualInput" type="text" inputmode="numeric" placeholder="3760000000000">
+                        <button type="submit">{{ 'admin.product.scanner.manual_submit'|trans }}</button>
+                    </div>
+                </form>
+
+                <div class="admin-scanner-result" data-admin-products-target="result"></div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

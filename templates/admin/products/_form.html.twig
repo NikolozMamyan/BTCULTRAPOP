@@ -1,0 +1,181 @@
+{{ form_start(form, {attr: {class: 'admin-product-form'}}) }}
+    <div class="admin-product-form__main">
+        <article class="admin-panel admin-form-card">
+            <div class="admin-form-card__heading">
+                <span><i class="fa-solid fa-tag"></i></span>
+                <div>
+                    <strong>{{ 'admin.product.form.identity_title'|trans }}</strong>
+                    <small>{{ 'admin.product.form.identity_text'|trans }}</small>
+                </div>
+            </div>
+
+            {{ form_errors(form) }}
+
+            <div class="admin-form-grid admin-form-grid--two">
+                <div class="admin-field">
+                    {{ form_label(form.name) }}
+                    {{ form_widget(form.name) }}
+                    {{ form_errors(form.name) }}
+                </div>
+                <div class="admin-field">
+                    {{ form_label(form.reference) }}
+                    {{ form_widget(form.reference) }}
+                    {{ form_errors(form.reference) }}
+                </div>
+                <div class="admin-field">
+                    {{ form_label(form.ean) }}
+                    {{ form_widget(form.ean) }}
+                    {{ form_errors(form.ean) }}
+                </div>
+                <div class="admin-field">
+                    {{ form_label(form.status) }}
+                    {{ form_widget(form.status) }}
+                    {{ form_errors(form.status) }}
+                </div>
+                <div class="admin-field admin-field--switch">
+                    {{ form_widget(form.active) }}
+                    {{ form_label(form.active) }}
+                    {{ form_errors(form.active) }}
+                </div>
+                <div class="admin-field">
+                    {{ form_label(form.category) }}
+                    {{ form_widget(form.category) }}
+                    {{ form_errors(form.category) }}
+                </div>
+                <div class="admin-field">
+                    {{ form_label(form.license) }}
+                    {{ form_widget(form.license) }}
+                    {{ form_errors(form.license) }}
+                </div>
+            </div>
+        </article>
+
+        <article class="admin-panel admin-form-card">
+            <div class="admin-form-card__heading">
+                <span><i class="fa-solid fa-align-left"></i></span>
+                <div>
+                    <strong>{{ 'admin.product.form.content_title'|trans }}</strong>
+                    <small>{{ 'admin.product.form.content_text'|trans }}</small>
+                </div>
+            </div>
+
+            <div class="admin-field admin-field--full">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description) }}
+                {{ form_errors(form.description) }}
+            </div>
+
+            <div class="admin-form-grid admin-form-grid--two">
+                <div class="admin-field">
+                    {{ form_label(form.seoTitle) }}
+                    {{ form_widget(form.seoTitle) }}
+                    {{ form_errors(form.seoTitle) }}
+                </div>
+                <div class="admin-field">
+                    {{ form_label(form.seoDescription) }}
+                    {{ form_widget(form.seoDescription) }}
+                    {{ form_errors(form.seoDescription) }}
+                </div>
+            </div>
+        </article>
+
+        <article class="admin-panel admin-form-card">
+            <div class="admin-form-card__heading">
+                <span><i class="fa-solid fa-scale-balanced"></i></span>
+                <div>
+                    <strong>{{ 'admin.product.form.inventory_title'|trans }}</strong>
+                    <small>{{ 'admin.product.form.inventory_text'|trans }}</small>
+                </div>
+            </div>
+
+            <div class="admin-form-grid admin-form-grid--three">
+                <div class="admin-field">
+                    {{ form_label(form.priceTaxExcluded) }}
+                    {{ form_widget(form.priceTaxExcluded) }}
+                    {{ form_errors(form.priceTaxExcluded) }}
+                </div>
+                <div class="admin-field">
+                    {{ form_label(form.priceTaxIncluded) }}
+                    {{ form_widget(form.priceTaxIncluded) }}
+                    {{ form_errors(form.priceTaxIncluded) }}
+                </div>
+                <div class="admin-field">
+                    {{ form_label(form.quantity) }}
+                    {{ form_widget(form.quantity) }}
+                    {{ form_errors(form.quantity) }}
+                </div>
+                <div class="admin-field">
+                    {{ form_label(form.width) }}
+                    {{ form_widget(form.width) }}
+                    {{ form_errors(form.width) }}
+                </div>
+                <div class="admin-field">
+                    {{ form_label(form.height) }}
+                    {{ form_widget(form.height) }}
+                    {{ form_errors(form.height) }}
+                </div>
+                <div class="admin-field">
+                    {{ form_label(form.depth) }}
+                    {{ form_widget(form.depth) }}
+                    {{ form_errors(form.depth) }}
+                </div>
+                <div class="admin-field">
+                    {{ form_label(form.weight) }}
+                    {{ form_widget(form.weight) }}
+                    {{ form_errors(form.weight) }}
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <aside class="admin-product-form__side">
+        <article class="admin-panel admin-product-preview">
+            {% set cover = product.coverImage %}
+            <div class="admin-product-preview__image">
+                {% if cover %}
+                    <img src="{{ cover.path }}" alt="{{ cover.alt ?: product.name }}">
+                {% else %}
+                    <i class="fa-solid fa-image"></i>
+                {% endif %}
+            </div>
+
+            <div class="admin-field">
+                {{ form_label(form.coverImageUrl) }}
+                {{ form_widget(form.coverImageUrl) }}
+                {{ form_errors(form.coverImageUrl) }}
+            </div>
+
+            <div class="admin-product-preview__meta">
+                <span>{{ product.reference ?: 'admin.product.form.reference_empty'|trans }}</span>
+                <strong>{{ product.name ?: 'admin.product.form.name_empty'|trans }}</strong>
+                <em>{{ ('admin.product.status.' ~ product.status.value)|trans }}</em>
+            </div>
+        </article>
+
+        <div class="admin-product-form__actions">
+            <button type="submit" class="admin-action-button admin-action-button--wide">
+                <i class="fa-solid fa-floppy-disk"></i>
+                {{ submit_label|trans }}
+            </button>
+            <a href="{{ path('app_admin_products_index') }}" class="admin-secondary-button admin-secondary-button--wide">
+                {{ 'admin.product.form.cancel'|trans }}
+            </a>
+        </div>
+    </aside>
+
+    {{ form_rest(form) }}
+{{ form_end(form) }}
+
+{% if mode == 'edit' and product.id %}
+    <form class="admin-danger-zone" action="{{ path('app_admin_products_delete', {id: product.id}) }}" method="post" onsubmit="return confirm('{{ 'admin.product.delete_confirm'|trans|e('js') }}');">
+        <div>
+            <strong>{{ 'admin.product.delete_zone_title'|trans }}</strong>
+            <span>{{ 'admin.product.delete_zone_text'|trans }}</span>
+        </div>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_product_delete_' ~ product.id) }}">
+        <button type="submit">
+            <i class="fa-solid fa-trash"></i>
+            {{ 'admin.product.action.delete'|trans }}
+        </button>
+    </form>
+{% endif %}

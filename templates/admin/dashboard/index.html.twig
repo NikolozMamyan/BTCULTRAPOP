@@ -1,0 +1,88 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.dashboard.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-dashboard">
+        <div class="admin-page-heading">
+            <div>
+                <span>{{ 'admin.dashboard.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.dashboard.title'|trans }}</h1>
+                <p>{{ 'admin.dashboard.subtitle'|trans }}</p>
+            </div>
+        </div>
+
+        <div class="admin-stats-grid">
+            {% for stat in dashboard.stats %}
+                <article class="admin-stat-card admin-stat-card--{{ stat.tone }}">
+                    <span class="admin-stat-card__icon">
+                        <i class="{{ stat.icon }}"></i>
+                    </span>
+                    <div>
+                        <small>{{ stat.label|trans }}</small>
+                        <strong>{{ stat.value }}</strong>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+
+        <div class="admin-dashboard-grid">
+            <article class="admin-panel admin-panel--wide">
+                <div class="admin-panel__heading">
+                    <div>
+                        <span>{{ 'admin.dashboard.orders_eyebrow'|trans }}</span>
+                        <h2>{{ 'admin.dashboard.recent_orders'|trans }}</h2>
+                    </div>
+                </div>
+
+                {% if dashboard.recent_orders %}
+                    <div class="admin-table">
+                        <div class="admin-table__row admin-table__row--head">
+                            <span>{{ 'admin.order.number'|trans }}</span>
+                            <span>{{ 'admin.order.customer'|trans }}</span>
+                            <span>{{ 'admin.order.total'|trans }}</span>
+                            <span>{{ 'admin.order.status'|trans }}</span>
+                        </div>
+                        {% for order in dashboard.recent_orders %}
+                            <div class="admin-table__row">
+                                <strong>{{ order.number }}</strong>
+                                <span>{{ order.customer }}</span>
+                                <span>{{ order.total }}</span>
+                                <em>{{ order.status }}</em>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="admin-empty-state">
+                        <i class="fa-solid fa-receipt"></i>
+                        <p>{{ 'admin.dashboard.no_orders'|trans }}</p>
+                    </div>
+                {% endif %}
+            </article>
+
+            <aside class="admin-panel">
+                <div class="admin-panel__heading">
+                    <div>
+                        <span>{{ 'admin.dashboard.health_eyebrow'|trans }}</span>
+                        <h2>{{ 'admin.dashboard.health'|trans }}</h2>
+                    </div>
+                </div>
+
+                <div class="admin-health-list">
+                    <div>
+                        <span>{{ 'admin.dashboard.revenue'|trans }}</span>
+                        <strong>{{ dashboard.revenue }}</strong>
+                    </div>
+                    <div>
+                        <span>{{ 'admin.dashboard.pending_orders'|trans }}</span>
+                        <strong>{{ dashboard.pending_orders }}</strong>
+                    </div>
+                    <div>
+                        <span>{{ 'admin.dashboard.low_stock'|trans }}</span>
+                        <strong>{{ dashboard.low_stock_products }}</strong>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </section>
+{% endblock %}

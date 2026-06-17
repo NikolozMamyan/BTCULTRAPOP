@@ -1,0 +1,32 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ product.name }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-product-editor">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.product.edit.eyebrow'|trans }}</span>
+                <h1>{{ product.name }}</h1>
+                <p>{{ 'admin.product.edit.subtitle'|trans({'%reference%': product.reference}) }}</p>
+            </div>
+            <div class="admin-heading-actions">
+                <a href="{{ path('app_front_product', {id: product.id}) }}" target="_blank" rel="noreferrer" class="admin-secondary-button">
+                    <i class="fa-solid fa-up-right-from-square"></i>
+                    {{ 'admin.product.action.view_front'|trans }}
+                </a>
+                <a href="{{ path('app_admin_products_index') }}" class="admin-secondary-button">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    {{ 'admin.product.back_to_list'|trans }}
+                </a>
+            </div>
+        </div>
+
+        {% include 'admin/products/_form.html.twig' with {
+            form: form,
+            product: product,
+            submit_label: 'admin.product.form.update_submit',
+            mode: 'edit'
+        } only %}
+    </section>
+{% endblock %}

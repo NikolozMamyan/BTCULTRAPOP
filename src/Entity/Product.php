@@ -71,6 +71,9 @@ class Product
     #[Assert\PositiveOrZero]
     private int $quantity = 0;
 
+    #[ORM\Column(options: ['default' => true])]
+    private bool $active = true;
+
     #[ORM\Column(length: 20, enumType: ProductStatus::class)]
     private ProductStatus $status = ProductStatus::STANDARD;
 
@@ -187,7 +190,8 @@ class Product
 
     public function setEan(?string $ean): self
     {
-        $this->ean = null === $ean ? null : trim($ean);
+        $ean = null === $ean ? null : trim($ean);
+        $this->ean = '' === $ean ? null : $ean;
 
         return $this;
     }
@@ -260,6 +264,18 @@ class Product
     public function setQuantity(int $quantity): self
     {
         $this->quantity = $quantity;
+
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->active;
+    }
+
+    public function setActive(bool $active): self
+    {
+        $this->active = $active;
 
         return $this;
     }

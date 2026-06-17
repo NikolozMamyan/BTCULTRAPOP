@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% block admin_title %}{{ 'admin.title'|trans }}{% endblock %} | ULTRAPOP{% endblock %}
+{% block body_class %}admin-body{% endblock %}
+
+{% block body %}
+    {% set current_route = app.request.attributes.get('_route') %}
+    {% set display_name = admin_user is defined ? admin_user.fullName : app.user.userIdentifier|default('Admin') %}
+
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <a href="{{ path('app_admin_dashboard') }}" class="admin-sidebar__brand">
+                <span>UP</span>
+                <div>
+                    <strong>ULTRAPOP</strong>
+                    <small>{{ 'admin.backoffice'|trans }}</small>
+                </div>
+            </a>
+
+            <nav class="admin-sidebar__nav" aria-label="{{ 'admin.navigation'|trans }}">
+                <a href="{{ path('app_admin_dashboard') }}" class="admin-sidebar__link {{ current_route == 'app_admin_dashboard' ? 'is-active' : '' }}">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>{{ 'admin.dashboard.title'|trans }}</span>
+                </a>
+                <a href="{{ path('app_admin_products_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_products' ? 'is-active' : '' }}">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <span>{{ 'admin.nav.products'|trans }}</span>
+                </a>
+                <span class="admin-sidebar__link is-disabled">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>{{ 'admin.nav.orders'|trans }}</span>
+                    <em>{{ 'admin.nav.soon'|trans }}</em>
+                </span>
+                <span class="admin-sidebar__link is-disabled">
+                    <i class="fa-solid fa-users"></i>
+                    <span>{{ 'admin.nav.customers'|trans }}</span>
+                    <em>{{ 'admin.nav.soon'|trans }}</em>
+                </span>
+            </nav>
+
+            <div class="admin-sidebar__footer">
+                <a href="{{ path('app_front_home') }}">
+                    <i class="fa-solid fa-store"></i>
+                    {{ 'admin.back_to_store'|trans }}
+                </a>
+                <form action="{{ path('app_auth_logout') }}" method="post">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('auth_logout') }}">
+                    <button type="submit">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        {{ 'auth.logout.submit'|trans }}
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-topbar">
+                <div>
+                    <span>{{ 'admin.connected_as'|trans }}</span>
+                    <strong>{{ display_name }}</strong>
+                </div>
+                <a href="{{ path('app_front_profil') }}" class="admin-topbar__profile">
+                    <i class="fa-solid fa-user-gear"></i>
+                    {{ 'common.profile'|trans }}
+                </a>
+            </header>
+
+            {% set admin_flashes = app.flashes %}
+            {% if admin_flashes %}
+                <div class="admin-flashes" aria-live="polite">
+                    {% for type, messages in admin_flashes %}
+                        {% for message in messages %}
+                            <div class="admin-flash admin-flash--{{ type }}">
+                                <i class="fa-solid {{ type == 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation' }}"></i>
+                                <span>{{ message|trans }}</span>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block admin_content %}{% endblock %}
+        </main>
+    </div>
+{% endblock %}

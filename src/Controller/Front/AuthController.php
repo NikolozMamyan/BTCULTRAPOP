@@ -39,7 +39,7 @@ final class AuthController extends AbstractController
             return $this->redirectToRoute('app_front_profil');
         }
 
-        $response = $this->redirectToRoute('app_front_profil');
+        $response = $this->redirectToRoute($this->isAdmin($user) ? 'app_admin_dashboard' : 'app_front_boutique');
         $response->headers->setCookie($userSessionManager->createSession($user, $request));
         $this->addFlash('success', 'auth.flash.login_success');
 
@@ -129,5 +129,10 @@ final class AuthController extends AbstractController
         $this->addFlash('success', 'auth.flash.logout_success');
 
         return $response;
+    }
+
+    private function isAdmin(User $user): bool
+    {
+        return in_array('ROLE_ADMIN', $user->getRoles(), true);
     }
 }
