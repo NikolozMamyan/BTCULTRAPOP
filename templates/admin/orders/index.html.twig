@@ -1,0 +1,117 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.order.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-orders">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.order.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.order.index.title'|trans }}</h1>
+                <p>{{ 'admin.order.index.subtitle'|trans }}</p>
+            </div>
+        </div>
+
+        <div class="admin-stats-grid admin-order-stats">
+            {% for stat in stats %}
+                <article class="admin-stat-card admin-stat-card--{{ stat.tone }}">
+                    <span class="admin-stat-card__icon">
+                        <i class="{{ stat.icon }}"></i>
+                    </span>
+                    <div>
+                        <small>{{ stat.label|trans }}</small>
+                        <strong>{{ stat.value }}</strong>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+
+        <form class="admin-search-bar admin-order-filters" method="get" action="{{ path('app_admin_orders_index') }}">
+            <label for="admin-order-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span>{{ 'admin.order.index.search_label'|trans }}</span>
+            </label>
+            <input
+                id="admin-order-search"
+                type="search"
+                name="q"
+                value="{{ search }}"
+                placeholder="{{ 'admin.order.index.search_placeholder'|trans }}"
+            >
+            <select name="status" aria-label="{{ 'admin.order.index.status_filter'|trans }}">
+                <option value="">{{ 'admin.order.index.all_statuses'|trans }}</option>
+                {% for status in statuses %}
+                    <option value="{{ status.value }}" {{ selected_status == status.value ? 'selected' : '' }}>
+                        {{ ('admin.order.status.' ~ status.value)|trans }}
+                    </option>
+                {% endfor %}
+            </select>
+            <select name="payment_status" aria-label="{{ 'admin.order.index.payment_filter'|trans }}">
+                <option value="">{{ 'admin.order.index.all_payments'|trans }}</option>
+                {% for status in payment_statuses %}
+                    <option value="{{ status.value }}" {{ selected_payment_status == status.value ? 'selected' : '' }}>
+                        {{ ('admin.order.payment_status.' ~ status.value)|trans }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit">{{ 'admin.order.index.search_submit'|trans }}</button>
+            {% if search or selected_status or selected_payment_status %}
+                <a href="{{ path('app_admin_orders_index') }}">{{ 'admin.order.index.reset'|trans }}</a>
+            {% endif %}
+        </form>
+
+        <article class="admin-panel admin-orders-panel">
+            <div class="admin-panel__heading">
+                <div>
+                    <span>{{ 'admin.order.index.list_eyebrow'|trans }}</span>
+                    <h2>{{ 'admin.order.index.list_title'|trans({'%count%': orders|length}) }}</h2>
+                </div>
+            </div>
+
+            {% if orders %}
+                <div class="admin-order-table">
+                    <div class="admin-order-table__row admin-order-table__row--head">
+                        <span>{{ 'admin.order.number'|trans }}</span>
+                        <span>{{ 'admin.order.customer'|trans }}</span>
+                        <span>{{ 'admin.order.date'|trans }}</span>
+                        <span>{{ 'admin.order.total'|trans }}</span>
+                        <span>{{ 'admin.order.status'|trans }}</span>
+                        <span>{{ 'admin.order.payment'|trans }}</span>
+                        <span>{{ 'admin.order.actions'|trans }}</span>
+                    </div>
+
+                    {% for order in orders %}
+                        <div class="admin-order-table__row">
+                            <a href="{{ path('app_admin_orders_show', {id: order.id}) }}" class="admin-order-number">
+                                <strong>{{ order.number }}</strong>
+                                <small>{{ order.user ? 'admin.order.registered_customer'|trans : 'admin.order.guest_customer'|trans }}</small>
+                            </a>
+                            <span class="admin-order-customer">
+                                <strong>{{ order.customer ?: 'admin.order.unknown_customer'|trans }}</strong>
+                                <small>{{ order.email ?: 'admin.order.email_pending'|trans }}</small>
+                            </span>
+                            <span>{{ order.created_at|date('d/m/Y H:i') }}</span>
+                            <strong>{{ order.total }}</strong>
+                            <span class="admin-order-badge admin-order-badge--{{ order.status }}">
+                                {{ order.status_key|trans }}
+                            </span>
+                            <span class="admin-order-badge admin-order-badge--payment-{{ order.payment_status }}">
+                                {{ order.payment_status_key|trans }}
+                            </span>
+                            <div class="admin-product-actions">
+                                <a href="{{ path('app_admin_orders_show', {id: order.id}) }}" title="{{ 'admin.order.action.view'|trans }}">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="admin-empty-state">
+                    <i class="fa-solid fa-receipt"></i>
+                    <p>{{ search or selected_status or selected_payment_status ? 'admin.order.index.no_search_results'|trans : 'admin.order.index.empty'|trans }}</p>
+                </div>
+            {% endif %}
+        </article>
+    </section>
+{% endblock %}

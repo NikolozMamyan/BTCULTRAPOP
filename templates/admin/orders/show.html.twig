@@ -1,0 +1,184 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ order.number }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-order-show">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.order.show.eyebrow'|trans }}</span>
+                <h1>{{ order.number }}</h1>
+                <p>{{ 'admin.order.show.subtitle'|trans({'%date%': order.created_at|date('d/m/Y H:i')}) }}</p>
+            </div>
+            <a href="{{ path('app_admin_orders_index') }}" class="admin-secondary-button">
+                <i class="fa-solid fa-arrow-left"></i>
+                {{ 'admin.order.back_to_list'|trans }}
+            </a>
+        </div>
+
+        <div class="admin-order-show__grid">
+            <article class="admin-panel admin-order-summary-panel">
+                <div class="admin-panel__heading">
+                    <div>
+                        <span>{{ 'admin.order.show.summary_eyebrow'|trans }}</span>
+                        <h2>{{ 'admin.order.show.summary_title'|trans }}</h2>
+                    </div>
+                </div>
+
+                <div class="admin-order-summary">
+                    <div>
+                        <span>{{ 'admin.order.status'|trans }}</span>
+                        <strong class="admin-order-badge admin-order-badge--{{ order.status }}">{{ order.status_key|trans }}</strong>
+                    </div>
+                    <div>
+                        <span>{{ 'admin.order.payment'|trans }}</span>
+                        <strong class="admin-order-badge admin-order-badge--payment-{{ order.payment_status }}">{{ order.payment_status_key|trans }}</strong>
+                    </div>
+                    <div>
+                        <span>{{ 'admin.order.total'|trans }}</span>
+                        <strong>{{ order.total }}</strong>
+                    </div>
+                    <div>
+                        <span>{{ 'admin.order.items'|trans }}</span>
+                        <strong>{{ order.items_count }}</strong>
+                    </div>
+                </div>
+            </article>
+
+            <article class="admin-panel">
+                <div class="admin-panel__heading">
+                    <div>
+                        <span>{{ 'admin.order.show.customer_eyebrow'|trans }}</span>
+                        <h2>{{ 'admin.order.show.customer_title'|trans }}</h2>
+                    </div>
+                </div>
+
+                <div class="admin-order-info-list">
+                    <div>
+                        <span>{{ 'admin.order.customer'|trans }}</span>
+                        <strong>{{ order.customer ?: 'admin.order.unknown_customer'|trans }}</strong>
+                    </div>
+                    <div>
+                        <span>{{ 'common.email'|trans }}</span>
+                        <strong>{{ order.email ?: 'admin.order.email_pending'|trans }}</strong>
+                    </div>
+                    <div>
+                        <span>{{ 'admin.order.customer_type'|trans }}</span>
+                        <strong>{{ order.user ? 'admin.order.registered_customer'|trans : 'admin.order.guest_customer'|trans }}</strong>
+                    </div>
+                </div>
+            </article>
+
+            <article class="admin-panel">
+                <div class="admin-panel__heading">
+                    <div>
+                        <span>{{ 'admin.order.show.shipping_eyebrow'|trans }}</span>
+                        <h2>{{ 'admin.order.show.shipping_title'|trans }}</h2>
+                    </div>
+                </div>
+
+                <address class="admin-order-address">
+                    <strong>{{ order.shipping.name }}</strong>
+                    <span>{{ order.shipping.street }}</span>
+                    <span>{{ order.shipping.postal_code }} {{ order.shipping.city }}</span>
+                    <span>{{ order.shipping.country_code }}</span>
+                    {% if order.shipping.phone %}
+                        <span>{{ order.shipping.phone }}</span>
+                    {% endif %}
+                </address>
+            </article>
+
+            <article class="admin-panel">
+                <div class="admin-panel__heading">
+                    <div>
+                        <span>{{ 'admin.order.show.payment_eyebrow'|trans }}</span>
+                        <h2>{{ 'admin.order.show.payment_title'|trans }}</h2>
+                    </div>
+                </div>
+
+                <div class="admin-order-info-list">
+                    <div>
+                        <span>{{ 'admin.order.stripe_session'|trans }}</span>
+                        <strong>{{ order.stripe_checkout_session_id ?: 'admin.order.not_available'|trans }}</strong>
+                    </div>
+                    <div>
+                        <span>{{ 'admin.order.stripe_payment_intent'|trans }}</span>
+                        <strong>{{ order.stripe_payment_intent_id ?: 'admin.order.not_available'|trans }}</strong>
+                    </div>
+                    <div>
+                        <span>{{ 'admin.order.stripe_customer'|trans }}</span>
+                        <strong>{{ order.stripe_customer_id ?: 'admin.order.not_available'|trans }}</strong>
+                    </div>
+                    {% if order.payment_failure_reason %}
+                        <div>
+                            <span>{{ 'admin.order.failure_reason'|trans }}</span>
+                            <strong>{{ order.payment_failure_reason }}</strong>
+                        </div>
+                    {% endif %}
+                </div>
+            </article>
+        </div>
+
+        <article class="admin-panel admin-order-items-panel">
+            <div class="admin-panel__heading">
+                <div>
+                    <span>{{ 'admin.order.show.items_eyebrow'|trans }}</span>
+                    <h2>{{ 'admin.order.show.items_title'|trans }}</h2>
+                </div>
+            </div>
+
+            {% if order.items %}
+                <div class="admin-order-items">
+                    {% for item in order.items %}
+                        <article class="admin-order-item">
+                            <span class="admin-order-item__image">
+                                {% if item.image %}
+                                    <img src="{{ item.image }}" alt="">
+                                {% else %}
+                                    <i class="fa-solid fa-box"></i>
+                                {% endif %}
+                            </span>
+                            <span class="admin-order-item__main">
+                                <strong>{{ item.name }}</strong>
+                                <small>
+                                    {{ item.reference ?: 'admin.order.no_reference'|trans }}
+                                    {% if item.license %} - {{ item.license }}{% endif %}
+                                    {% if item.category %} - {{ item.category }}{% endif %}
+                                </small>
+                            </span>
+                            <span>{{ item.unit_price }}</span>
+                            <span>x{{ item.quantity }}</span>
+                            <strong>{{ item.total }}</strong>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="admin-empty-state">
+                    <i class="fa-solid fa-box-open"></i>
+                    <p>{{ 'admin.order.show.no_items'|trans }}</p>
+                </div>
+            {% endif %}
+        </article>
+
+        <article class="admin-panel admin-order-totals-panel">
+            <div class="admin-order-totals">
+                <div>
+                    <span>{{ 'admin.order.subtotal_tax_excluded'|trans }}</span>
+                    <strong>{{ order.subtotal_tax_excluded }}</strong>
+                </div>
+                <div>
+                    <span>{{ 'overlay.delivery'|trans }}</span>
+                    <strong>{{ order.shipping_amount }}</strong>
+                </div>
+                <div>
+                    <span>{{ 'admin.order.discount'|trans }}</span>
+                    <strong>{{ order.discount }}</strong>
+                </div>
+                <div class="admin-order-totals__grand">
+                    <span>{{ 'overlay.total'|trans }}</span>
+                    <strong>{{ order.total }}</strong>
+                </div>
+            </div>
+        </article>
+    </section>
+{% endblock %}
