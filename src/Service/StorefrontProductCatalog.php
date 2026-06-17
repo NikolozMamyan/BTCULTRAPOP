@@ -3,8 +3,10 @@
 namespace App\Service;
 
 use App\Entity\Product;
+use App\Entity\User;
 use App\Enum\ProductStatus;
 use App\Repository\ProductRepository;
+use App\Repository\UserFavoriteRepository;
 
 final readonly class StorefrontProductCatalog
 {
@@ -12,27 +14,28 @@ final readonly class StorefrontProductCatalog
 
     public function __construct(
         private ProductRepository $products,
+        private UserFavoriteRepository $favorites,
     ) {
     }
 
     /**
      * @return list<array<string, mixed>>
      */
-    public function all(): array
+    public function all(?User $user = null): array
     {
-        return array_map(
+        return $this->withFavoriteState(array_map(
             fn (Product $product): array => $this->present($product),
             $this->products->findForStorefront(),
-        );
+        ), $user);
     }
 
     /**
      * @return list<array<string, mixed>>
      */
-    public function onSale(): array
+    public function onSale(?User $user = null): array
     {
         return array_values(array_filter(
-            $this->all(),
+            $this->all($user),
             static fn (array $product): bool => 'Promo' === ($product['tag'] ?? null),
         ));
     }
@@ -45,12 +48,31 @@ final readonly class StorefrontProductCatalog
     /**
      * @return list<array<string, mixed>>
      */
-    public function related(Product $product, int $limit = 3): array
+    public function related(Product $product, int $limit = 3, ?User $user = null): array
     {
-        return array_map(
+        return $this->withFavoriteState(array_map(
             fn (Product $relatedProduct): array => $this->present($relatedProduct),
             $this->products->findRelatedForStorefront($product, $limit),
-        );
+        ), $user);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function favorites(User $user): array
+    {
+        return $this->withFavoriteState(array_map(
+            fn (Product $product): array => $this->present($product),
+            $this->products->findFavoritesForStorefront($user),
+        ), $user);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function presentForUser(Product $product, ?User $user = null): array
+    {
+        return $this->withFavoriteState([$this->present($product)], $user)[0];
     }
 
     /**
@@ -122,6 +144,7 @@ final readonly class StorefrontProductCatalog
             'rating' => null,
             'pop' => min(100, $quantity),
             'tag' => $this->tagForStatus($product->getStatus()),
+            'favorite' => false,
         ];
     }
 
@@ -153,5 +176,28 @@ final readonly class StorefrontProductCatalog
         sort($values, SORT_NATURAL | SORT_FLAG_CASE);
 
         return $values;
+    }
+
+    /**
+     * @param list<array<string, mixed>> $products
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function withFavoriteState(array $products, ?User $user): array
+    {
+        if (!$user instanceof User || [] === $products) {
+            return $products;
+        }
+
+        $favoriteIds = array_flip($this->favorites->findProductIdsForUser($user));
+
+        return array_map(
+            static function (array $product) use ($favoriteIds): array {
+                $product['favorite'] = isset($favoriteIds[(int) $product['id']]);
+
+                return $product;
+            },
+            $products,
+        );
     }
 }

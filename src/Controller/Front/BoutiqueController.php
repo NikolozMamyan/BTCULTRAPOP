@@ -2,6 +2,7 @@
 
 namespace App\Controller\Front;
 
+use App\Entity\User;
 use App\Service\StorefrontProductCatalog;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,7 +13,7 @@ final class BoutiqueController extends AbstractController
     #[Route('/boutique', name: 'app_front_boutique', methods: ['GET'])]
     public function index(StorefrontProductCatalog $catalog): Response
     {
-        $products = $catalog->all();
+        $products = $catalog->all($this->getAuthenticatedUser());
 
         return $this->render('front/boutique/index.html.twig', [
             'products' => $products,
@@ -31,8 +32,15 @@ final class BoutiqueController extends AbstractController
         }
 
         return $this->render('front/boutique/show.html.twig', [
-            'product' => $catalog->present($product),
-            'related_products' => $catalog->related($product),
+            'product' => $catalog->presentForUser($product, $this->getAuthenticatedUser()),
+            'related_products' => $catalog->related($product, user: $this->getAuthenticatedUser()),
         ]);
+    }
+
+    private function getAuthenticatedUser(): ?User
+    {
+        $user = $this->getUser();
+
+        return $user instanceof User ? $user : null;
     }
 }

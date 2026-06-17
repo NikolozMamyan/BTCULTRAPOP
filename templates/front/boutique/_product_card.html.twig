@@ -20,8 +20,17 @@
         {% endif %}
 
         <div class="shop-product-card__actions">
-            <button type="button" aria-label="{{ 'product.add_favorite'|trans }}">
-                <i class="fa-regular fa-heart"></i>
+            <button
+                type="button"
+                class="favorite-button {{ product.favorite|default(false) ? 'is-active' : '' }}"
+                data-action="favorites#toggle"
+                data-favorites-product-id-param="{{ product.id }}"
+                data-favorite-active-label="{{ 'product.remove_favorite'|trans }}"
+                data-favorite-inactive-label="{{ 'product.add_favorite'|trans }}"
+                aria-pressed="{{ product.favorite|default(false) ? 'true' : 'false' }}"
+                aria-label="{{ (product.favorite|default(false) ? 'product.remove_favorite' : 'product.add_favorite')|trans }}"
+            >
+                <i class="{{ product.favorite|default(false) ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
             </button>
             <button
                 type="button"

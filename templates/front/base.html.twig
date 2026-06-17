@@ -5,7 +5,7 @@
 {% block body %}
     <div
         id="storefront-app"
-        data-controller="cart"
+        data-controller="cart favorites"
         {% block storefront_data %}data-page="home"{% endblock %}
         data-home-url="{{ path('app_front_home') }}"
         data-shop-url="{{ path('app_front_boutique') }}"
@@ -14,6 +14,9 @@
         data-cart-add-url-value="{{ path('app_api_cart_item_add') }}"
         data-cart-csrf-value="{{ csrf_token('cart_api') }}"
         data-cart-error-value="{{ 'cart.flash.error'|trans }}"
+        data-favorites-toggle-url-value="{{ path('app_api_favorite_toggle', {productId: 0})|replace({'/0': '/__PRODUCT_ID__'}) }}"
+        data-favorites-csrf-value="{{ csrf_token('favorite_api') }}"
+        data-favorites-error-value="{{ 'favorite.flash.error'|trans }}"
         data-cart-shipping-empty="{{ 'overlay.shipping_empty'|trans }}"
         data-cart-empty-eyebrow="{{ 'cart.empty_eyebrow'|trans }}"
         data-cart-empty-title="{{ 'overlay.cart_empty_title'|trans }}"

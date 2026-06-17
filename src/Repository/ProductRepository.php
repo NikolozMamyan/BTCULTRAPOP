@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Product;
+use App\Entity\User;
+use App\Entity\UserFavorite;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -63,6 +65,25 @@ final class ProductRepository extends ServiceEntityRepository
             ->orderBy('related.quantity', 'DESC')
             ->addOrderBy('related.name', 'ASC')
             ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return list<Product>
+     */
+    public function findFavoritesForStorefront(User $user): array
+    {
+        return $this->createQueryBuilder('product')
+            ->addSelect('category', 'license', 'images')
+            ->innerJoin('product.category', 'category')
+            ->innerJoin('product.license', 'license')
+            ->innerJoin(UserFavorite::class, 'favorite', 'WITH', 'favorite.product = product')
+            ->leftJoin('product.images', 'images')
+            ->andWhere('favorite.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('favorite.createdAt', 'DESC')
+            ->addOrderBy('product.name', 'ASC')
             ->getQuery()
             ->getResult();
     }

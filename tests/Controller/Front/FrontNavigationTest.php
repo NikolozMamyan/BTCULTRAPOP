@@ -23,6 +23,7 @@ final class FrontNavigationTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', $title);
         self::assertSelectorExists(sprintf('#storefront-app[data-page="%s"]', $page));
+        self::assertSelectorExists('#storefront-app[data-controller~="favorites"]');
         self::assertSelectorExists('header');
         self::assertSelectorExists('footer');
         self::assertSelectorExists('#search-modal');
@@ -99,6 +100,7 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorCount(84, '.shop-product-card');
         self::assertSelectorTextContains('.shop-product-card:first-child', 'ULTRA ICE TEA - Vegeta');
         self::assertSelectorExists('.shop-product-card a[href="/boutique/product/1648"]');
+        self::assertSelectorExists('.shop-product-card .favorite-button[data-action="favorites#toggle"]');
         self::assertSelectorExists('.shop-product-card button[data-action="product-preview-open"] .fa-magnifying-glass-plus');
         self::assertSelectorTextContains('.shop-product-card:first-child', '1,31 €');
         self::assertSelectorCount(3, '.shop-filter-card');
@@ -135,6 +137,7 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorTextContains('.product-detail__price', '1,31 €');
         self::assertSelectorExists('.product-detail__visual img[src="https://ultrapop.com/img/p/1/6/4/164-large_default.jpg"]');
         self::assertSelectorExists('[data-controller="product-detail"]');
+        self::assertSelectorExists('.product-detail__secondary.favorite-button[data-action="favorites#toggle"]');
         self::assertSelectorCount(3, '.product-tabs__nav button');
         self::assertSelectorCount(0, '.product-formats');
     }

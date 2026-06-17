@@ -89,8 +89,17 @@
                         <i class="fa-solid fa-bag-shopping"></i>
                         {{ 'product.add_to_cart'|trans }}
                     </button>
-                    <button type="button" class="product-detail__secondary" aria-label="{{ 'product.add_favorite'|trans }}">
-                        <i class="fa-regular fa-heart"></i>
+                    <button
+                        type="button"
+                        class="product-detail__secondary favorite-button {{ product.favorite|default(false) ? 'is-active' : '' }}"
+                        data-action="favorites#toggle"
+                        data-favorites-product-id-param="{{ product.id }}"
+                        data-favorite-active-label="{{ 'product.remove_favorite'|trans }}"
+                        data-favorite-inactive-label="{{ 'product.add_favorite'|trans }}"
+                        aria-pressed="{{ product.favorite|default(false) ? 'true' : 'false' }}"
+                        aria-label="{{ (product.favorite|default(false) ? 'product.remove_favorite' : 'product.add_favorite')|trans }}"
+                    >
+                        <i class="{{ product.favorite|default(false) ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
                     </button>
                 </div>
 

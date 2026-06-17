@@ -16,13 +16,21 @@
     </section>
 
     <section class="max-w-7xl mx-auto px-5 py-8">
-        {% include 'front/components/_catalog_empty.html.twig' with {
-            icon: 'fa-regular fa-heart',
-            eyebrow: 'common.favorites',
-            title: 'favorites.empty_title',
-            text: 'favorites.empty_text',
-            action_url: path('app_front_boutique'),
-            action_label: 'favorites.view_shop'
-        } only %}
+        {% if products|default([]) %}
+            <div class="shop-products-grid">
+                {% for product in products %}
+                    {% include 'front/boutique/_product_card.html.twig' with {product: product} only %}
+                {% endfor %}
+            </div>
+        {% else %}
+            {% include 'front/components/_catalog_empty.html.twig' with {
+                icon: 'fa-regular fa-heart',
+                eyebrow: 'common.favorites',
+                title: 'favorites.empty_title',
+                text: 'favorites.empty_text',
+                action_url: path('app_front_boutique'),
+                action_label: 'favorites.view_shop'
+            } only %}
+        {% endif %}
     </section>
 {% endblock %}
