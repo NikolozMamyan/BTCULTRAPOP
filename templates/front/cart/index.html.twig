@@ -93,7 +93,7 @@
                     </div>
                 </dl>
                 {% if not cart.empty and checkout_form is defined %}
-                    {{ form_start(checkout_form, {attr: {class: 'checkout-address-form'}}) }}
+                    {{ form_start(checkout_form, {attr: {class: 'checkout-address-form', 'data-turbo': 'false'}}) }}
                         <div class="checkout-address-form__heading">
                             <span><i class="fa-solid fa-truck-fast"></i></span>
                             <div>
