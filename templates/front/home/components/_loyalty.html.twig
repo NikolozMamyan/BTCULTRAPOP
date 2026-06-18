@@ -1,0 +1,55 @@
+<section class="home-loyalty max-w-7xl mx-auto px-5 mt-16 reveal" aria-labelledby="home-loyalty-title">
+    <div class="home-loyalty__card">
+        <span class="home-loyalty__orb home-loyalty__orb--yellow" aria-hidden="true"></span>
+
+        <div class="home-loyalty__intro">
+            <span class="home-loyalty__eyebrow">
+                <i class="fa-solid fa-crown"></i>
+                {{ 'home.loyalty.eyebrow'|trans }}
+            </span>
+            <h2 id="home-loyalty-title">{{ 'home.loyalty.title'|trans }}</h2>
+            <p>{{ 'home.loyalty.compact_text'|trans }}</p>
+        </div>
+
+        <div class="home-loyalty__formula" aria-label="{{ 'home.loyalty.formula_label'|trans }}">
+            <span><strong>1 €</strong>{{ 'home.loyalty.spent'|trans }}</span>
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            <span><strong>1</strong>{{ 'home.loyalty.point'|trans }}</span>
+        </div>
+
+        <div class="home-loyalty__reward" aria-label="{{ 'home.loyalty.reward_label'|trans }}">
+            <div class="home-loyalty__reward-ring">
+                <span class="home-loyalty__reward-kicker">{{ 'home.loyalty.from'|trans }} 50 {{ 'home.loyalty.points'|trans }}</span>
+                <div class="home-loyalty__discount">
+                    <b>-5%</b>
+                    <small>{{ 'home.loyalty.order'|trans }}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="home-loyalty__benefits">
+            <div class="home-loyalty__benefit">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <strong>{{ 'home.loyalty.benefit_auto_title'|trans }}</strong>
+            </div>
+            <div class="home-loyalty__benefit">
+                <i class="fa-solid fa-ticket"></i>
+                <strong>{{ 'home.loyalty.benefit_offers_title'|trans }}</strong>
+            </div>
+            {# <div class="home-loyalty__benefit">
+                <i class="fa-solid fa-gift"></i>
+                <strong>{{ 'home.loyalty.benefit_surprises_title'|trans }}</strong>
+            </div> #}
+        </div>
+
+        <a href="{{ path('app_front_profil') }}" class="home-loyalty__action">
+            <span>
+                {{ (app.user ? 'home.loyalty.cta_account' : 'home.loyalty.cta_join')|trans }}
+                {% if app.user %}
+                    <small>{{ 'home.loyalty.current_balance'|trans({'%count%': app.user.loyaltyPoints}) }}</small>
+                {% endif %}
+            </span>
+            <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+</section>

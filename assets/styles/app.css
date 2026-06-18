@@ -2151,82 +2151,340 @@ body.is-page-loading {
     box-shadow: var(--shadow-sm);
 }
 
-@keyframes rise {
-    from {
-        opacity: 0;
-        transform: translateY(24px);
+/* Compact loyalty banner */
+.home-loyalty__card {
+    position: relative;
+    display: grid;
+    min-height: 190px;
+    overflow: hidden;
+    grid-template-areas:
+        "intro formula reward action"
+        "benefits benefits benefits benefits";
+    grid-template-columns: minmax(260px, 1fr) auto auto auto;
+    align-items: center;
+    gap: .9rem 1.2rem;
+    padding: 1.55rem 2rem;
+    border: 1px solid rgba(255, 255, 255, .2);
+    border-radius: 18px;
+    background:
+        radial-gradient(circle at 88% 10%, rgba(255, 204, 7, .26), transparent 30%),
+        linear-gradient(125deg, #e82118 0%, #d01818 55%, #a80f18 100%);
+    box-shadow: 0 20px 48px rgba(184, 20, 24, .24);
+    color: #fff;
+    isolation: isolate;
+}
+
+.home-loyalty__card::before {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px);
+    background-size: 28px 28px;
+    content: "";
+    mask-image: linear-gradient(to right, #000, transparent 75%);
+    pointer-events: none;
+}
+
+.home-loyalty__intro,
+.home-loyalty__formula,
+.home-loyalty__reward,
+.home-loyalty__benefits,
+.home-loyalty__action {
+    position: relative;
+    z-index: 1;
+}
+
+.home-loyalty__intro {
+    grid-area: intro;
+}
+
+.home-loyalty__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .38rem .65rem;
+    border: 1px solid rgba(255, 255, 255, .28);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .13);
+    color: #fff;
+    font-size: .58rem;
+    font-weight: 900;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.home-loyalty__intro h2 {
+    margin-top: .55rem;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: clamp(1.65rem, 2.7vw, 2.35rem);
+    font-weight: 900;
+    letter-spacing: -.04em;
+    line-height: 1;
+}
+
+.home-loyalty__intro > p {
+    max-width: 520px;
+    margin-top: .45rem;
+    color: rgba(255, 255, 255, .78);
+    font-size: .76rem;
+    line-height: 1.45;
+}
+
+.home-loyalty__formula {
+    display: inline-flex;
+    align-items: center;
+    grid-area: formula;
+    gap: .55rem;
+    margin: 0;
+    padding: .65rem .75rem;
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+    backdrop-filter: blur(10px);
+}
+
+.home-loyalty__formula span {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    color: rgba(255, 255, 255, .75);
+    font-size: .55rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.home-loyalty__formula strong {
+    color: #fff;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: 1.25rem;
+    font-weight: 900;
+}
+
+.home-loyalty__formula > i {
+    display: grid;
+    width: 25px;
+    height: 25px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--primary-color);
+    font-size: .58rem;
+}
+
+.home-loyalty__reward {
+    display: grid;
+    place-items: center;
+    grid-area: reward;
+}
+
+.home-loyalty__reward-ring {
+    display: flex;
+    width: auto;
+    min-width: 126px;
+    aspect-ratio: auto;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: .35rem;
+    padding: .65rem .75rem;
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .12);
+    box-shadow: none;
+}
+
+.home-loyalty__reward-ring::before {
+    display: none;
+}
+
+.home-loyalty__reward-kicker {
+    color: rgba(255, 255, 255, .78);
+    font-size: .55rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.home-loyalty__discount {
+    position: static;
+    display: grid;
+    min-width: 92px;
+    padding: .4rem .65rem;
+    border: 0;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(112, 8, 13, .2);
+    color: var(--primary-color);
+    text-align: center;
+    transform: none;
+}
+
+.home-loyalty__discount b {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: 1.65rem;
+    font-weight: 900;
+    line-height: .9;
+}
+
+.home-loyalty__discount small {
+    color: #a80f18;
+    font-size: .49rem;
+    font-weight: 900;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.home-loyalty__benefits {
+    grid-area: benefits;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    padding: 0;
+    border: 0;
+}
+
+.home-loyalty__benefit {
+    display: inline-flex;
+    min-height: auto;
+    align-items: center;
+    gap: .38rem;
+    padding: .34rem .58rem;
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .1);
+    transition: background .2s ease, border-color .2s ease;
+}
+
+.home-loyalty__benefit:hover {
+    border-color: rgba(255, 255, 255, .26);
+    background: rgba(255, 255, 255, .16);
+    transform: none;
+}
+
+.home-loyalty__benefit > i {
+    color: var(--secondary-color);
+    font-size: .62rem;
+}
+
+.home-loyalty__benefit strong {
+    font-size: .62rem;
+    font-weight: 900;
+}
+
+.home-loyalty__action {
+    display: flex;
+    width: fit-content;
+    grid-area: action;
+    min-height: 46px;
+    align-items: center;
+    gap: .65rem;
+    margin: 0;
+    padding: .55rem .65rem .55rem .85rem;
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(112, 8, 13, .22);
+    color: var(--primary-color);
+    font-size: .7rem;
+    font-weight: 900;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.home-loyalty__action span {
+    display: grid;
+    gap: .1rem;
+}
+
+.home-loyalty__action small {
+    color: #777;
+    font-size: .57rem;
+}
+
+.home-loyalty__action > i {
+    display: grid;
+    width: 29px;
+    height: 29px;
+    place-items: center;
+    border-radius: 9px;
+    background: var(--primary-color);
+    color: #fff;
+}
+
+.home-loyalty__action:hover {
+    box-shadow: 0 15px 32px rgba(112, 8, 13, .3);
+    transform: translateY(-2px);
+}
+
+.home-loyalty__orb--yellow {
+    position: absolute;
+    z-index: 0;
+    top: -130px;
+    right: -70px;
+    bottom: auto;
+    width: 270px;
+    height: 270px;
+    border-radius: 50%;
+    background: rgba(255, 204, 7, .24);
+    filter: blur(28px);
+    pointer-events: none;
+}
+
+@media (max-width: 1050px) {
+    .home-loyalty__card {
+        grid-template-areas:
+            "intro intro reward"
+            "formula benefits action";
+        grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+}
+
+@media (max-width: 700px) {
+    .home-loyalty {
+        margin-top: 2.5rem;
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    .home-loyalty__card {
+        grid-template-areas:
+            "intro intro"
+            "formula reward"
+            "benefits benefits"
+            "action action";
+        grid-template-columns: 1fr 1fr;
+        gap: .8rem;
+        padding: 1.25rem;
+        border-radius: 16px;
     }
-}
 
-.s-rise {
-    animation: rise .7s cubic-bezier(.16, 1, .3, 1) both;
-}
+    .home-loyalty__intro {
+        text-align: left;
+    }
 
-.d1 {
-    animation-delay: .05s;
-}
+    .home-loyalty__intro > p {
+        margin-right: 0;
+        margin-left: 0;
+    }
 
-.d2 {
-    animation-delay: .12s;
-}
+    .home-loyalty__formula,
+    .home-loyalty__action {
+        margin-right: 0;
+        margin-left: 0;
+    }
 
-.d3 {
-    animation-delay: .19s;
-}
+    .home-loyalty__formula,
+    .home-loyalty__reward-ring {
+        width: 100%;
+    }
 
-.d4 {
-    animation-delay: .26s;
-}
-
-.d5 {
-    animation-delay: .33s;
-}
-
-.d6 {
-    animation-delay: .40s;
-}
-
-.d7 {
-    animation-delay: .47s;
-}
-
-.d8 {
-    animation-delay: .54s;
-}
-
-.home-services__grid {
-    align-items: stretch;
-}
-
-.home-service-card {
-    min-width: 0;
-    min-height: 96px;
-    box-shadow: 0 10px 28px rgba(32, 50, 99, .04);
-}
-
-.home-service-card__content {
-    min-width: 0;
-}
-
-.home-service-card__title,
-.home-service-card__text {
-    overflow-wrap: normal;
-    word-break: normal;
-}
-
-.home-service-card__title {
-    color: var(--text-dark);
-    line-height: 1.25;
-}
-
-.home-service-card__text {
-    margin-top: .12rem;
-    line-height: 1.35;
+    .home-loyalty__action {
+        width: 100%;
+        justify-content: space-between;
+    }
 }
 
 .reveal {
@@ -4158,6 +4416,10 @@ body.is-page-loading {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1.5rem;
+}
+
+.shop-products-grid.home-products-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .shop-product-card {
@@ -6595,6 +6857,10 @@ body.is-page-loading {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .shop-products-grid.home-products-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .product-detail {
         grid-template-columns: 1fr;
     }
@@ -6771,6 +7037,10 @@ body.is-page-loading {
     }
 
     .shop-products-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .shop-products-grid.home-products-grid {
         grid-template-columns: 1fr;
     }
 
@@ -7508,37 +7778,6 @@ body.is-page-loading {
         padding: 1.4rem;
     }
 
-    .home-services {
-        margin-top: 2rem;
-    }
-
-    .home-services__grid {
-        gap: .75rem;
-    }
-
-    .home-service-card {
-        min-height: 112px;
-        align-items: flex-start;
-        gap: .75rem !important;
-        padding: 1rem !important;
-        border-radius: 22px;
-    }
-
-    .home-service-card__icon {
-        width: 3rem !important;
-        height: 3rem !important;
-        font-size: 1rem !important;
-    }
-
-    .home-service-card__title {
-        font-size: .9rem !important;
-        line-height: 1.18;
-    }
-
-    .home-service-card__text {
-        font-size: .72rem !important;
-        line-height: 1.28;
-    }
 }
 
 @media (max-width: 520px) {
@@ -7572,38 +7811,6 @@ body.is-page-loading {
         min-height: 260px;
     }
 
-    .home-service-card {
-        min-height: 132px;
-        flex-direction: column;
-        justify-content: center;
-        gap: .7rem !important;
-        padding: .9rem !important;
-    }
-
-    .home-service-card__icon {
-        width: 2.8rem !important;
-        height: 2.8rem !important;
-    }
-
-    .home-service-card__title {
-        font-size: .82rem !important;
-    }
-
-    .home-service-card__text {
-        font-size: .68rem !important;
-    }
-}
-
-@media (max-width: 380px) {
-    .home-services__grid {
-        grid-template-columns: 1fr !important;
-    }
-
-    .home-service-card {
-        min-height: 100px;
-        flex-direction: row;
-        justify-content: flex-start;
-    }
 }
 
 @media (max-width: 420px) {

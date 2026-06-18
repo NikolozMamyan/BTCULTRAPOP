@@ -76,6 +76,19 @@ final readonly class StorefrontProductCatalog
     }
 
     /**
+     * @param list<Product> $products
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function presentManyForUser(array $products, ?User $user = null): array
+    {
+        return $this->withFavoriteState(array_map(
+            fn (Product $product): array => $this->present($product),
+            $products,
+        ), $user);
+    }
+
+    /**
      * @return list<string>
      */
     public function categories(): array

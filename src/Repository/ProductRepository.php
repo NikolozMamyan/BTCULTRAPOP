@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Entity\UserFavorite;
+use App\Enum\ProductStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -96,6 +97,75 @@ final class ProductRepository extends ServiceEntityRepository
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    /**
+     * @param list<int> $ids
+     *
+     * @return list<Product>
+     */
+    public function findForStorefrontByIds(array $ids): array
+    {
+        if ([] === $ids) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('product')
+            ->addSelect('category', 'license', 'images')
+            ->innerJoin('product.category', 'category')
+            ->innerJoin('product.license', 'license')
+            ->leftJoin('product.images', 'images')
+            ->andWhere('product.id IN (:ids)')
+            ->andWhere('product.active = true')
+            ->andWhere('product.quantity > 0')
+            ->andWhere('category.active = true')
+            ->andWhere('license.active = true')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @param list<int> $excludedIds
+     *
+     * @return list<Product>
+     */
+    public function findHomeFallbackForStorefront(array $excludedIds = [], int $limit = 4): array
+    {
+        $queryBuilder = $this->createQueryBuilder('product')
+            ->addSelect('category', 'license')
+            ->addSelect(
+                'CASE
+                    WHEN product.status = :bestseller THEN 0
+                    WHEN product.status = :new THEN 1
+                    WHEN product.status = :promo THEN 2
+                    ELSE 3
+                END AS HIDDEN homePriority',
+            )
+            ->innerJoin('product.category', 'category')
+            ->innerJoin('product.license', 'license')
+            ->andWhere('product.active = true')
+            ->andWhere('product.quantity > 0')
+            ->andWhere('category.active = true')
+            ->andWhere('license.active = true')
+            ->setParameter('bestseller', ProductStatus::BESTSELLER->value)
+            ->setParameter('new', ProductStatus::NEW->value)
+            ->setParameter('promo', ProductStatus::PROMO->value)
+            ->orderBy('homePriority', 'ASC')
+            ->addOrderBy('product.updatedAt', 'DESC')
+            ->addOrderBy('product.quantity', 'DESC')
+            ->addOrderBy('product.name', 'ASC')
+            ->setMaxResults(max(1, min(8, $limit)));
+
+        if ([] !== $excludedIds) {
+            $queryBuilder
+                ->andWhere('product.id NOT IN (:excludedIds)')
+                ->setParameter('excludedIds', $excludedIds);
+        }
+
+        return $queryBuilder
+            ->getQuery()
+            ->getResult();
     }
 
     /**

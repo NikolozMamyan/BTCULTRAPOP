@@ -43,7 +43,6 @@ function initializeStorefront() {
     const abortController = new AbortController();
     const { signal } = abortController;
     let carouselTimer;
-    let countdownTimer;
     let toastTimer;
     let slideIndex = 0;
 
@@ -231,22 +230,6 @@ function initializeStorefront() {
         resetCarouselTimer();
     };
 
-    const tickCountdown = () => {
-        const hours = document.getElementById('cd-h');
-        if (!hours) {
-            return;
-        }
-
-        const end = new Date();
-        end.setHours(23, 59, 59, 0);
-        const difference = Math.max(0, end - new Date());
-        const pad = (value) => String(value).padStart(2, '0');
-
-        hours.textContent = pad(Math.floor(difference / 3.6e6));
-        document.getElementById('cd-m').textContent = pad(Math.floor((difference % 3.6e6) / 6e4));
-        document.getElementById('cd-s').textContent = pad(Math.floor((difference % 6e4) / 1e3));
-    };
-
     const triggerReveals = () => {
         document.querySelectorAll('.reveal').forEach((element) => {
             if (element.getBoundingClientRect().top < window.innerHeight - 60) {
@@ -342,15 +325,12 @@ function initializeStorefront() {
     bindFallbacks();
     renderCarouselDots();
     resetCarouselTimer();
-    tickCountdown();
-    countdownTimer = window.setInterval(tickCountdown, 1000);
     triggerReveals();
     updateBackToTop();
 
     return () => {
         abortController.abort();
         window.clearInterval(carouselTimer);
-        window.clearInterval(countdownTimer);
         window.clearTimeout(toastTimer);
         setBodyLocked(false);
         document.getElementById('search-modal')?.classList.add('hidden');

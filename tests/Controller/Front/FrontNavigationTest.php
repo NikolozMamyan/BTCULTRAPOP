@@ -76,10 +76,11 @@ final class FrontNavigationTest extends WebTestCase
     public function testHomeUsesOfficialLicencesAndSingleSpotlight(): void
     {
         $client = static::createClient();
+        $this->skipIfStorefrontCatalogIsUnavailable();
         $crawler = $client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('body', 'Licences officielles');
+        self::assertSelectorTextContains('.licenses-showcase', 'Univers officiels');
         self::assertSelectorExists('.home-hero');
         self::assertSelectorCount(2, '.home-hero__image');
         self::assertSelectorCount(2, '.home-hero__overlay');
@@ -91,6 +92,17 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorCount(14, '.license-card');
         self::assertSelectorExists('a.license-card[href*="/licences?license=One"]');
         self::assertSelectorExists('a.license-card[href="/licences?license=Naruto"]');
+        self::assertSelectorExists('.home-loyalty');
+        self::assertSelectorTextContains('.home-loyalty__formula', '1 €');
+        self::assertSelectorTextContains('.home-loyalty__reward', '50');
+        self::assertSelectorTextContains('.home-loyalty__discount', '-5%');
+        self::assertSelectorExists('.home-loyalty__action[href="/profil"]');
+        self::assertSelectorCount(3, '.home-loyalty__benefit');
+        self::assertSelectorCount(4, '.home-products-grid .shop-product-card');
+        self::assertSelectorTextContains('.home-products-grid', 'Ajouter');
+        self::assertSelectorTextSame('.home-products h2', 'Les produits du moment');
+        self::assertSelectorNotExists('.home-services');
+        self::assertSelectorNotExists('#cd-h');
         self::assertStringNotContainsString('Retour 30 jours', $crawler->html());
         self::assertStringNotContainsString('Goodies & Accessoires', $crawler->html());
     }
@@ -174,6 +186,7 @@ final class FrontNavigationTest extends WebTestCase
     public function testLocaleCookieRendersTheStorefrontInEnglish(): void
     {
         $client = static::createClient();
+        $this->skipIfStorefrontCatalogIsUnavailable();
         $client->getCookieJar()->set(new Cookie('ultrapop_locale', 'en'));
 
         $client->request('GET', '/');
@@ -232,7 +245,8 @@ final class FrontNavigationTest extends WebTestCase
 
     private function requiresCatalogDatabase(string $path): bool
     {
-        return str_starts_with($path, '/boutique')
+        return '/' === $path
+            || str_starts_with($path, '/boutique')
             || str_starts_with($path, '/licences')
             || str_starts_with($path, '/soldes');
     }
