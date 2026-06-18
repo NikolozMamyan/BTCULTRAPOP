@@ -2249,6 +2249,19 @@ body.is-page-loading {
     min-width: 100%;
 }
 
+.home-hero__image,
+.home-hero__media-fallback {
+    display: block;
+}
+
+.home-hero__image {
+    filter: brightness(.78) contrast(1.04);
+}
+
+.home-hero__overlay {
+    background: linear-gradient(90deg, rgba(0, 0, 0, .55), rgba(0, 0, 0, .1) 56%, transparent);
+}
+
 @keyframes marquee {
     from {
         transform: translateX(0);
@@ -6282,6 +6295,74 @@ body.is-page-loading {
 }
 
 @media (max-width: 640px) {
+    .home-hero {
+        width: 100vw;
+        max-width: none;
+        margin-left: calc(50% - 50vw);
+        padding: 0;
+    }
+
+    .home-hero__viewport {
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .home-hero__image,
+    .home-hero__media-fallback {
+        height: clamp(420px, 70svh, 560px);
+    }
+
+    .home-hero__image {
+        object-position: center;
+        filter: brightness(.62) contrast(1.05) saturate(.92);
+    }
+
+    .home-hero__overlay {
+        align-items: flex-end;
+        background:
+            linear-gradient(180deg, rgba(8, 13, 29, .12) 10%, rgba(8, 13, 29, .42) 48%, rgba(8, 13, 29, .94) 100%);
+    }
+
+    .home-hero__content {
+        width: 100%;
+        max-width: 25rem;
+        padding: 1.25rem 1.25rem 4.2rem;
+    }
+
+    .home-hero__badge,
+    .home-hero__arrow {
+        display: none !important;
+    }
+
+    .home-hero__title {
+        max-width: 20rem;
+        margin-bottom: .75rem;
+        font-size: clamp(2rem, 9.5vw, 2.65rem);
+        letter-spacing: -.045em;
+        line-height: 1.02;
+        text-wrap: balance;
+    }
+
+    .home-hero__text {
+        display: block !important;
+        max-width: 19rem;
+        margin-bottom: 1.1rem;
+        color: rgba(255, 255, 255, .84);
+        font-size: .88rem;
+        line-height: 1.45;
+    }
+
+    .home-hero__action {
+        min-height: 44px;
+        align-items: center;
+        padding: .72rem 1.15rem;
+        font-size: .8rem;
+    }
+
+    .home-hero #carousel-dots {
+        bottom: 1.2rem;
+    }
+
     .shop-catalog-heading {
         align-items: flex-start;
         flex-direction: column;

@@ -80,6 +80,11 @@ final class FrontNavigationTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('body', 'Licences officielles');
+        self::assertSelectorExists('.home-hero');
+        self::assertSelectorCount(2, '.home-hero__image');
+        self::assertSelectorCount(2, '.home-hero__overlay');
+        self::assertSelectorCount(2, '.home-hero__badge');
+        self::assertSelectorCount(2, '.home-hero__arrow');
         self::assertSelectorCount(1, '.licence-spotlight');
         self::assertSelectorExists('.licence-spotlight img[src*="MENU_LICENCE-01"]');
         self::assertSelectorCount(1, '.licenses-carousel');

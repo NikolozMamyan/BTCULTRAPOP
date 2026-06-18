@@ -278,7 +278,7 @@ function initializeStorefront() {
         document.querySelectorAll('[data-banner-fallback]').forEach((image) => {
             on(image, 'error', () => {
                 const fallback = document.createElement('div');
-                fallback.className = 'w-full h-[300px] md:h-[480px] flex items-center justify-center';
+                fallback.className = 'home-hero__media-fallback w-full h-[300px] md:h-[480px] flex items-center justify-center';
                 fallback.style.background = `linear-gradient(135deg,${image.dataset.fallbackColor},#203263)`;
                 fallback.innerHTML = `<span class="font-display text-white text-4xl font-extrabold opacity-90">${image.dataset.bannerFallback}</span>`;
                 image.replaceWith(fallback);

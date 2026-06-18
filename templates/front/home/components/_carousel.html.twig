@@ -1,31 +1,31 @@
-<section class="relative max-w-7xl mx-auto px-5 pt-6">
-    <div class="relative rounded-lg-c overflow-hidden shadow-lg-c bg-text-dark">
+<section class="home-hero relative max-w-7xl mx-auto px-0 pt-6">
+    <div class="home-hero__viewport relative rounded-lg-c overflow-hidden shadow-lg-c bg-text-dark">
         <div id="carousel-track" class="carousel-track">
-            <div class="carousel-slide relative">
-                <img src="https://ultrapop.com/modules/ps_imageslider/images/c3696f91648822e205335187259f31ec97720a5d_banner_3.png" alt="{{ 'home.carousel.banner_one_alt'|trans }}" class="w-full h-[300px] md:h-[480px] object-cover" data-banner-fallback="{{ 'home.carousel.collection_fallback'|trans }}" data-fallback-color="#e82118">
-                <div class="absolute inset-0 bg-gradient-to-r from-black/55 via-black/10 to-transparent flex items-center">
-                    <div class="px-8 md:px-16 max-w-xl text-white">
-                        <span class="inline-block bg-secondary text-text-dark text-xs font-bold px-3 py-1 rounded-full mb-4">{{ 'home.carousel.new_collection'|trans|upper }}</span>
-                        <h1 class="font-display text-3xl md:text-5xl font-extrabold leading-tight mb-4">{{ 'home.carousel.hero_title'|trans }}</h1>
-                        <p class="text-white/80 mb-6 hidden sm:block">{{ 'home.carousel.hero_text'|trans }}</p>
-                        <a href="{{ path('app_front_boutique') }}" class="inline-flex bg-primary hover:bg-primary-d px-7 py-3 rounded-full font-bold text-sm transition-colors shadow-lg-c">{{ 'home.carousel.discover'|trans }} <i class="fa-solid fa-arrow-right ml-2 mt-1"></i></a>
+            <div class="home-hero__slide carousel-slide relative">
+                <img src="https://ultrapop.com/modules/ps_imageslider/images/c3696f91648822e205335187259f31ec97720a5d_banner_3.png" alt="{{ 'home.carousel.banner_one_alt'|trans }}" class="home-hero__image w-full h-[300px] md:h-[480px] object-cover" data-banner-fallback="{{ 'home.carousel.collection_fallback'|trans }}" data-fallback-color="#e82118">
+                <div class="home-hero__overlay absolute inset-0 flex items-center">
+                    <div class="home-hero__content px-8 md:px-16 max-w-xl text-white">
+                        <span class="home-hero__badge inline-block bg-secondary text-text-dark text-xs font-bold px-3 py-1 rounded-full mb-4">{{ 'home.carousel.new_collection'|trans|upper }}</span>
+                        <h1 class="home-hero__title font-display text-3xl md:text-5xl font-extrabold leading-tight mb-4">{{ 'home.carousel.hero_title'|trans }}</h1>
+                        <p class="home-hero__text text-white/80 mb-6 hidden sm:block">{{ 'home.carousel.hero_text'|trans }}</p>
+                        <a href="{{ path('app_front_boutique') }}" class="home-hero__action inline-flex bg-primary hover:bg-primary-d px-7 py-3 rounded-full font-bold text-sm transition-colors shadow-lg-c">{{ 'home.carousel.discover'|trans }} <i class="fa-solid fa-arrow-right ml-2 mt-1"></i></a>
                     </div>
                 </div>
             </div>
-            <div class="carousel-slide relative">
-                <img src="https://ultrapop.com/modules/ps_imageslider/images/35579f854ad9b7278e67450daf673b524e7deefb_banner_1.png" alt="{{ 'home.carousel.banner_two_alt'|trans }}" class="w-full h-[300px] md:h-[480px] object-cover" data-banner-fallback="{{ 'home.carousel.limited_fallback'|trans }}" data-fallback-color="#203263">
-                <div class="absolute inset-0 bg-gradient-to-r from-black/55 via-black/10 to-transparent flex items-center">
-                    <div class="px-8 md:px-16 max-w-xl text-white">
-                        <span class="inline-block bg-primary text-white text-xs font-bold px-3 py-1 rounded-full mb-4">{{ 'home.carousel.limited'|trans|upper }}</span>
-                        <h2 class="font-display text-3xl md:text-5xl font-extrabold leading-tight mb-4">{{ 'home.carousel.limited_title'|trans }}</h2>
-                        <p class="text-white/80 mb-6 hidden sm:block">{{ 'home.carousel.limited_text'|trans }}</p>
-                        <a href="{{ path('app_front_boutique') }}" class="inline-flex bg-secondary hover:brightness-95 text-text-dark px-7 py-3 rounded-full font-bold text-sm transition-all shadow-lg-c">{{ 'home.carousel.view_shop'|trans }} <i class="fa-solid fa-arrow-right ml-2 mt-1"></i></a>
+            <div class="home-hero__slide carousel-slide relative">
+                <img src="https://ultrapop.com/modules/ps_imageslider/images/35579f854ad9b7278e67450daf673b524e7deefb_banner_1.png" alt="{{ 'home.carousel.banner_two_alt'|trans }}" class="home-hero__image w-full h-[300px] md:h-[480px] object-cover" data-banner-fallback="{{ 'home.carousel.limited_fallback'|trans }}" data-fallback-color="#203263">
+                <div class="home-hero__overlay absolute inset-0 flex items-center">
+                    <div class="home-hero__content px-8 md:px-16 max-w-xl text-white">
+                        <span class="home-hero__badge inline-block bg-primary text-white text-xs font-bold px-3 py-1 rounded-full mb-4">{{ 'home.carousel.limited'|trans|upper }}</span>
+                        <h2 class="home-hero__title font-display text-3xl md:text-5xl font-extrabold leading-tight mb-4">{{ 'home.carousel.limited_title'|trans }}</h2>
+                        <p class="home-hero__text text-white/80 mb-6 hidden sm:block">{{ 'home.carousel.limited_text'|trans }}</p>
+                        <a href="{{ path('app_front_boutique') }}" class="home-hero__action inline-flex bg-secondary hover:brightness-95 text-text-dark px-7 py-3 rounded-full font-bold text-sm transition-all shadow-lg-c">{{ 'home.carousel.view_shop'|trans }} <i class="fa-solid fa-arrow-right ml-2 mt-1"></i></a>
                     </div>
                 </div>
             </div>
         </div>
-        <button type="button" data-action="carousel-prev" class="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 hover:bg-white text-text-dark flex items-center justify-center shadow-md-c transition-all hover:scale-105" aria-label="{{ 'home.carousel.previous'|trans }}"><i class="fa-solid fa-chevron-left"></i></button>
-        <button type="button" data-action="carousel-next" class="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 hover:bg-white text-text-dark flex items-center justify-center shadow-md-c transition-all hover:scale-105" aria-label="{{ 'home.carousel.next'|trans }}"><i class="fa-solid fa-chevron-right"></i></button>
+        <button type="button" data-action="carousel-prev" class="home-hero__arrow absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 hover:bg-white text-text-dark flex items-center justify-center shadow-md-c transition-all hover:scale-105" aria-label="{{ 'home.carousel.previous'|trans }}"><i class="fa-solid fa-chevron-left"></i></button>
+        <button type="button" data-action="carousel-next" class="home-hero__arrow absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 hover:bg-white text-text-dark flex items-center justify-center shadow-md-c transition-all hover:scale-105" aria-label="{{ 'home.carousel.next'|trans }}"><i class="fa-solid fa-chevron-right"></i></button>
         <div id="carousel-dots" class="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2"></div>
     </div>
 </section>
