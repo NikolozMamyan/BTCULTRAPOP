@@ -75,8 +75,10 @@
             <aside class="cart-page__summary" aria-label="{{ 'cart.summary'|trans }}">
                 <h2>{{ 'cart.summary'|trans }}</h2>
                 <div class="cart-page__shipping">
-                    <p id="cart-page-ship-msg">{{ cart.shippingMessage }}</p>
-                    <div><span id="cart-page-ship-bar" style="width: {{ cart.shippingProgress }}%"></span></div>
+                    {% include 'front/components/cart/_shipping_meter.html.twig' with {
+                        prefix: 'page',
+                        cart: cart
+                    } only %}
                 </div>
                 <dl>
                     <div>
@@ -85,7 +87,7 @@
                     </div>
                     <div>
                         <dt>{{ 'overlay.delivery'|trans }}</dt>
-                        <dd class="is-free">{{ 'overlay.free'|trans }}</dd>
+                        <dd id="cart-page-shipping" class="{{ cart.shippingFree ? 'is-free' : '' }}">{{ cart.shippingDisplay }}</dd>
                     </div>
                     <div class="cart-page__summary-total">
                         <dt>{{ 'overlay.total'|trans }}</dt>
@@ -93,43 +95,94 @@
                     </div>
                 </dl>
                 {% if not cart.empty and checkout_form is defined %}
-                    {{ form_start(checkout_form, {attr: {class: 'checkout-address-form', 'data-turbo': 'false'}}) }}
+                    {{ form_start(checkout_form, {attr: {
+                        class: 'checkout-address-form',
+                        'data-turbo': 'false',
+                        'data-controller': 'checkout-address'
+                    }}) }}
                         <div class="checkout-address-form__heading">
                             <span><i class="fa-solid fa-truck-fast"></i></span>
                             <div>
                                 <strong>{{ 'checkout.address.title'|trans }}</strong>
-                                <small>{{ 'checkout.address.text'|trans }}</small>
+                                <small>{{ checkout_address_saved ? 'checkout.address.saved_text'|trans : 'checkout.address.text'|trans }}</small>
                             </div>
                         </div>
 
                         {{ form_errors(checkout_form) }}
 
-                        <div class="checkout-address-form__field checkout-address-form__field--wide">
-                            {{ form_label(checkout_form.name) }}
-                            {{ form_widget(checkout_form.name, {attr: {placeholder: 'checkout.address.name_placeholder'|trans}}) }}
-                            {{ form_errors(checkout_form.name) }}
-                        </div>
-                        <div class="checkout-address-form__field checkout-address-form__field--wide">
-                            {{ form_label(checkout_form.street) }}
-                            {{ form_widget(checkout_form.street, {attr: {placeholder: 'checkout.address.street_placeholder'|trans}}) }}
-                            {{ form_errors(checkout_form.street) }}
-                        </div>
-                        <div class="checkout-address-form__grid">
-                            <div class="checkout-address-form__field">
-                                {{ form_label(checkout_form.postalCode) }}
-                                {{ form_widget(checkout_form.postalCode) }}
-                                {{ form_errors(checkout_form.postalCode) }}
+                        {% if checkout_address_saved and checkout_address %}
+                            <article class="checkout-address-card" data-checkout-address-target="card">
+                                <span class="checkout-address-card__icon">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </span>
+                                <address>
+                                    <strong>{{ checkout_address.name }}</strong>
+                                    <span>{{ checkout_address.street }}</span>
+                                    <span>{{ checkout_address.postalCode }} {{ checkout_address.city }}</span>
+                                    <small>
+                                        {{ checkout_address.countryCode }}
+                                        {% if checkout_address.phone %} - {{ checkout_address.phone }}{% endif %}
+                                    </small>
+                                </address>
+                                <button
+                                    type="button"
+                                    class="checkout-address-card__edit"
+                                    data-checkout-address-target="editButton"
+                                    data-action="checkout-address#edit"
+                                    aria-controls="checkout-address-editor"
+                                    aria-expanded="false"
+                                    aria-label="{{ 'checkout.address.edit'|trans }}"
+                                >
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                            </article>
+                        {% endif %}
+
+                        <div
+                            id="checkout-address-editor"
+                            class="checkout-address-form__editor"
+                            data-checkout-address-target="editor"
+                            {% if checkout_address_saved %}hidden{% endif %}
+                        >
+                            <div class="checkout-address-form__field checkout-address-form__field--wide">
+                                {{ form_label(checkout_form.name) }}
+                                {{ form_widget(checkout_form.name, {attr: {placeholder: 'checkout.address.name_placeholder'|trans}}) }}
+                                {{ form_errors(checkout_form.name) }}
                             </div>
-                            <div class="checkout-address-form__field">
-                                {{ form_label(checkout_form.city) }}
-                                {{ form_widget(checkout_form.city) }}
-                                {{ form_errors(checkout_form.city) }}
+                            <div class="checkout-address-form__field checkout-address-form__field--wide">
+                                {{ form_label(checkout_form.street) }}
+                                {{ form_widget(checkout_form.street, {attr: {placeholder: 'checkout.address.street_placeholder'|trans}}) }}
+                                {{ form_errors(checkout_form.street) }}
                             </div>
-                        </div>
-                        <div class="checkout-address-form__field checkout-address-form__field--wide">
-                            {{ form_label(checkout_form.phone) }}
-                            {{ form_widget(checkout_form.phone, {attr: {placeholder: 'checkout.address.phone_placeholder'|trans}}) }}
-                            {{ form_errors(checkout_form.phone) }}
+                            <div class="checkout-address-form__grid">
+                                <div class="checkout-address-form__field">
+                                    {{ form_label(checkout_form.postalCode) }}
+                                    {{ form_widget(checkout_form.postalCode) }}
+                                    {{ form_errors(checkout_form.postalCode) }}
+                                </div>
+                                <div class="checkout-address-form__field">
+                                    {{ form_label(checkout_form.city) }}
+                                    {{ form_widget(checkout_form.city) }}
+                                    {{ form_errors(checkout_form.city) }}
+                                </div>
+                            </div>
+                            <div class="checkout-address-form__field checkout-address-form__field--wide">
+                                {{ form_label(checkout_form.phone) }}
+                                {{ form_widget(checkout_form.phone, {attr: {placeholder: 'checkout.address.phone_placeholder'|trans}}) }}
+                                {{ form_errors(checkout_form.phone) }}
+                            </div>
+
+                            {% if checkout_address_saved %}
+                                <button
+                                    type="button"
+                                    class="checkout-address-form__cancel"
+                                    data-checkout-address-target="cancelButton"
+                                    data-action="checkout-address#cancel"
+                                >
+                                    <i class="fa-solid fa-arrow-rotate-left"></i>
+                                    {{ 'checkout.address.cancel_edit'|trans }}
+                                </button>
+                            {% endif %}
                         </div>
 
                         {{ form_widget(checkout_form.countryCode) }}

@@ -1,0 +1,31 @@
+{% set shipping_cart = cart|default(null) %}
+
+<div class="shipping-meter {{ compact|default(false) ? 'shipping-meter--compact' : '' }}">
+    <div class="shipping-meter__heading">
+        <p id="{{ prefix }}-ship-msg">{{ shipping_cart ? shipping_cart.shippingMessage : 'overlay.shipping_empty'|trans }}</p>
+        <strong id="{{ prefix }}-ship-amount" class="{{ shipping_cart and shipping_cart.shippingFree ? 'is-free' : '' }}">
+            {{ shipping_cart ? shipping_cart.shippingDisplay : '—' }}
+        </strong>
+    </div>
+
+    <div class="shipping-meter__track" aria-hidden="true">
+        <span
+            id="{{ prefix }}-ship-bar"
+            class="shipping-meter__fill"
+            style="width: {{ shipping_cart ? shipping_cart.shippingProgress : 0 }}%"
+        ></span>
+        <div id="{{ prefix }}-shipping-checkpoints" class="shipping-meter__checkpoints">
+            {% if shipping_cart %}
+                {% for checkpoint in shipping_cart.shippingCheckpoints %}
+                    <span
+                        class="shipping-meter__checkpoint {{ checkpoint.reached ? 'is-reached' : '' }} {{ checkpoint.current ? 'is-current' : '' }} {{ checkpoint.shippingAmountCents == 0 ? 'is-free-checkpoint' : '' }}"
+                        style="--checkpoint-position: {{ checkpoint.position }}%"
+                    >
+                        <i></i>
+                        <small>{{ checkpoint.thresholdCents == 0 ? '0 €' : checkpoint.thresholdFormatted }}</small>
+                    </span>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>

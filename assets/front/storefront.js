@@ -155,14 +155,25 @@ function initializeStorefront() {
             badge.textContent = '0';
         });
 
-        const shippingBar = document.getElementById('ship-bar');
+        const shippingBar = document.getElementById('drawer-ship-bar');
         if (shippingBar) {
             shippingBar.style.width = '0%';
         }
 
-        const shippingMessage = document.getElementById('ship-msg');
+        const shippingMessage = document.getElementById('drawer-ship-msg');
         if (shippingMessage) {
             shippingMessage.textContent = app.dataset.cartShippingEmpty;
+        }
+
+        const shippingAmount = document.getElementById('drawer-ship-amount');
+        if (shippingAmount) {
+            shippingAmount.textContent = '—';
+            shippingAmount.classList.remove('is-free');
+        }
+
+        const shippingCheckpoints = document.getElementById('drawer-shipping-checkpoints');
+        if (shippingCheckpoints) {
+            shippingCheckpoints.innerHTML = '';
         }
 
         const cartItems = document.getElementById('cart-items');
@@ -177,6 +188,7 @@ function initializeStorefront() {
         }
 
         document.getElementById('cart-subtotal').textContent = '0,00€';
+        document.getElementById('cart-shipping').textContent = '—';
         document.getElementById('cart-total').textContent = '0,00€';
     };
 

@@ -24,7 +24,10 @@ final class CartController extends AbstractController
         EntityManagerInterface $entityManager,
     ): Response
     {
-        $cart = $cartResolver->resolve($request, $this->getAuthenticatedUser());
+        $user = $this->getAuthenticatedUser();
+        $cart = $cartResolver->resolve($request, $user);
+        $checkoutAddress = CheckoutAddress::fromUser($user);
+        $hasSavedAddress = null !== $user?->getDefaultAddress();
 
         if ($cart instanceof Cart) {
             $entityManager->flush();
@@ -32,9 +35,11 @@ final class CartController extends AbstractController
 
         $response = $this->render('front/cart/index.html.twig', [
             'cart' => $cartViewBuilder->build($cart),
-            'checkout_form' => $this->createForm(CheckoutAddressType::class, CheckoutAddress::fromUser($this->getAuthenticatedUser()), [
+            'checkout_form' => $this->createForm(CheckoutAddressType::class, $checkoutAddress, [
                 'action' => $this->generateUrl('app_checkout_stripe_create'),
             ])->createView(),
+            'checkout_address' => $hasSavedAddress ? $checkoutAddress : null,
+            'checkout_address_saved' => $hasSavedAddress,
         ]);
 
         if ($cart instanceof Cart) {

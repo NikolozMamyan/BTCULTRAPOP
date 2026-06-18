@@ -119,15 +119,8 @@ export default class extends Controller {
             requestAnimationFrame(() => badge.classList.add('badge-pulse'));
         });
 
-        const shippingBar = document.getElementById('ship-bar');
-        if (shippingBar) {
-            shippingBar.style.width = `${cart.shippingProgress}%`;
-        }
-
-        const shippingMessage = document.getElementById('ship-msg');
-        if (shippingMessage) {
-            shippingMessage.textContent = cart.shippingMessage;
-        }
+        this.renderShippingMeter('drawer', cart);
+        this.renderShippingMeter('page', cart);
 
         const cartItems = document.getElementById('cart-items');
         if (cartItems) {
@@ -141,14 +134,54 @@ export default class extends Controller {
 
         this.setText('cart-subtotal', cart.subtotalFormatted);
         this.setText('cart-total', cart.totalFormatted);
+        this.setShippingText('cart-shipping', cart);
         this.setText('cart-page-subtotal', cart.subtotalFormatted);
         this.setText('cart-page-total', cart.totalFormatted);
-        this.setText('cart-page-ship-msg', cart.shippingMessage);
+        this.setShippingText('cart-page-shipping', cart);
+    }
 
-        const cartPageShippingBar = document.getElementById('cart-page-ship-bar');
-        if (cartPageShippingBar) {
-            cartPageShippingBar.style.width = `${cart.shippingProgress}%`;
+    renderShippingMeter(prefix, cart) {
+        this.setText(`${prefix}-ship-msg`, cart.shippingMessage);
+        this.setShippingText(`${prefix}-ship-amount`, cart);
+
+        const bar = document.getElementById(`${prefix}-ship-bar`);
+        if (bar) {
+            bar.style.width = `${cart.shippingProgress}%`;
         }
+
+        const checkpoints = document.getElementById(`${prefix}-shipping-checkpoints`);
+        if (checkpoints) {
+            checkpoints.innerHTML = (cart.shippingCheckpoints || [])
+                .map((checkpoint) => this.shippingCheckpointTemplate(checkpoint))
+                .join('');
+        }
+    }
+
+    shippingCheckpointTemplate(checkpoint) {
+        const classes = [
+            'shipping-meter__checkpoint',
+            checkpoint.reached ? 'is-reached' : '',
+            checkpoint.current ? 'is-current' : '',
+            Number(checkpoint.shippingAmountCents) === 0 ? 'is-free-checkpoint' : '',
+        ].filter(Boolean).join(' ');
+
+        return `
+            <span class="${classes}" style="--checkpoint-position: ${Number(checkpoint.position) || 0}%">
+                <i></i>
+                <small>${this.escape(Number(checkpoint.thresholdCents) === 0 ? '0 €' : checkpoint.thresholdFormatted)}</small>
+            </span>
+        `;
+    }
+
+    setShippingText(id, cart) {
+        const element = document.getElementById(id);
+
+        if (!element) {
+            return;
+        }
+
+        element.textContent = cart.shippingDisplay;
+        element.classList.toggle('is-free', Boolean(cart.shippingFree));
     }
 
     emptyTemplate() {

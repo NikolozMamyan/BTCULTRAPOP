@@ -2,7 +2,12 @@
 
 namespace App\Tests\Controller\Front;
 
+use App\Entity\Address;
+use App\Entity\Category;
+use App\Entity\License;
+use App\Entity\Product;
 use App\Entity\User;
+use App\Service\CartManager;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -45,6 +50,90 @@ final class AuthControllerTest extends WebTestCase
         } finally {
             $connection = static::getContainer()->get(Connection::class);
             \assert($connection instanceof Connection);
+            $connection->delete('app_user', ['email' => $email]);
+        }
+    }
+
+    public function testSavedAddressIsCollapsedIntoCardOnCartPage(): void
+    {
+        $client = static::createClient();
+        $this->skipIfDatabaseIsUnavailable();
+
+        $suffix = bin2hex(random_bytes(4));
+        $email = sprintf('cart-address-%s@example.com', $suffix);
+        $password = 'customer-password';
+        $reference = sprintf('CART-ADDRESS-%s', strtoupper($suffix));
+        $categoryName = sprintf('Cart Address Category %s', $suffix);
+        $licenseName = sprintf('Cart Address License %s', $suffix);
+        $entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+        $cartManager = static::getContainer()->get(CartManager::class);
+        \assert($entityManager instanceof EntityManagerInterface);
+        \assert($passwordHasher instanceof UserPasswordHasherInterface);
+        \assert($cartManager instanceof CartManager);
+
+        $user = (new User())
+            ->setEmail($email)
+            ->setFirstName('Client')
+            ->setLastName('Adresse');
+        $user->setPassword($passwordHasher->hashPassword($user, $password));
+        $user->addAddress(
+            (new Address())
+                ->setName('Maison')
+                ->setStreet('12 rue de la Livraison')
+                ->setPostalCode('75010')
+                ->setCity('Paris')
+                ->setCountryCode('FR')
+                ->setPhone('0601020304')
+                ->setDefaultAddress(true),
+        );
+
+        $category = (new Category())->setName($categoryName);
+        $license = (new License())->setName($licenseName);
+        $product = (new Product())
+            ->setName('Cart Address Product')
+            ->setReference($reference)
+            ->setCategory($category)
+            ->setLicense($license)
+            ->setPriceTaxExcluded('10.000000')
+            ->setPriceTaxIncluded('12.000000')
+            ->setQuantity(5);
+        $cart = $cartManager->createCart($user, sprintf('cart-address-%s', $suffix));
+        $cartManager->addProduct($cart, $product);
+
+        try {
+            $entityManager->persist($user);
+            $entityManager->persist($category);
+            $entityManager->persist($license);
+            $entityManager->persist($product);
+            $entityManager->persist($cart);
+            $entityManager->flush();
+
+            $crawler = $client->request('GET', '/profil');
+            $loginToken = $crawler->filter('form[action="/auth/login"][method="post"] input[name="_csrf_token"]')->attr('value');
+
+            $client->request('POST', '/auth/login', [
+                '_csrf_token' => $loginToken,
+                'email' => $email,
+                'password' => $password,
+            ]);
+
+            self::assertResponseRedirects('/boutique');
+
+            $client->request('GET', '/cart');
+            self::assertResponseIsSuccessful();
+            self::assertSelectorExists('form.checkout-address-form[data-controller="checkout-address"]');
+            self::assertSelectorTextContains('.checkout-address-card', 'Client Adresse');
+            self::assertSelectorTextContains('.checkout-address-card', '12 rue de la Livraison');
+            self::assertSelectorExists('.checkout-address-card__edit[data-action="checkout-address#edit"]');
+            self::assertSelectorExists('#checkout-address-editor[hidden]');
+        } finally {
+            $connection = static::getContainer()->get(Connection::class);
+            \assert($connection instanceof Connection);
+            $connection->delete('cart', ['token' => sprintf('cart-address-%s', $suffix)]);
+            $connection->delete('product', ['reference' => $reference]);
+            $connection->delete('category', ['name' => $categoryName]);
+            $connection->delete('product_license', ['name' => $licenseName]);
             $connection->delete('app_user', ['email' => $email]);
         }
     }

@@ -14,6 +14,7 @@ use App\Repository\OrderRepository;
 use App\Service\CartResolver;
 use App\Service\CartViewBuilder;
 use App\Service\OrderManager;
+use App\Service\ShippingRateCalculator;
 use App\Service\StripeCheckoutService;
 use App\Service\StripeWebhookHandler;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,6 +33,7 @@ final class CheckoutController extends AbstractController
         CartResolver $cartResolver,
         CartViewBuilder $cartViewBuilder,
         OrderManager $orderManager,
+        ShippingRateCalculator $shippingRateCalculator,
         StripeCheckoutService $stripeCheckout,
         EntityManagerInterface $entityManager,
     ): Response {
@@ -54,6 +56,8 @@ final class CheckoutController extends AbstractController
             $response = $this->render('front/cart/index.html.twig', [
                 'cart' => $cartViewBuilder->build($cart),
                 'checkout_form' => $form->createView(),
+                'checkout_address' => null,
+                'checkout_address_saved' => false,
             ]);
             $response->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
 
@@ -73,6 +77,9 @@ final class CheckoutController extends AbstractController
                 cart: $cart,
                 shippingAddress: $address,
                 user: $user,
+                shippingAmountTaxIncludedCents: $shippingRateCalculator->amountForSubtotal(
+                    $cart->getTotalTaxIncludedCents(),
+                ),
             );
             $entityManager->persist($order);
             $entityManager->flush();

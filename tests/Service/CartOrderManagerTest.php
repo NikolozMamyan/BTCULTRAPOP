@@ -14,6 +14,7 @@ use App\Enum\PaymentStatus;
 use App\Model\CheckoutAddress;
 use App\Service\CartManager;
 use App\Service\OrderManager;
+use App\Service\ShippingRateCalculator;
 use PHPUnit\Framework\TestCase;
 
 final class CartOrderManagerTest extends TestCase
@@ -170,6 +171,9 @@ final class CartOrderManagerTest extends TestCase
         $order = (new OrderManager())->createGuestFromCart(
             cart: $cart,
             shippingAddress: $address,
+            shippingAmountTaxIncludedCents: (new ShippingRateCalculator())->amountForSubtotal(
+                $cart->getTotalTaxIncludedCents(),
+            ),
             orderNumber: 'UP-TEST-GUEST',
         );
 
@@ -178,7 +182,8 @@ final class CartOrderManagerTest extends TestCase
         self::assertNull($order->getCustomerEmail());
         self::assertSame('Client Invite', $order->getCustomerName());
         self::assertSame('20 rue de Lyon', $order->getShippingStreet());
-        self::assertSame(2400, $order->getTotalTaxIncludedCents());
+        self::assertSame(475, $order->getShippingAmountTaxIncludedCents());
+        self::assertSame(2875, $order->getTotalTaxIncludedCents());
         self::assertSame(PaymentStatus::PENDING, $order->getPaymentStatus());
     }
 

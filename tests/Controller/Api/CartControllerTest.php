@@ -29,6 +29,9 @@ final class CartControllerTest extends WebTestCase
         $payload = $this->jsonResponse($client->getResponse()->getContent());
         self::assertSame(2, $payload['cart']['totalQuantity']);
         self::assertSame('2,62 €', $payload['cart']['subtotalFormatted']);
+        self::assertSame(800, $payload['cart']['shippingAmountCents']);
+        self::assertSame('8,00 €', $payload['cart']['shippingAmountFormatted']);
+        self::assertSame('10,62 €', $payload['cart']['totalFormatted']);
         self::assertSame('ULTRA ICE TEA - Vegeta - Dragon Ball Z - Ice Tea Pêche 33cL', $payload['cart']['items'][0]['name']);
         self::assertNotNull($client->getCookieJar()->get('ultrapop_cart'));
 
@@ -47,7 +50,8 @@ final class CartControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         $payload = $this->jsonResponse($client->getResponse()->getContent());
         self::assertSame(3, $payload['cart']['totalQuantity']);
-        self::assertSame('3,93 €', $payload['cart']['totalFormatted']);
+        self::assertSame('3,93 €', $payload['cart']['subtotalFormatted']);
+        self::assertSame('11,93 €', $payload['cart']['totalFormatted']);
 
         $removeUrl = $payload['cart']['items'][0]['removeUrl'];
 
@@ -64,6 +68,8 @@ final class CartControllerTest extends WebTestCase
         $payload = $this->jsonResponse($client->getResponse()->getContent());
         self::assertTrue($payload['cart']['empty']);
         self::assertSame(0, $payload['cart']['totalQuantity']);
+        self::assertSame(0, $payload['cart']['shippingAmountCents']);
+        self::assertSame('0,00 €', $payload['cart']['totalFormatted']);
     }
 
     /**

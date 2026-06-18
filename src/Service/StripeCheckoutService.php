@@ -7,12 +7,14 @@ use App\Entity\OrderItem;
 use Stripe\Checkout\Session;
 use Stripe\StripeClient;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class StripeCheckoutService
 {
     public function __construct(
         private StripeConfigProvider $stripeConfig,
         private UrlGeneratorInterface $urlGenerator,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -23,13 +25,19 @@ final readonly class StripeCheckoutService
 
     public function createSession(Order $order): Session
     {
+        $lineItems = array_map(
+            fn (OrderItem $item): array => $this->lineItem($item),
+            $order->getItems()->toArray(),
+        );
+
+        if ($order->getShippingAmountTaxIncludedCents() > 0) {
+            $lineItems[] = $this->shippingLineItem($order);
+        }
+
         $payload = [
             'mode' => 'payment',
             'payment_method_types' => ['card'],
-            'line_items' => array_map(
-                fn (OrderItem $item): array => $this->lineItem($item),
-                $order->getItems()->toArray(),
-            ),
+            'line_items' => $lineItems,
             'client_reference_id' => $order->getOrderNumber(),
             'metadata' => [
                 'order_id' => (string) $order->getId(),
@@ -80,6 +88,23 @@ final readonly class StripeCheckoutService
                 'unit_amount' => $item->getUnitPriceTaxIncludedCents(),
             ],
             'quantity' => $item->getQuantity(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function shippingLineItem(Order $order): array
+    {
+        return [
+            'price_data' => [
+                'currency' => strtolower($order->getCurrency()),
+                'product_data' => [
+                    'name' => $this->translator->trans('checkout.shipping_line'),
+                ],
+                'unit_amount' => $order->getShippingAmountTaxIncludedCents(),
+            ],
+            'quantity' => 1,
         ];
     }
 
