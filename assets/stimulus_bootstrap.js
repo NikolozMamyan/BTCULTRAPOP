@@ -8,6 +8,7 @@ import LanguageController from './controllers/language_controller.js';
 import LicensesCarouselController from './controllers/licenses_carousel_controller.js';
 import ProductDetailController from './controllers/product_detail_controller.js';
 import ProfileAuthController from './controllers/profile_auth_controller.js';
+import SearchController from './controllers/search_controller.js';
 import ShopFiltersController from './controllers/shop_filters_controller.js';
 
 const app = startStimulusApp();
@@ -20,4 +21,5 @@ app.register('language', LanguageController);
 app.register('licenses-carousel', LicensesCarouselController);
 app.register('product-detail', ProductDetailController);
 app.register('profile-auth', ProfileAuthController);
+app.register('search', SearchController);
 app.register('shop-filters', ShopFiltersController);

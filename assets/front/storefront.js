@@ -112,7 +112,10 @@ function initializeStorefront() {
         }
 
         modal.classList.remove('hidden');
-        requestAnimationFrame(() => modal.classList.add('open'));
+        requestAnimationFrame(() => {
+            modal.classList.add('open');
+            document.getElementById('search-input')?.focus();
+        });
         setBodyLocked(true);
     };
 

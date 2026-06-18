@@ -101,6 +101,43 @@ final class ProductRepository extends ServiceEntityRepository
     /**
      * @return list<Product>
      */
+    public function searchForStorefront(string $query, int $limit = 8): array
+    {
+        $query = mb_strtolower(trim($query));
+
+        if (mb_strlen($query) < 2) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('product')
+            ->addSelect('category', 'license', 'images')
+            ->addSelect('CASE WHEN LOWER(product.name) LIKE :startsWith THEN 0 ELSE 1 END AS HIDDEN relevance')
+            ->innerJoin('product.category', 'category')
+            ->innerJoin('product.license', 'license')
+            ->leftJoin('product.images', 'images')
+            ->andWhere('product.active = true')
+            ->andWhere('category.active = true')
+            ->andWhere('license.active = true')
+            ->andWhere(
+                'LOWER(product.name) LIKE :query
+                OR LOWER(product.reference) LIKE :query
+                OR LOWER(COALESCE(product.ean, \'\')) LIKE :query
+                OR LOWER(category.name) LIKE :query
+                OR LOWER(license.name) LIKE :query',
+            )
+            ->setParameter('query', '%' . $query . '%')
+            ->orderBy('relevance', 'ASC')
+            ->addOrderBy('product.quantity', 'DESC')
+            ->addOrderBy('product.name', 'ASC')
+            ->setParameter('startsWith', $query . '%')
+            ->setMaxResults(max(1, min(12, $limit)))
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return list<Product>
+     */
     public function findRelatedForStorefront(Product $product, int $limit = 3): array
     {
         return $this->createQueryBuilder('related')
