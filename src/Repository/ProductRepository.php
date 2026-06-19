@@ -96,6 +96,18 @@ final class ProductRepository extends ServiceEntityRepository
     /**
      * @return list<Product>
      */
+    public function findForStockAdmin(): array
+    {
+        return $this->createQueryBuilder('product')
+            ->orderBy('product.reference', 'ASC')
+            ->addOrderBy('product.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return list<Product>
+     */
     public function findForStorefront(): array
     {
         return $this->createQueryBuilder('product')

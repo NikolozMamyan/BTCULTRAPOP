@@ -64,6 +64,10 @@
                     <span>{{ 'admin.nav.customers'|trans }}</span>
                     <em>{{ 'admin.nav.soon'|trans }}</em>
                 </span>
+                <a href="{{ path('app_admin_stock_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_stock' ? 'is-active' : '' }}">
+                    <i class="fa-solid fa-warehouse"></i>
+                    <span>{{ 'admin.nav.stock'|trans }}</span>
+                </a>
             </nav>
 
             <div class="admin-sidebar__footer">

@@ -1,0 +1,81 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.stock.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section
+        class="admin-stock-page"
+        data-controller="admin-stock"
+        data-admin-stock-token-value="{{ csrf_token('admin_stock_update') }}"
+        data-admin-stock-saving-text-value="{{ 'admin.stock.status.saving'|trans }}"
+        data-admin-stock-saved-text-value="{{ 'admin.stock.status.saved'|trans }}"
+        data-admin-stock-error-text-value="{{ 'admin.stock.status.error'|trans }}"
+    >
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.stock.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.stock.index.title'|trans }}</h1>
+                <p>{{ 'admin.stock.index.subtitle'|trans }}</p>
+            </div>
+            <div class="admin-heading-actions">
+                <button
+                    type="button"
+                    class="admin-action-button admin-stock-sync"
+                    title="{{ 'admin.stock.sync.coming_soon'|trans }}"
+                >
+                    <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+                    {{ 'admin.stock.sync.label'|trans }}
+                </button>
+            </div>
+        </div>
+
+        {% if products %}
+            <div class="admin-panel admin-stock-table-panel">
+                <div class="admin-stock-table-scroll">
+                    <table class="admin-stock-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">{{ 'admin.stock.table.reference'|trans }}</th>
+                                <th scope="col">{{ 'admin.stock.table.name'|trans }}</th>
+                                <th scope="col">{{ 'admin.stock.table.quantity'|trans }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                                <tr
+                                    data-stock-product-id="{{ product.id }}"
+                                    data-stock-update-url="{{ path('app_admin_stock_product_update', {id: product.id}) }}"
+                                >
+                                    <td><span class="admin-stock-reference">{{ product.reference }}</span></td>
+                                    <td><strong>{{ product.name }}</strong></td>
+                                    <td>
+                                        <div class="admin-stock-quantity">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                step="1"
+                                                inputmode="numeric"
+                                                value="{{ product.quantity }}"
+                                                data-saved-value="{{ product.quantity }}"
+                                                data-action="blur->admin-stock#save keydown->admin-stock#submitOnEnter"
+                                                aria-label="{{ 'admin.stock.field.quantity_for'|trans({'%product%': product.name}) }}"
+                                            >
+                                            <span data-stock-status aria-live="polite"></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <article class="admin-panel admin-empty-state">
+                <div>
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <p>{{ 'admin.stock.index.empty_products'|trans }}</p>
+                </div>
+            </article>
+        {% endif %}
+    </section>
+{% endblock %}
