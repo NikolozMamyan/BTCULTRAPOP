@@ -93,6 +93,7 @@ final class ProductTest extends TestCase
         $product = (new Product())
             ->setPriceTaxExcluded('49.916667')
             ->setPriceTaxIncluded('59.900000')
+            ->setTaxRate('20')
             ->setQuantity(12)
             ->setStatus(ProductStatus::PROMO)
             ->setWidth('10.500')
@@ -102,6 +103,7 @@ final class ProductTest extends TestCase
 
         self::assertSame('49.916667', $product->getPriceTaxExcluded());
         self::assertSame('59.900000', $product->getPriceTaxIncluded());
+        self::assertSame('20.00', $product->getTaxRate());
         self::assertSame(12, $product->getQuantity());
         self::assertSame(ProductStatus::PROMO, $product->getStatus());
         self::assertTrue($product->isOnSale());

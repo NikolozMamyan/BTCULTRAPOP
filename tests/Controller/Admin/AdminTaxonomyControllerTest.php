@@ -69,6 +69,8 @@ final class AdminTaxonomyControllerTest extends WebTestCase
             $client->request('GET', '/admin/categories');
             self::assertResponseIsSuccessful();
             self::assertSelectorTextContains('h1', 'Catégories');
+            self::assertSelectorExists('details.admin-sidebar__group[open]');
+            self::assertSelectorExists('.admin-sidebar__sublink.is-active[href="/admin/categories"]');
             self::assertSelectorTextContains('.admin-category-grid', $categoryName);
             self::assertSelectorExists(sprintf('button[data-admin-products-url-param="/admin/categories/%d/toggle"]', $category->getId()));
             self::assertSelectorExists('a[href="/admin/categories/new"]');
@@ -83,6 +85,8 @@ final class AdminTaxonomyControllerTest extends WebTestCase
             $client->request('GET', '/admin/licenses');
             self::assertResponseIsSuccessful();
             self::assertSelectorTextContains('h1', 'Licences');
+            self::assertSelectorExists('details.admin-sidebar__group[open]');
+            self::assertSelectorExists('.admin-sidebar__sublink.is-active[href="/admin/licenses"]');
             self::assertSelectorTextContains('.admin-category-grid', $licenseName);
             self::assertSelectorExists(sprintf('button[data-admin-products-url-param="/admin/licenses/%d/toggle"]', $license->getId()));
             self::assertSelectorExists('a[href="/admin/licenses/new"]');

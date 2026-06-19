@@ -47,6 +47,7 @@ final class AdminProductControllerTest extends WebTestCase
             ->setLicense($license)
             ->setPriceTaxExcluded('10.000000')
             ->setPriceTaxIncluded('12.000000')
+            ->setTaxRate('20')
             ->setQuantity(7);
         $product->addImage(
             (new ProductImage())
@@ -89,6 +90,8 @@ final class AdminProductControllerTest extends WebTestCase
             self::assertSelectorExists('input[name="product[name]"]');
             self::assertSelectorExists('input[name="product[active]"]');
             self::assertSelectorExists('select[name="product[category]"]');
+            self::assertSelectorExists('input[name="product[taxRate]"][value="20.00"]');
+            self::assertSelectorExists('input[name="product[priceTaxIncluded]"][disabled]');
             self::assertSelectorExists('input[name="product[coverImageUrl]"]');
             self::assertSelectorExists('form.admin-danger-zone');
 

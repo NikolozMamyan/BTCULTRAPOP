@@ -105,9 +105,17 @@ final class ProductType extends AbstractType
             ])
             ->add('priceTaxIncluded', TextType::class, [
                 'label' => 'admin.product.form.price_ttc',
+                'disabled' => true,
                 'attr' => [
                     'inputmode' => 'decimal',
                     'placeholder' => '0.00',
+                ],
+            ])
+            ->add('taxRate', TextType::class, [
+                'label' => 'admin.product.form.tax_rate',
+                'attr' => [
+                    'inputmode' => 'decimal',
+                    'placeholder' => '20.00',
                 ],
             ])
             ->add('quantity', IntegerType::class, [
@@ -154,7 +162,7 @@ final class ProductType extends AbstractType
                 return;
             }
 
-            foreach (['priceTaxExcluded', 'priceTaxIncluded'] as $field) {
+            foreach (['priceTaxExcluded', 'taxRate'] as $field) {
                 $value = trim((string) ($data[$field] ?? ''));
                 $data[$field] = '' === $value ? '0' : self::normalizeDecimal($value);
             }

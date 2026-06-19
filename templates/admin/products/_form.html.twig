@@ -95,6 +95,11 @@
                     {{ form_errors(form.priceTaxExcluded) }}
                 </div>
                 <div class="admin-field">
+                    {{ form_label(form.taxRate) }}
+                    {{ form_widget(form.taxRate) }}
+                    {{ form_errors(form.taxRate) }}
+                </div>
+                <div class="admin-field">
                     {{ form_label(form.priceTaxIncluded) }}
                     {{ form_widget(form.priceTaxIncluded) }}
                     {{ form_errors(form.priceTaxIncluded) }}

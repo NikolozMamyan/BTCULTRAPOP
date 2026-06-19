@@ -6,6 +6,10 @@
 {% block body %}
     {% set current_route = app.request.attributes.get('_route') %}
     {% set display_name = admin_user is defined ? admin_user.fullName : app.user.userIdentifier|default('Admin') %}
+    {% set catalog_menu_active = current_route starts with 'app_admin_products'
+        or current_route starts with 'app_admin_categories'
+        or current_route starts with 'app_admin_licenses'
+        or current_route starts with 'app_admin_prices' %}
 
     <div class="admin-shell">
         <aside class="admin-sidebar">
@@ -22,18 +26,31 @@
                     <i class="fa-solid fa-chart-pie"></i>
                     <span>{{ 'admin.dashboard.title'|trans }}</span>
                 </a>
-                <a href="{{ path('app_admin_products_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_products' ? 'is-active' : '' }}">
-                    <i class="fa-solid fa-boxes-stacked"></i>
-                    <span>{{ 'admin.nav.products'|trans }}</span>
-                </a>
-                <a href="{{ path('app_admin_categories_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_categories' ? 'is-active' : '' }}">
-                    <i class="fa-solid fa-layer-group"></i>
-                    <span>{{ 'admin.nav.categories'|trans }}</span>
-                </a>
-                <a href="{{ path('app_admin_licenses_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_licenses' ? 'is-active' : '' }}">
-                    <i class="fa-solid fa-clapperboard"></i>
-                    <span>{{ 'admin.nav.licenses'|trans }}</span>
-                </a>
+                <details class="admin-sidebar__group" {{ catalog_menu_active ? 'open' : '' }}>
+                    <summary class="admin-sidebar__link admin-sidebar__group-toggle {{ catalog_menu_active ? 'is-active' : '' }}">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                        <span>{{ 'admin.nav.catalog'|trans }}</span>
+                        <i class="admin-sidebar__group-chevron fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </summary>
+                    <div class="admin-sidebar__submenu">
+                        <a href="{{ path('app_admin_products_index') }}" class="admin-sidebar__sublink {{ current_route starts with 'app_admin_products' ? 'is-active' : '' }}">
+                            <i class="fa-solid fa-box"></i>
+                            <span>{{ 'admin.nav.products'|trans }}</span>
+                        </a>
+                        <a href="{{ path('app_admin_categories_index') }}" class="admin-sidebar__sublink {{ current_route starts with 'app_admin_categories' ? 'is-active' : '' }}">
+                            <i class="fa-solid fa-layer-group"></i>
+                            <span>{{ 'admin.nav.categories'|trans }}</span>
+                        </a>
+                        <a href="{{ path('app_admin_licenses_index') }}" class="admin-sidebar__sublink {{ current_route starts with 'app_admin_licenses' ? 'is-active' : '' }}">
+                            <i class="fa-solid fa-clapperboard"></i>
+                            <span>{{ 'admin.nav.licenses'|trans }}</span>
+                        </a>
+                        <a href="{{ path('app_admin_prices_index') }}" class="admin-sidebar__sublink {{ current_route starts with 'app_admin_prices' ? 'is-active' : '' }}">
+                            <i class="fa-solid fa-tags"></i>
+                            <span>{{ 'admin.nav.prices'|trans }}</span>
+                        </a>
+                    </div>
+                </details>
                 <a href="{{ path('app_admin_payments_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_payments' ? 'is-active' : '' }}">
                     <i class="fa-solid fa-credit-card"></i>
                     <span>{{ 'admin.nav.payments'|trans }}</span>

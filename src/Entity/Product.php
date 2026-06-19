@@ -67,6 +67,11 @@ class Product
     #[Assert\PositiveOrZero]
     private string $priceTaxIncluded = '0.000000';
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2, options: ['default' => '0.00'])]
+    #[Assert\PositiveOrZero]
+    #[Assert\LessThanOrEqual(100)]
+    private string $taxRate = '0.00';
+
     #[ORM\Column(options: ['default' => 0])]
     #[Assert\PositiveOrZero]
     private int $quantity = 0;
@@ -252,6 +257,18 @@ class Product
     public function setPriceTaxIncluded(string $priceTaxIncluded): self
     {
         $this->priceTaxIncluded = $priceTaxIncluded;
+
+        return $this;
+    }
+
+    public function getTaxRate(): string
+    {
+        return $this->taxRate;
+    }
+
+    public function setTaxRate(string $taxRate): self
+    {
+        $this->taxRate = number_format(max(0, (float) str_replace(',', '.', $taxRate)), 2, '.', '');
 
         return $this;
     }

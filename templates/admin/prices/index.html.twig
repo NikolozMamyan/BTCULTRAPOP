@@ -1,0 +1,176 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.price.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section
+        class="admin-prices"
+        data-controller="admin-prices"
+        data-admin-prices-token-value="{{ csrf_token('admin_prices_update') }}"
+        data-admin-prices-saving-text-value="{{ 'admin.price.status.saving'|trans }}"
+        data-admin-prices-saved-text-value="{{ 'admin.price.status.saved'|trans }}"
+        data-admin-prices-error-text-value="{{ 'admin.price.status.error'|trans }}"
+        data-admin-prices-category-confirm-value="{{ 'admin.price.category.confirm'|trans }}"
+    >
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.price.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.price.index.title'|trans }}</h1>
+                <p>{{ 'admin.price.index.subtitle'|trans }}</p>
+            </div>
+        </div>
+
+        <div class="admin-price-switcher" role="tablist" aria-label="{{ 'admin.price.mode.label'|trans }}">
+            <button
+                type="button"
+                data-admin-prices-target="tab"
+                data-admin-prices-mode-param="product"
+                data-action="admin-prices#switchMode"
+                role="tab"
+            >
+                <i class="fa-solid fa-box"></i>
+                {{ 'admin.price.mode.products'|trans }}
+            </button>
+            <button
+                type="button"
+                data-admin-prices-target="tab"
+                data-admin-prices-mode-param="category"
+                data-action="admin-prices#switchMode"
+                role="tab"
+            >
+                <i class="fa-solid fa-layer-group"></i>
+                {{ 'admin.price.mode.categories'|trans }}
+            </button>
+        </div>
+
+        <div class="admin-price-panel" data-admin-prices-target="panel" data-mode="product">
+            {% if products %}
+                <div class="admin-price-products">
+                    {% for product in products %}
+                        <article
+                            class="admin-panel admin-price-product"
+                            data-price-product-id="{{ product.id }}"
+                            data-price-update-url="{{ path('app_admin_prices_product_update', {id: product.id}) }}"
+                        >
+                            <div class="admin-price-product__identity">
+                                <span>{{ product.reference }}</span>
+                                <strong>{{ product.name }}</strong>
+                                <small>{{ product.category }}</small>
+                            </div>
+                            <label class="admin-price-field">
+                                <span>{{ 'admin.price.field.price_ht'|trans }}</span>
+                                <span class="admin-price-input">
+                                    <input
+                                        type="text"
+                                        inputmode="decimal"
+                                        value="{{ product.priceTaxExcluded }}"
+                                        data-price-field="priceTaxExcluded"
+                                        data-saved-value="{{ product.priceTaxExcluded }}"
+                                        data-action="blur->admin-prices#saveProduct keydown->admin-prices#submitOnEnter"
+                                        aria-label="{{ 'admin.price.field.price_ht_for'|trans({'%product%': product.name}) }}"
+                                    >
+                                    <em>€</em>
+                                </span>
+                            </label>
+                            <label class="admin-price-field">
+                                <span>{{ 'admin.price.field.tax_rate'|trans }}</span>
+                                <span class="admin-price-input">
+                                    <input
+                                        type="text"
+                                        inputmode="decimal"
+                                        value="{{ product.taxRate }}"
+                                        data-price-field="taxRate"
+                                        data-saved-value="{{ product.taxRate }}"
+                                        data-action="blur->admin-prices#saveProduct keydown->admin-prices#submitOnEnter"
+                                        aria-label="{{ 'admin.price.field.tax_rate_for'|trans({'%product%': product.name}) }}"
+                                    >
+                                    <em>%</em>
+                                </span>
+                            </label>
+                            <div class="admin-price-product__total">
+                                <span>{{ 'admin.price.field.price_ttc'|trans }}</span>
+                                <strong data-price-tax-included>{{ product.priceTaxIncluded }} €</strong>
+                            </div>
+                            <div class="admin-price-status" data-price-status aria-live="polite"></div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <article class="admin-panel admin-empty-state">
+                    <i class="fa-solid fa-tags"></i>
+                    <p>{{ 'admin.price.index.empty_products'|trans }}</p>
+                </article>
+            {% endif %}
+        </div>
+
+        <div class="admin-price-panel" data-admin-prices-target="panel" data-mode="category" hidden>
+            <div class="admin-price-categories">
+                {% for category in categories %}
+                    <details
+                        class="admin-panel admin-price-category"
+                        data-price-category-id="{{ category.id }}"
+                        data-price-category-name="{{ category.name }}"
+                        data-price-product-count="{{ category.products|length }}"
+                        data-price-update-url="{{ path('app_admin_prices_category_update', {id: category.id}) }}"
+                    >
+                        <summary>
+                            <span class="admin-price-category__icon"><i class="fa-solid fa-layer-group"></i></span>
+                            <span>
+                                <strong>{{ category.name }}</strong>
+                                <small>{{ 'admin.price.category.product_count'|trans({'%count%': category.products|length}) }}</small>
+                            </span>
+                            <i class="admin-price-category__chevron fa-solid fa-chevron-down"></i>
+                        </summary>
+
+                        <div class="admin-price-category__body">
+                            <div class="admin-price-category__editor">
+                                <label class="admin-price-field">
+                                    <span>{{ 'admin.price.field.price_ht'|trans }}</span>
+                                    <span class="admin-price-input">
+                                        <input type="text" inputmode="decimal" value="" placeholder="0.00" data-price-field="priceTaxExcluded">
+                                        <em>€</em>
+                                    </span>
+                                </label>
+                                <label class="admin-price-field">
+                                    <span>{{ 'admin.price.field.tax_rate'|trans }}</span>
+                                    <span class="admin-price-input">
+                                        <input type="text" inputmode="decimal" value="" placeholder="20.00" data-price-field="taxRate">
+                                        <em>%</em>
+                                    </span>
+                                </label>
+                                <button
+                                    type="button"
+                                    class="admin-action-button"
+                                    data-action="admin-prices#saveCategory"
+                                    {{ category.products is empty ? 'disabled' : '' }}
+                                >
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                    {{ 'admin.price.category.apply'|trans }}
+                                </button>
+                                <div class="admin-price-status" data-price-status aria-live="polite"></div>
+                            </div>
+
+                            {% if category.products %}
+                                <div class="admin-price-category__products">
+                                    {% for product in category.products %}
+                                        <div class="admin-price-category__product" data-price-product-id="{{ product.id }}">
+                                            <span>{{ product.reference }}</span>
+                                            <strong>{{ product.name }}</strong>
+                                            <small>
+                                                <b data-price-tax-excluded>{{ product.priceTaxExcluded }} € HT</b>
+                                                <em data-price-tax-rate>{{ product.taxRate }} %</em>
+                                                <b data-price-tax-included>{{ product.priceTaxIncluded }} €</b>
+                                            </small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="admin-price-category__empty">{{ 'admin.price.category.empty'|trans }}</p>
+                            {% endif %}
+                        </div>
+                    </details>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

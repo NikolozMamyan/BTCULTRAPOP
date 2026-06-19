@@ -10,11 +10,19 @@ final class AdminProductManager
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly ProductPriceCalculator $priceCalculator,
     ) {
     }
 
     public function save(Product $product, ?string $coverImageUrl): void
     {
+        $product
+            ->setPriceTaxExcluded($this->priceCalculator->normalizeTaxExcluded($product->getPriceTaxExcluded()))
+            ->setTaxRate($this->priceCalculator->normalizeTaxRate($product->getTaxRate()))
+            ->setPriceTaxIncluded($this->priceCalculator->taxIncluded(
+                $product->getPriceTaxExcluded(),
+                $product->getTaxRate(),
+            ));
         $this->syncCoverImage($product, $coverImageUrl);
 
         $this->entityManager->persist($product);

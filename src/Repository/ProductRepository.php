@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Entity\UserFavorite;
@@ -62,6 +63,34 @@ final class ProductRepository extends ServiceEntityRepository
             ->setParameter('ean', trim($ean))
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    /**
+     * @return list<Product>
+     */
+    public function findForPriceAdmin(): array
+    {
+        return $this->createQueryBuilder('product')
+            ->addSelect('category', 'license')
+            ->innerJoin('product.category', 'category')
+            ->innerJoin('product.license', 'license')
+            ->orderBy('category.name', 'ASC')
+            ->addOrderBy('product.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return list<Product>
+     */
+    public function findByCategoryForPriceAdmin(Category $category): array
+    {
+        return $this->createQueryBuilder('product')
+            ->andWhere('product.category = :category')
+            ->setParameter('category', $category)
+            ->orderBy('product.name', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     /**

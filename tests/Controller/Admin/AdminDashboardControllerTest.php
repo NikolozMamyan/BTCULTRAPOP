@@ -49,7 +49,20 @@ final class AdminDashboardControllerTest extends WebTestCase
             self::assertSelectorTextContains('h1', 'Dashboard');
             self::assertSelectorExists('.admin-sidebar');
             self::assertSelectorExists('.admin-sidebar__link.is-active[href="/admin/dashboard"]');
+            self::assertSelectorExists('details.admin-sidebar__group:not([open])');
+            self::assertSelectorTextSame('.admin-sidebar__group-toggle span', 'Catalogue');
+            self::assertSelectorExists('.admin-sidebar__sublink[href="/admin/products"]');
+            self::assertSelectorExists('.admin-sidebar__sublink[href="/admin/categories"]');
+            self::assertSelectorExists('.admin-sidebar__sublink[href="/admin/licenses"]');
             self::assertSelectorTextContains('.admin-topbar', 'Admin ULTRAPOP');
+
+            $client->request('GET', '/admin/prices');
+            self::assertResponseIsSuccessful();
+            self::assertSelectorTextSame('h1', 'Prix');
+            self::assertSelectorExists('details.admin-sidebar__group[open]');
+            self::assertSelectorExists('.admin-sidebar__sublink.is-active[href="/admin/prices"]');
+            self::assertSelectorCount(2, '.admin-price-switcher button');
+            self::assertSelectorExists('[data-controller="admin-prices"]');
         } finally {
             $connection = static::getContainer()->get(Connection::class);
             \assert($connection instanceof Connection);
