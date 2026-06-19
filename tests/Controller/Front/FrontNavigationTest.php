@@ -153,7 +153,7 @@ final class FrontNavigationTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'ULTRA ICE TEA - Vegeta');
         self::assertSelectorTextContains('.product-detail__price', '1,31 €');
-        self::assertSelectorExists('.product-detail__visual img[src="https://ultrapop.com/img/p/1/6/4/164-large_default.jpg"]');
+        self::assertSelectorExists('.product-detail__visual img[src*="164-large_default"]');
         self::assertSelectorExists('[data-controller="product-detail"]');
         self::assertSelectorExists('.product-detail__primary.cart-add-button[data-action="product-detail#addToCart"]');
         self::assertSelectorExists('.product-detail__secondary.favorite-button[data-action="favorites#toggle"]');

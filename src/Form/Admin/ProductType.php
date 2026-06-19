@@ -151,7 +151,7 @@ final class ProductType extends AbstractType
                 'data' => $options['cover_image_url'],
                 'attr' => [
                     'autocomplete' => 'off',
-                    'placeholder' => 'https://ultrapop.com/img/p/...',
+                    'placeholder' => 'img/products/nom-du-fichier.jpg',
                 ],
             ]);
 

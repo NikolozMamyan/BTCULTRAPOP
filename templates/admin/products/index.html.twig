@@ -82,7 +82,7 @@
                             <a href="{{ path('app_admin_products_edit', {id: product.id}) }}" class="admin-product-cell">
                                 <span class="admin-product-thumb">
                                     {% if cover %}
-                                        <img src="{{ cover.path }}" alt="{{ cover.alt ?: product.name }}">
+                                        <img src="{{ asset(cover.path) }}" alt="{{ cover.alt ?: product.name }}">
                                     {% else %}
                                         <i class="fa-solid fa-image"></i>
                                     {% endif %}

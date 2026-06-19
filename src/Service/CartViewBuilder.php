@@ -13,6 +13,7 @@ final readonly class CartViewBuilder
         private TranslatorInterface $translator,
         private UrlGeneratorInterface $urlGenerator,
         private ShippingRateCalculator $shippingRateCalculator,
+        private AssetUrlResolver $assetUrlResolver,
     ) {
     }
 
@@ -88,7 +89,7 @@ final readonly class CartViewBuilder
             'id' => $item->getId(),
             'productId' => $productId,
             'name' => $product?->getName() ?? '',
-            'image' => $product?->getCoverImage()?->getPath(),
+            'image' => $this->assetUrlResolver->resolve($product?->getCoverImage()?->getPath()),
             'quantity' => $item->getQuantity(),
             'unitPriceFormatted' => $this->formatCents($item->getUnitPriceTaxIncludedCents()),
             'totalFormatted' => $this->formatCents($item->getTotalTaxIncludedCents()),

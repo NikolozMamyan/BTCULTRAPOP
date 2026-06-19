@@ -138,7 +138,7 @@
             {% set cover = product.coverImage %}
             <div class="admin-product-preview__image">
                 {% if cover %}
-                    <img src="{{ cover.path }}" alt="{{ cover.alt ?: product.name }}">
+                    <img src="{{ asset(cover.path) }}" alt="{{ cover.alt ?: product.name }}">
                 {% else %}
                     <i class="fa-solid fa-image"></i>
                 {% endif %}

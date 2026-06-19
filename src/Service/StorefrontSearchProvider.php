@@ -8,11 +8,12 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final readonly class StorefrontSearchProvider
 {
-    private const FALLBACK_IMAGE = 'https://ultrapop.com/img/p/fr-default-large_default.jpg';
+    private const FALLBACK_IMAGE = 'img/products/fr-default-large_default.jpg';
 
     public function __construct(
         private ProductRepository $products,
         private UrlGeneratorInterface $urlGenerator,
+        private AssetUrlResolver $assetUrlResolver,
     ) {
     }
 
@@ -41,7 +42,7 @@ final readonly class StorefrontSearchProvider
             'reference' => $product->getReference(),
             'category' => $product->getCategory()?->getName() ?? '',
             'license' => $product->getLicense()?->getName() ?? '',
-            'image' => $product->getCoverImage()?->getPath() ?: self::FALLBACK_IMAGE,
+            'image' => $this->assetUrlResolver->resolve($product->getCoverImage()?->getPath() ?: self::FALLBACK_IMAGE),
             'price' => $price,
             'priceFormatted' => number_format($price, 2, ',', ' ') . ' €',
             'inStock' => $quantity > 0,

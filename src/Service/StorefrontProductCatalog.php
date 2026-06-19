@@ -10,11 +10,12 @@ use App\Repository\UserFavoriteRepository;
 
 final readonly class StorefrontProductCatalog
 {
-    private const FALLBACK_IMAGE = 'https://ultrapop.com/img/p/fr-default-large_default.jpg';
+    private const FALLBACK_IMAGE = 'img/products/fr-default-large_default.jpg';
 
     public function __construct(
         private ProductRepository $products,
         private UserFavoriteRepository $favorites,
+        private AssetUrlResolver $assetUrlResolver,
     ) {
     }
 
@@ -151,7 +152,7 @@ final readonly class StorefrontProductCatalog
             'license' => $product->getLicense()?->getName() ?? '',
             'price' => (float) $product->getPriceTaxIncluded(),
             'old' => null,
-            'img' => $cover?->getPath() ?: self::FALLBACK_IMAGE,
+            'img' => $this->assetUrlResolver->resolve($cover?->getPath() ?: self::FALLBACK_IMAGE),
             'quantity' => $quantity,
             'in_stock' => $quantity > 0,
             'rating' => null,
