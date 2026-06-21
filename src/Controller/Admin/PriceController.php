@@ -32,7 +32,7 @@ final class PriceController extends AbstractController
         ]);
     }
 
-    #[Route('/products/{id}', name: 'app_admin_prices_product_update', requirements: ['id' => '\d+'], methods: ['PATCH'])]
+    #[Route('/products/{id}', name: 'app_admin_prices_product_update', requirements: ['id' => '\d+'], methods: ['POST', 'PATCH'])]
     public function updateProduct(
         Product $product,
         Request $request,
@@ -66,7 +66,7 @@ final class PriceController extends AbstractController
         ]);
     }
 
-    #[Route('/categories/{id}', name: 'app_admin_prices_category_update', requirements: ['id' => '\d+'], methods: ['PATCH'])]
+    #[Route('/categories/{id}', name: 'app_admin_prices_category_update', requirements: ['id' => '\d+'], methods: ['POST', 'PATCH'])]
     public function updateCategory(
         Category $category,
         Request $request,

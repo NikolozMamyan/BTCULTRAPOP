@@ -72,7 +72,7 @@ final class AdminStockControllerTest extends WebTestCase
             $csrfToken = $crawler->filter('[data-controller="admin-stock"]')->attr('data-admin-stock-token-value');
 
             $client->request(
-                'PATCH',
+                'POST',
                 sprintf('/admin/stock/products/%d', $product->getId()),
                 server: [
                     'CONTENT_TYPE' => 'application/json',
@@ -93,7 +93,7 @@ final class AdminStockControllerTest extends WebTestCase
             ));
 
             $client->request(
-                'PATCH',
+                'POST',
                 sprintf('/admin/stock/products/%d', $product->getId()),
                 server: [
                     'CONTENT_TYPE' => 'application/json',

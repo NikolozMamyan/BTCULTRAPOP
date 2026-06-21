@@ -64,7 +64,7 @@ final class AdminPriceControllerTest extends WebTestCase
             $csrfToken = $crawler->filter('[data-controller="admin-prices"]')->attr('data-admin-prices-token-value');
 
             $client->request(
-                'PATCH',
+                'POST',
                 sprintf('/admin/prices/products/%d', $firstProduct->getId()),
                 server: [
                     'CONTENT_TYPE' => 'application/json',
@@ -82,7 +82,7 @@ final class AdminPriceControllerTest extends WebTestCase
             self::assertSame('18.60', $payload['product']['priceTaxIncluded']);
 
             $client->request(
-                'PATCH',
+                'POST',
                 sprintf('/admin/prices/categories/%d', $category->getId()),
                 server: [
                     'CONTENT_TYPE' => 'application/json',

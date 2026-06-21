@@ -31,7 +31,7 @@ final class StockController extends AbstractController
         ]);
     }
 
-    #[Route('/products/{id}', name: 'app_admin_stock_product_update', requirements: ['id' => '\d+'], methods: ['PATCH'])]
+    #[Route('/products/{id}', name: 'app_admin_stock_product_update', requirements: ['id' => '\d+'], methods: ['POST', 'PATCH'])]
     public function updateProduct(
         Product $product,
         Request $request,

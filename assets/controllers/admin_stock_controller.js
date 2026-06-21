@@ -32,7 +32,7 @@ export default class extends Controller {
 
         try {
             const response = await fetch(row.dataset.stockUpdateUrl, {
-                method: 'PATCH',
+                method: 'POST',
                 headers: {
                     Accept: 'application/json',
                     'Content-Type': 'application/json',

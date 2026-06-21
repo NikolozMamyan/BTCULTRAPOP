@@ -100,7 +100,7 @@ export default class extends Controller {
 
         try {
             const response = await fetch(url, {
-                method: 'PATCH',
+                method: 'POST',
                 headers: {
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
