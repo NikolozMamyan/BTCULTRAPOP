@@ -129,6 +129,11 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('.shop-category-group[open]');
         self::assertSelectorExists('.shop-category-group__count');
         self::assertSelectorExists('.shop-category-button--child .shop-category-button__count');
+        self::assertSelectorExists('.shop-category-button--child[title="Chipsan - Chips de Pommes de terre"]');
+        self::assertSelectorExists('.shop-category-img-container--root img[src="https://ultrapop.com/img/cms/Germany.png"]');
+        self::assertSelectorExists('.shop-category-img-container img[src="https://ultrapop.com/144-product_main_2x/ultrapop-naruto-chibi-naruto-tropical-33cl.jpg"]');
+        self::assertSelectorExists('.shop-category-img-container img[src="https://ultrapop.com/116-default_md/komesan-luffy-one-piece-chips-de-riz-barbecue-60g.jpg"]');
+        self::assertSelectorExists('.shop-category-img-container img[src="https://ultrapop.com/60-default_md/yokosan-dragon-ball-super-cereales-miel-350g.jpg"]');
         self::assertSelectorExists('.shop-filter-trigger[aria-controls="shop-filters-modal"]');
         self::assertSelectorExists('.shop-filter-modal__footer');
         self::assertSelectorExists('.shop-sort select');

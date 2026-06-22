@@ -56,9 +56,18 @@
 
                 <section class="shop-filter-card shop-filter-card--categories">
                     <h2 class="shop-filter-title">
-                        <i class="{{ catalog_filter_icon }}"></i>
+                        <span class="shop-filter-title-icon-wrapper">
+                            <i class="{{ catalog_filter_field == 'category' ? 'fa-solid fa-compass' : catalog_filter_icon }}"></i>
+                        </span>
                         {{ catalog_filter_label|trans }}
                     </h2>
+
+                    {% set first_filter_group = catalog_filter_items|first %}
+                    {% set root_thumbnail = catalog_filter_field == 'category'
+                        ? 'https://ultrapop.com/img/cms/Germany.png'
+                        : first_filter_group.image|default(catalog_products|first.img|default('')) %}
+                    {% set root_thumbnail_fallback = first_filter_group.fallbackImage|default(catalog_products|first.img|default('')) %}
+
                     <div class="shop-category-list">
                         <button
                             type="button"
@@ -68,20 +77,36 @@
                             data-action="shop-filters#selectCategory"
                         >
                             <span class="shop-category-button__label">
-                                <i class="fa-solid fa-border-all"></i>
+                                {% if catalog_filter_field == 'category' %}
+                                    <span class="shop-category-img-container shop-category-img-container--root">
+                                        <img
+                                            src="{{ root_thumbnail }}"
+                                            data-fallback-src="{{ root_thumbnail_fallback }}"
+                                            data-action="error->shop-filters#useImageFallback"
+                                            alt=""
+                                            width="44"
+                                            height="44"
+                                            loading="lazy"
+                                        >
+                                    </span>
+                                {% else %}
+                                    <span class="shop-category-button__icon">
+                                        <i class="fa-solid fa-border-all"></i>
+                                    </span>
+                                {% endif %}
                                 <strong>{{ 'shop.filters.all'|trans }}</strong>
                             </span>
                             <span class="shop-category-button__count">{{ catalog_products|length }}</span>
                         </button>
                         {% if catalog_filter_field == 'category' %}
                             {% for filter_group in catalog_filter_items %}
-                                {% set group_icon = filter_group.name == 'Boissons'
-                                    ? 'fa-solid fa-bottle-water'
+                                {% set group_subtitle = filter_group.name == 'Boissons'
+                                    ? 'shop.filters.group.drinks'
                                     : (filter_group.name == 'Épicerie salée'
-                                        ? 'fa-solid fa-bowl-food'
+                                        ? 'shop.filters.group.savory'
                                         : (filter_group.name == 'Épicerie sucrée'
-                                            ? 'fa-solid fa-candy-cane'
-                                            : 'fa-solid fa-gift')) %}
+                                            ? 'shop.filters.group.sweet'
+                                            : 'shop.filters.group.boxes')) %}
                                 <details
                                     class="shop-category-group"
                                     data-shop-filters-target="categoryGroup"
@@ -89,12 +114,20 @@
                                     {{ loop.first ? 'open' : '' }}
                                 >
                                     <summary>
-                                        <span class="shop-category-group__icon">
-                                            <i class="{{ group_icon }}"></i>
+                                        <span class="shop-category-img-container">
+                                            <img
+                                                src="{{ filter_group.image ?: root_thumbnail }}"
+                                                data-fallback-src="{{ filter_group.fallbackImage ?: root_thumbnail_fallback }}"
+                                                data-action="error->shop-filters#useImageFallback"
+                                                alt=""
+                                                width="44"
+                                                height="44"
+                                                loading="lazy"
+                                            >
                                         </span>
                                         <span class="shop-category-group__title">
                                             <strong>{{ filter_group.name }}</strong>
-                                            <small>{{ 'shop.filters.subcategories'|trans }}</small>
+                                            <small>{{ group_subtitle|trans }}</small>
                                         </span>
                                         <span class="shop-category-group__count">{{ filter_group.count }}</span>
                                         <i class="shop-category-group__chevron fa-solid fa-chevron-down"></i>
@@ -108,8 +141,8 @@
                                             data-action="shop-filters#selectCategory"
                                         >
                                             <span class="shop-category-button__label">
-                                                <i class="fa-solid fa-layer-group"></i>
-                                                <strong>{{ 'shop.filters.view_group'|trans }}</strong>
+                                                <i class="fa-solid fa-circle-notch"></i>
+                                                <strong>{{ 'shop.filters.view_group_short'|trans }}</strong>
                                             </span>
                                             <span class="shop-category-button__count">{{ filter_group.count }}</span>
                                         </button>
@@ -120,6 +153,7 @@
                                                 data-shop-filters-target="category"
                                                 data-shop-filters-category-param="{{ filter_item.name }}"
                                                 data-action="shop-filters#selectCategory"
+                                                title="{{ filter_item.name }}"
                                             >
                                                 <span class="shop-category-button__label">
                                                     <i class="fa-solid fa-angle-right"></i>

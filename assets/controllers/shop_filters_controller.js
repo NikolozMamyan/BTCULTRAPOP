@@ -75,6 +75,18 @@ export default class extends Controller {
         this.filter();
     }
 
+    useImageFallback(event) {
+        const image = event.currentTarget;
+        const fallback = image.dataset.fallbackSrc;
+
+        if (!fallback || image.dataset.fallbackApplied === 'true') {
+            return;
+        }
+
+        image.dataset.fallbackApplied = 'true';
+        image.src = fallback;
+    }
+
     toggleCategoryGroup(event) {
         const openedGroup = event.currentTarget;
 
