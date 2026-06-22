@@ -9,9 +9,9 @@
         <nav class="hidden lg:flex items-center gap-8 font-semibold text-sm text-text-dark" aria-label="{{ 'nav.primary_label'|trans }}">
             <a href="{{ path('app_front_home') }}" class="nav-link {{ current_route == 'app_front_home' ? 'active' : '' }}">{{ 'common.home'|trans }}</a>
             <a href="{{ path('app_front_boutique') }}" class="nav-link {{ current_route in ['app_front_boutique'] ? 'active' : '' }}">{{ 'common.shop'|trans }}</a>
-            <a href="{{ path('app_front_boutique', {filter: 'nouveautes'}) }}" class="nav-link">{{ 'common.new_products'|trans }}</a>
+            {# <a href="{{ path('app_front_boutique', {filter: 'nouveautes'}) }}" class="nav-link">{{ 'common.new_products'|trans }}</a> #}
             <a href="{{ path('app_front_licences') }}" class="nav-link {{ current_route == 'app_front_licences' ? 'active' : '' }}">{{ 'common.licenses'|trans }}</a>
-            <a href="{{ path('app_front_soldes') }}" class="nav-link text-primary {{ current_route == 'app_front_soldes' ? 'active' : '' }}">{{ 'common.sales'|trans }}</a>
+            {# <a href="{{ path('app_front_soldes') }}" class="nav-link text-primary {{ current_route == 'app_front_soldes' ? 'active' : '' }}">{{ 'common.sales'|trans }}</a> #}
         </nav>
 
         <div class="flex items-center gap-2 sm:gap-3">
