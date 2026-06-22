@@ -125,6 +125,10 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('[data-controller="shop-filters"]');
         self::assertSelectorExists('.shop-layout[data-shop-filters-filter-field-value="category"]');
         self::assertGreaterThan(1, $crawler->filter('.shop-category-button')->count());
+        self::assertSelectorCount(4, '.shop-category-group');
+        self::assertSelectorExists('.shop-category-group[open]');
+        self::assertSelectorExists('.shop-category-group__count');
+        self::assertSelectorExists('.shop-category-button--child .shop-category-button__count');
         self::assertSelectorExists('.shop-filter-trigger[aria-controls="shop-filters-modal"]');
         self::assertSelectorExists('.shop-filter-modal__footer');
         self::assertSelectorExists('.shop-sort select');

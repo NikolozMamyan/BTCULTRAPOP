@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Entity\UserFavorite;
 use App\Enum\ProductStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -71,10 +72,14 @@ final class ProductRepository extends ServiceEntityRepository
     public function findForPriceAdmin(): array
     {
         return $this->createQueryBuilder('product')
-            ->addSelect('category', 'license')
+            ->addSelect('category', 'categoryParent', 'categoryGrandparent', 'license')
             ->innerJoin('product.category', 'category')
+            ->leftJoin('category.parent', 'categoryParent')
+            ->leftJoin('categoryParent.parent', 'categoryGrandparent')
             ->innerJoin('product.license', 'license')
-            ->orderBy('category.name', 'ASC')
+            ->orderBy('categoryGrandparent.position', 'ASC')
+            ->addOrderBy('categoryParent.position', 'ASC')
+            ->addOrderBy('category.position', 'ASC')
             ->addOrderBy('product.name', 'ASC')
             ->getQuery()
             ->getResult();
@@ -86,7 +91,14 @@ final class ProductRepository extends ServiceEntityRepository
     public function findByCategoryForPriceAdmin(Category $category): array
     {
         return $this->createQueryBuilder('product')
-            ->andWhere('product.category = :category')
+            ->innerJoin('product.category', 'productCategory')
+            ->leftJoin('productCategory.parent', 'categoryParent')
+            ->leftJoin('categoryParent.parent', 'categoryGrandparent')
+            ->andWhere(
+                'productCategory = :category
+                OR categoryParent = :category
+                OR categoryGrandparent = :category',
+            )
             ->setParameter('category', $category)
             ->orderBy('product.name', 'ASC')
             ->getQuery()
@@ -110,14 +122,7 @@ final class ProductRepository extends ServiceEntityRepository
      */
     public function findForStorefront(): array
     {
-        return $this->createQueryBuilder('product')
-            ->addSelect('category', 'license', 'images')
-            ->innerJoin('product.category', 'category')
-            ->innerJoin('product.license', 'license')
-            ->leftJoin('product.images', 'images')
-            ->andWhere('product.active = true')
-            ->andWhere('category.active = true')
-            ->andWhere('license.active = true')
+        return $this->createStorefrontQueryBuilder('product')
             ->orderBy('product.quantity', 'DESC')
             ->addOrderBy('product.name', 'ASC')
             ->getQuery()
@@ -126,15 +131,8 @@ final class ProductRepository extends ServiceEntityRepository
 
     public function findOneForStorefront(int $id): ?Product
     {
-        return $this->createQueryBuilder('product')
-            ->addSelect('category', 'license', 'images')
-            ->innerJoin('product.category', 'category')
-            ->innerJoin('product.license', 'license')
-            ->leftJoin('product.images', 'images')
+        return $this->createStorefrontQueryBuilder('product')
             ->andWhere('product.id = :id')
-            ->andWhere('product.active = true')
-            ->andWhere('category.active = true')
-            ->andWhere('license.active = true')
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
@@ -151,16 +149,9 @@ final class ProductRepository extends ServiceEntityRepository
             return [];
         }
 
-        return $this->createQueryBuilder('product')
-            ->addSelect('category', 'license', 'images')
-            ->innerJoin('product.category', 'category')
-            ->innerJoin('product.license', 'license')
-            ->leftJoin('product.images', 'images')
+        return $this->createStorefrontQueryBuilder('product')
             ->andWhere('product.id IN (:ids)')
-            ->andWhere('product.active = true')
             ->andWhere('product.quantity > 0')
-            ->andWhere('category.active = true')
-            ->andWhere('license.active = true')
             ->setParameter('ids', $ids)
             ->getQuery()
             ->getResult();
@@ -173,8 +164,7 @@ final class ProductRepository extends ServiceEntityRepository
      */
     public function findHomeFallbackForStorefront(array $excludedIds = [], int $limit = 4): array
     {
-        $queryBuilder = $this->createQueryBuilder('product')
-            ->addSelect('category', 'license')
+        $queryBuilder = $this->createStorefrontQueryBuilder('product', false)
             ->addSelect(
                 'CASE
                     WHEN product.status = :bestseller THEN 0
@@ -183,12 +173,7 @@ final class ProductRepository extends ServiceEntityRepository
                     ELSE 3
                 END AS HIDDEN homePriority',
             )
-            ->innerJoin('product.category', 'category')
-            ->innerJoin('product.license', 'license')
-            ->andWhere('product.active = true')
             ->andWhere('product.quantity > 0')
-            ->andWhere('category.active = true')
-            ->andWhere('license.active = true')
             ->setParameter('bestseller', ProductStatus::BESTSELLER->value)
             ->setParameter('new', ProductStatus::NEW->value)
             ->setParameter('promo', ProductStatus::PROMO->value)
@@ -220,15 +205,8 @@ final class ProductRepository extends ServiceEntityRepository
             return [];
         }
 
-        return $this->createQueryBuilder('product')
-            ->addSelect('category', 'license', 'images')
+        return $this->createStorefrontQueryBuilder('product')
             ->addSelect('CASE WHEN LOWER(product.name) LIKE :startsWith THEN 0 ELSE 1 END AS HIDDEN relevance')
-            ->innerJoin('product.category', 'category')
-            ->innerJoin('product.license', 'license')
-            ->leftJoin('product.images', 'images')
-            ->andWhere('product.active = true')
-            ->andWhere('category.active = true')
-            ->andWhere('license.active = true')
             ->andWhere(
                 'LOWER(product.name) LIKE :query
                 OR LOWER(product.reference) LIKE :query
@@ -251,15 +229,8 @@ final class ProductRepository extends ServiceEntityRepository
      */
     public function findRelatedForStorefront(Product $product, int $limit = 3): array
     {
-        return $this->createQueryBuilder('related')
-            ->addSelect('category', 'license', 'images')
-            ->innerJoin('related.category', 'category')
-            ->innerJoin('related.license', 'license')
-            ->leftJoin('related.images', 'images')
+        return $this->createStorefrontQueryBuilder('related')
             ->andWhere('related.id != :id')
-            ->andWhere('related.active = true')
-            ->andWhere('category.active = true')
-            ->andWhere('license.active = true')
             ->andWhere('related.category = :category OR related.license = :license')
             ->setParameter('id', $product->getId())
             ->setParameter('category', $product->getCategory())
@@ -276,16 +247,9 @@ final class ProductRepository extends ServiceEntityRepository
      */
     public function findFavoritesForStorefront(User $user): array
     {
-        return $this->createQueryBuilder('product')
-            ->addSelect('category', 'license', 'images')
-            ->innerJoin('product.category', 'category')
-            ->innerJoin('product.license', 'license')
+        return $this->createStorefrontQueryBuilder('product')
             ->innerJoin(UserFavorite::class, 'favorite', 'WITH', 'favorite.product = product')
-            ->leftJoin('product.images', 'images')
             ->andWhere('favorite.user = :user')
-            ->andWhere('product.active = true')
-            ->andWhere('category.active = true')
-            ->andWhere('license.active = true')
             ->setParameter('user', $user)
             ->orderBy('favorite.createdAt', 'DESC')
             ->addOrderBy('product.name', 'ASC')
@@ -293,24 +257,27 @@ final class ProductRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /**
-     * @return list<string>
-     */
-    public function findStorefrontCategoryNames(): array
+    private function createStorefrontQueryBuilder(string $productAlias, bool $withImages = true): QueryBuilder
     {
-        $rows = $this->createQueryBuilder('product')
-            ->select('category.name AS name')
-            ->innerJoin('product.category', 'category')
-            ->innerJoin('product.license', 'license')
-            ->andWhere('product.active = true')
+        $queryBuilder = $this->createQueryBuilder($productAlias)
+            ->addSelect('category', 'categoryParent', 'categoryGrandparent', 'license')
+            ->innerJoin($productAlias . '.category', 'category')
+            ->leftJoin('category.parent', 'categoryParent')
+            ->leftJoin('categoryParent.parent', 'categoryGrandparent')
+            ->innerJoin($productAlias . '.license', 'license')
+            ->andWhere($productAlias . '.active = true')
             ->andWhere('category.active = true')
+            ->andWhere('(categoryParent.id IS NULL OR categoryParent.active = true)')
+            ->andWhere('(categoryGrandparent.id IS NULL OR categoryGrandparent.active = true)')
             ->andWhere('license.active = true')
-            ->groupBy('category.id')
-            ->addGroupBy('category.name')
-            ->orderBy('category.name', 'ASC')
-            ->getQuery()
-            ->getScalarResult();
+        ;
 
-        return array_map(static fn (array $row): string => (string) $row['name'], $rows);
+        if ($withImages) {
+            $queryBuilder
+                ->addSelect('images')
+                ->leftJoin($productAlias . '.images', 'images');
+        }
+
+        return $queryBuilder;
     }
 }

@@ -14,7 +14,15 @@ final class AdminCategoryManager
 
     public function save(Category $category): void
     {
-        foreach ($category->getProducts() as $product) {
+        if ($category->getDepth() > Category::MAX_DEPTH
+            || $category->getParent()?->isDescendantOf($category)
+            || ($category->getChildren()->count() > 0 && $category->getProducts()->count() > 0)
+            || ($category->getParent() instanceof Category && $category->getParent()->getProducts()->count() > 0)
+        ) {
+            throw new \InvalidArgumentException('admin.category.error.invalid_hierarchy');
+        }
+
+        foreach ($category->getProductsRecursive() as $product) {
             $product->setActive($category->isActive());
         }
 

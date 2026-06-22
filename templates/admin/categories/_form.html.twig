@@ -23,6 +23,21 @@
             </div>
         </div>
 
+        <div class="admin-form-grid admin-form-grid--two">
+            <div class="admin-field">
+                {{ form_label(form.parent) }}
+                {{ form_widget(form.parent) }}
+                {{ form_errors(form.parent) }}
+                <small>{{ 'admin.category.form.parent_help'|trans }}</small>
+            </div>
+            <div class="admin-field">
+                {{ form_label(form.position) }}
+                {{ form_widget(form.position) }}
+                {{ form_errors(form.position) }}
+                <small>{{ 'admin.category.form.position_help'|trans }}</small>
+            </div>
+        </div>
+
         <div class="admin-field admin-field--full">
             {{ form_label(form.description) }}
             {{ form_widget(form.description) }}

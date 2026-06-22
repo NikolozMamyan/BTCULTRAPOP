@@ -33,6 +33,27 @@ final class AdminTaxonomyManagerTest extends TestCase
         self::assertTrue($product->isActive());
     }
 
+    public function testCategoryManagerAppliesParentActiveStateToDescendantProducts(): void
+    {
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager->expects(self::once())->method('persist');
+        $entityManager->expects(self::once())->method('flush');
+
+        $manager = new AdminCategoryManager($entityManager);
+        $root = (new Category())->setName('Tout');
+        $category = (new Category())->setName('Boissons')->setParent($root);
+        $subcategory = (new Category())->setName('Jus')->setParent($category);
+        $product = (new Product())->setActive(true);
+        $subcategory->addProduct($product);
+
+        $root->setActive(false);
+        $manager->save($root);
+
+        self::assertFalse($product->isActive());
+        self::assertSame(['Tout', 'Boissons', 'Jus'], $subcategory->getPathNames());
+        self::assertSame(2, $subcategory->getDepth());
+    }
+
     public function testLicenseManagerAppliesLicenseActiveStateToProducts(): void
     {
         $entityManager = $this->createMock(EntityManagerInterface::class);

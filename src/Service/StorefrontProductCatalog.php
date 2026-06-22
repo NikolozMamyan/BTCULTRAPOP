@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Enum\ProductStatus;
@@ -89,14 +90,6 @@ final readonly class StorefrontProductCatalog
         ), $user);
     }
 
-    /**
-     * @return list<string>
-     */
-    public function categories(): array
-    {
-        return $this->products->findStorefrontCategoryNames();
-    }
-
     public function maxPrice(): int
     {
         return $this->maxPriceFor($this->all());
@@ -118,11 +111,77 @@ final readonly class StorefrontProductCatalog
     /**
      * @param list<array<string, mixed>> $products
      *
-     * @return list<string>
+     * @return list<array{
+     *     name: string,
+     *     count: int,
+     *     children: list<array{name: string, count: int}>
+     * }>
      */
     public function categoriesFor(array $products): array
     {
-        return $this->uniqueSortedValuesFor($products, 'cat');
+        $tree = [];
+
+        foreach ($products as $product) {
+            $path = array_values(array_filter(
+                (array) ($product['category_path'] ?? []),
+                static fn (mixed $name): bool => is_string($name) && '' !== trim($name),
+            ));
+            $positions = array_map('intval', (array) ($product['category_position_path'] ?? []));
+
+            if ('Tout' === ($path[0] ?? null)) {
+                array_shift($path);
+                array_shift($positions);
+            }
+
+            $parent = $path[0] ?? null;
+
+            if (!is_string($parent) || '' === $parent) {
+                continue;
+            }
+
+            $tree[$parent] ??= [
+                'position' => $positions[0] ?? 0,
+                'count' => 0,
+                'children' => [],
+            ];
+            ++$tree[$parent]['count'];
+            $leaf = $path[1] ?? null;
+
+            if (is_string($leaf) && '' !== $leaf) {
+                $tree[$parent]['children'][$leaf] ??= [
+                    'position' => $positions[1] ?? 0,
+                    'count' => 0,
+                ];
+                ++$tree[$parent]['children'][$leaf]['count'];
+            }
+        }
+
+        uasort($tree, static function (array $first, array $second): int {
+            return $first['position'] <=> $second['position'];
+        });
+
+        return array_map(
+            static function (string $name, array $group): array {
+                uasort($group['children'], static function (array $first, array $second): int {
+                    return $first['position'] <=> $second['position'];
+                });
+
+                return [
+                    'name' => $name,
+                    'count' => $group['count'],
+                    'children' => array_map(
+                        static fn (string $childName, array $child): array => [
+                            'name' => $childName,
+                            'count' => $child['count'],
+                        ],
+                        array_keys($group['children']),
+                        array_values($group['children']),
+                    ),
+                ];
+            },
+            array_keys($tree),
+            array_values($tree),
+        );
     }
 
     /**
@@ -142,13 +201,16 @@ final readonly class StorefrontProductCatalog
     {
         $cover = $product->getCoverImage();
         $quantity = max(0, $product->getQuantity());
+        $category = $product->getCategory();
 
         return [
             'id' => $product->getId(),
             'name' => $product->getName(),
             'description' => $product->getDescription(),
             'reference' => $product->getReference(),
-            'cat' => $product->getCategory()?->getName() ?? '',
+            'cat' => $category?->getName() ?? '',
+            'category_path' => $category?->getPathNames() ?? [],
+            'category_position_path' => $this->categoryPositionPath($category),
             'license' => $product->getLicense()?->getName() ?? '',
             'price' => (float) $product->getPriceTaxIncluded(),
             'old' => null,
@@ -190,6 +252,29 @@ final readonly class StorefrontProductCatalog
         sort($values, SORT_NATURAL | SORT_FLAG_CASE);
 
         return $values;
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function categoryPositionPath(?Category $category): array
+    {
+        $positions = [];
+        $visited = [];
+
+        while ($category instanceof Category) {
+            $objectId = spl_object_id($category);
+
+            if (isset($visited[$objectId])) {
+                break;
+            }
+
+            $visited[$objectId] = true;
+            array_unshift($positions, $category->getPosition());
+            $category = $category->getParent();
+        }
+
+        return $positions;
     }
 
     /**

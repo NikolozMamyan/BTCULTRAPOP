@@ -10,6 +10,7 @@ export default class extends Controller {
         'backdrop',
         'card',
         'category',
+        'categoryGroup',
         'count',
         'empty',
         'grid',
@@ -35,6 +36,7 @@ export default class extends Controller {
         }
 
         this.syncCategoryButtons();
+        this.syncCategoryGroups();
         this.filter();
     }
 
@@ -68,11 +70,23 @@ export default class extends Controller {
     selectCategory(event) {
         this.selectedCategory = event.params.category;
 
-        this.categoryTargets.forEach((button) => {
-            button.classList.toggle('is-active', button === event.currentTarget);
-        });
-
+        this.syncCategoryButtons();
+        this.syncCategoryGroups();
         this.filter();
+    }
+
+    toggleCategoryGroup(event) {
+        const openedGroup = event.currentTarget;
+
+        if (!openedGroup.open) {
+            return;
+        }
+
+        this.categoryGroupTargets.forEach((group) => {
+            if (group !== openedGroup) {
+                group.open = false;
+            }
+        });
     }
 
     reset() {
@@ -84,6 +98,7 @@ export default class extends Controller {
         this.categoryTargets.forEach((button) => {
             button.classList.toggle('is-active', button.dataset.shopFiltersCategoryParam === 'all');
         });
+        this.syncCategoryGroups();
 
         this.filter();
     }
@@ -107,7 +122,7 @@ export default class extends Controller {
 
         const visibleCards = this.cardTargets.filter((card) => {
             const matchesCategory = this.selectedCategory === 'all'
-                || card.dataset[filterField] === this.selectedCategory;
+                || this.cardMatchesCategory(card, filterField);
             const matchesPrice = Number(card.dataset.price) <= maximumPrice;
             const matchesTag = requestedTags.length === 0
                 || requestedTags.includes(card.dataset.tag);
@@ -165,6 +180,16 @@ export default class extends Controller {
         return this.hasFilterFieldValue ? this.filterFieldValue : 'category';
     }
 
+    cardMatchesCategory(card, filterField) {
+        if (filterField !== 'category') {
+            return card.dataset[filterField] === this.selectedCategory;
+        }
+
+        return (card.dataset.categoryPath || '')
+            .split('|')
+            .includes(this.selectedCategory);
+    }
+
     initialSelectedCategory(searchParams) {
         const requestedCategory = searchParams.get(this.currentFilterField());
 
@@ -177,6 +202,19 @@ export default class extends Controller {
                 'is-active',
                 button.dataset.shopFiltersCategoryParam === this.selectedCategory,
             );
+        });
+    }
+
+    syncCategoryGroups() {
+        this.categoryGroupTargets.forEach((group) => {
+            const hasActiveCategory = [...group.querySelectorAll('[data-shop-filters-target~="category"]')]
+                .some((button) => button.classList.contains('is-active'));
+
+            group.classList.toggle('has-active-category', hasActiveCategory);
+
+            if (hasActiveCategory) {
+                group.open = true;
+            }
         });
     }
 }

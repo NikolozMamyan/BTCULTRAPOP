@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\License;
 use App\Entity\Product;
 use App\Enum\ProductStatus;
+use App\Repository\CategoryRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -20,6 +21,10 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 final class ProductType extends AbstractType
 {
+    public function __construct(private readonly CategoryRepository $categories)
+    {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -48,7 +53,8 @@ final class ProductType extends AbstractType
             ])
             ->add('category', EntityType::class, [
                 'class' => Category::class,
-                'choice_label' => 'name',
+                'choices' => $this->categories->findAssignable(),
+                'choice_label' => static fn (Category $category): string => $category->getPathLabel(),
                 'label' => 'admin.product.form.category',
                 'placeholder' => 'admin.product.form.choose_category',
             ])

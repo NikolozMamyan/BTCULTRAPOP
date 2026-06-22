@@ -35,7 +35,11 @@ final class CategoryController extends AbstractController
     }
 
     #[Route('/new', name: 'app_admin_categories_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, AdminCategoryManager $categoryManager): Response
+    public function new(
+        Request $request,
+        AdminCategoryManager $categoryManager,
+        CategoryRepository $categories,
+    ): Response
     {
         $adminUser = $this->resolveAdminUser();
 
@@ -44,7 +48,9 @@ final class CategoryController extends AbstractController
         }
 
         $category = new Category();
-        $form = $this->createForm(CategoryType::class, $category);
+        $form = $this->createForm(CategoryType::class, $category, [
+            'parent_choices' => $categories->findParentChoices($category),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -62,7 +68,12 @@ final class CategoryController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_admin_categories_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
-    public function edit(Category $category, Request $request, AdminCategoryManager $categoryManager): Response
+    public function edit(
+        Category $category,
+        Request $request,
+        AdminCategoryManager $categoryManager,
+        CategoryRepository $categories,
+    ): Response
     {
         $adminUser = $this->resolveAdminUser();
 
@@ -70,7 +81,9 @@ final class CategoryController extends AbstractController
             return $this->redirectToRoute('app_front_profil');
         }
 
-        $form = $this->createForm(CategoryType::class, $category);
+        $form = $this->createForm(CategoryType::class, $category, [
+            'parent_choices' => $categories->findParentChoices($category),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

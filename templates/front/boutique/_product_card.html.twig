@@ -2,6 +2,7 @@
     class="shop-product-card"
     data-shop-filters-target="card"
     data-category="{{ product.cat }}"
+    data-category-path="{{ product.category_path|default([])|join('|') }}"
     data-license="{{ product.license }}"
     data-price="{{ product.price }}"
     data-popularity="{{ product.pop }}"

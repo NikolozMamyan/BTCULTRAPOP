@@ -50,22 +50,27 @@
             {% if categories %}
                 <div class="admin-category-grid">
                     {% for category in categories %}
-                        {% set activeProducts = category.products|filter(product => product.active)|length %}
+                        {% set recursiveProducts = category.productsRecursive %}
+                        {% set activeProducts = recursiveProducts|filter(product => product.active)|length %}
 
-                        <article class="admin-category-card">
+                        <article class="admin-category-card admin-category-card--depth-{{ category.depth }}">
                             <a href="{{ path('app_admin_categories_edit', {id: category.id}) }}" class="admin-category-card__main">
                                 <span class="admin-category-card__icon">
                                     <i class="fa-solid fa-layer-group"></i>
                                 </span>
                                 <span>
+                                    <em class="admin-category-card__level">
+                                        {{ ('admin.category.level.' ~ category.depth)|trans }}
+                                    </em>
                                     <strong>{{ category.name }}</strong>
+                                    <small class="admin-category-card__path">{{ category.pathLabel }}</small>
                                     <small>{{ category.description ?: 'admin.category.table.no_description'|trans }}</small>
                                 </span>
                             </a>
 
                             <div class="admin-category-card__stats">
                                 <span>
-                                    <strong>{{ category.products|length }}</strong>
+                                    <strong>{{ recursiveProducts|length }}</strong>
                                     {{ 'admin.category.table.products'|trans }}
                                 </span>
                                 <span>

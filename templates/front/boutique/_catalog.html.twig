@@ -54,7 +54,7 @@
                     </div>
                 </div>
 
-                <section class="shop-filter-card">
+                <section class="shop-filter-card shop-filter-card--categories">
                     <h2 class="shop-filter-title">
                         <i class="{{ catalog_filter_icon }}"></i>
                         {{ catalog_filter_label|trans }}
@@ -62,20 +62,88 @@
                     <div class="shop-category-list">
                         <button
                             type="button"
-                            class="shop-category-button is-active"
+                            class="shop-category-button shop-category-button--root is-active"
                             data-shop-filters-target="category"
                             data-shop-filters-category-param="all"
                             data-action="shop-filters#selectCategory"
-                        >{{ 'shop.filters.all'|trans }}</button>
-                        {% for filter_item in catalog_filter_items %}
-                            <button
-                                type="button"
-                                class="shop-category-button"
-                                data-shop-filters-target="category"
-                                data-shop-filters-category-param="{{ filter_item }}"
-                                data-action="shop-filters#selectCategory"
-                            >{{ filter_item }}</button>
-                        {% endfor %}
+                        >
+                            <span class="shop-category-button__label">
+                                <i class="fa-solid fa-border-all"></i>
+                                <strong>{{ 'shop.filters.all'|trans }}</strong>
+                            </span>
+                            <span class="shop-category-button__count">{{ catalog_products|length }}</span>
+                        </button>
+                        {% if catalog_filter_field == 'category' %}
+                            {% for filter_group in catalog_filter_items %}
+                                {% set group_icon = filter_group.name == 'Boissons'
+                                    ? 'fa-solid fa-bottle-water'
+                                    : (filter_group.name == 'Épicerie salée'
+                                        ? 'fa-solid fa-bowl-food'
+                                        : (filter_group.name == 'Épicerie sucrée'
+                                            ? 'fa-solid fa-candy-cane'
+                                            : 'fa-solid fa-gift')) %}
+                                <details
+                                    class="shop-category-group"
+                                    data-shop-filters-target="categoryGroup"
+                                    data-action="toggle->shop-filters#toggleCategoryGroup"
+                                    {{ loop.first ? 'open' : '' }}
+                                >
+                                    <summary>
+                                        <span class="shop-category-group__icon">
+                                            <i class="{{ group_icon }}"></i>
+                                        </span>
+                                        <span class="shop-category-group__title">
+                                            <strong>{{ filter_group.name }}</strong>
+                                            <small>{{ 'shop.filters.subcategories'|trans }}</small>
+                                        </span>
+                                        <span class="shop-category-group__count">{{ filter_group.count }}</span>
+                                        <i class="shop-category-group__chevron fa-solid fa-chevron-down"></i>
+                                    </summary>
+                                    <div class="shop-category-group__panel">
+                                        <button
+                                            type="button"
+                                            class="shop-category-button shop-category-button--parent"
+                                            data-shop-filters-target="category"
+                                            data-shop-filters-category-param="{{ filter_group.name }}"
+                                            data-action="shop-filters#selectCategory"
+                                        >
+                                            <span class="shop-category-button__label">
+                                                <i class="fa-solid fa-layer-group"></i>
+                                                <strong>{{ 'shop.filters.view_group'|trans }}</strong>
+                                            </span>
+                                            <span class="shop-category-button__count">{{ filter_group.count }}</span>
+                                        </button>
+                                        {% for filter_item in filter_group.children %}
+                                            <button
+                                                type="button"
+                                                class="shop-category-button shop-category-button--child"
+                                                data-shop-filters-target="category"
+                                                data-shop-filters-category-param="{{ filter_item.name }}"
+                                                data-action="shop-filters#selectCategory"
+                                            >
+                                                <span class="shop-category-button__label">
+                                                    <i class="fa-solid fa-angle-right"></i>
+                                                    <span>{{ filter_item.name }}</span>
+                                                </span>
+                                                <span class="shop-category-button__count">{{ filter_item.count }}</span>
+                                            </button>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                            {% endfor %}
+                        {% else %}
+                            {% for filter_item in catalog_filter_items %}
+                                <button
+                                    type="button"
+                                    class="shop-category-button"
+                                    data-shop-filters-target="category"
+                                    data-shop-filters-category-param="{{ filter_item }}"
+                                    data-action="shop-filters#selectCategory"
+                                >
+                                    <span>{{ filter_item }}</span>
+                                </button>
+                            {% endfor %}
+                        {% endif %}
                     </div>
                 </section>
 

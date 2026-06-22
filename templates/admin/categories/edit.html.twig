@@ -8,7 +8,7 @@
             <div>
                 <span>{{ 'admin.category.edit.eyebrow'|trans }}</span>
                 <h1>{{ category.name }}</h1>
-                <p>{{ 'admin.category.edit.subtitle'|trans({'%count%': category.products|length}) }}</p>
+                <p>{{ 'admin.category.edit.subtitle'|trans({'%count%': category.productCountRecursive}) }}</p>
             </div>
             <a href="{{ path('app_admin_categories_index') }}" class="admin-secondary-button">
                 <i class="fa-solid fa-arrow-left"></i>
