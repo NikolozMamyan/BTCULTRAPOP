@@ -65,6 +65,17 @@ final class ProductTest extends TestCase
         self::assertNull($product->getEan());
     }
 
+    public function testIngredientsAreTrimmedAndStoredAsOptionalText(): void
+    {
+        $product = (new Product())->setIngredients('  Eau, sucre, arôme naturel.  ');
+
+        self::assertSame('Eau, sucre, arôme naturel.', $product->getIngredients());
+
+        $product->setIngredients('  ');
+
+        self::assertNull($product->getIngredients());
+    }
+
     public function testImagesAndCoverAreManagedByTheProduct(): void
     {
         $firstImage = (new ProductImage())

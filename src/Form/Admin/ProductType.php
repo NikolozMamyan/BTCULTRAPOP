@@ -86,6 +86,14 @@ final class ProductType extends AbstractType
                     'placeholder' => 'admin.product.form.description_placeholder',
                 ],
             ])
+            ->add('ingredients', TextareaType::class, [
+                'label' => 'admin.product.form.ingredients',
+                'required' => false,
+                'attr' => [
+                    'rows' => 7,
+                    'placeholder' => 'admin.product.form.ingredients_placeholder',
+                ],
+            ])
             ->add('seoTitle', TextType::class, [
                 'label' => 'admin.product.form.seo_title',
                 'required' => false,
@@ -178,7 +186,7 @@ final class ProductType extends AbstractType
                 $data[$field] = '' === $value ? null : self::normalizeDecimal($value);
             }
 
-            foreach (['ean', 'description', 'seoTitle', 'seoDescription', 'coverImageUrl'] as $field) {
+            foreach (['ean', 'description', 'ingredients', 'seoTitle', 'seoDescription', 'coverImageUrl'] as $field) {
                 if (array_key_exists($field, $data)) {
                     $data[$field] = trim((string) $data[$field]);
                 }

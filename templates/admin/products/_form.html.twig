@@ -65,6 +65,12 @@
                 {{ form_errors(form.description) }}
             </div>
 
+            <div class="admin-field admin-field--full">
+                {{ form_label(form.ingredients) }}
+                {{ form_widget(form.ingredients) }}
+                {{ form_errors(form.ingredients) }}
+            </div>
+
             <div class="admin-form-grid admin-form-grid--two">
                 <div class="admin-field">
                     {{ form_label(form.seoTitle) }}

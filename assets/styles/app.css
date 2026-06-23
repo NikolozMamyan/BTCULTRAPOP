@@ -6520,30 +6520,6 @@ body.is-page-loading {
     line-height: 1.8;
 }
 
-.product-specifications {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: .8rem 2rem;
-}
-
-.product-specifications div {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: .8rem 0;
-    border-bottom: 1px solid var(--border-color);
-    font-size: .78rem;
-}
-
-.product-specifications dt {
-    color: var(--text-light);
-}
-
-.product-specifications dd {
-    color: var(--text-dark);
-    font-weight: 800;
-}
-
 .product-no-reviews {
     display: grid;
     min-height: 115px;
@@ -8767,10 +8743,6 @@ body.is-page-loading {
 
     .product-tabs__panel {
         padding: 1.5rem;
-    }
-
-    .product-specifications {
-        grid-template-columns: 1fr;
     }
 
     .product-related__heading {

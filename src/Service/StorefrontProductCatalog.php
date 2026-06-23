@@ -226,6 +226,7 @@ final readonly class StorefrontProductCatalog
             'id' => $product->getId(),
             'name' => $product->getName(),
             'description' => $product->getDescription(),
+            'ingredients' => $product->getIngredients(),
             'reference' => $product->getReference(),
             'cat' => $category?->getName() ?? '',
             'category_path' => $category?->getPathNames() ?? [],

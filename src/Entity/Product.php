@@ -29,6 +29,9 @@ class Product
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $ingredients = null;
+
     #[ORM\Column(length: 255)]
     #[Assert\Length(max: 255)]
     private string $seoTitle = '';
@@ -148,6 +151,19 @@ class Product
     public function setDescription(?string $description): self
     {
         $this->description = null === $description ? null : trim($description);
+
+        return $this;
+    }
+
+    public function getIngredients(): ?string
+    {
+        return $this->ingredients;
+    }
+
+    public function setIngredients(?string $ingredients): self
+    {
+        $ingredients = null === $ingredients ? null : trim($ingredients);
+        $this->ingredients = '' === $ingredients ? null : $ingredients;
 
         return $this;
     }

@@ -21,7 +21,11 @@ final class FrontNavigationTest extends WebTestCase
         $client->request('GET', $path);
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', $title);
+        if ('profile' === $page) {
+            self::assertSelectorTextContains('.profile-auth__face--login h2', 'Content de vous revoir.');
+        } else {
+            self::assertSelectorTextContains('h1', $title);
+        }
         self::assertSelectorExists(sprintf('#storefront-app[data-page="%s"]', $page));
         self::assertSelectorExists('#storefront-app[data-controller~="favorites"]');
         self::assertSelectorExists('header');
@@ -53,8 +57,8 @@ final class FrontNavigationTest extends WebTestCase
         $client->request('GET', '/profil');
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('.profile-auth');
-        self::assertSelectorTextContains('.profile-auth__face--login', 'Connexion');
-        self::assertSelectorTextContains('.profile-auth__face--register', 'Inscription');
+        self::assertSelectorTextContains('.profile-auth__face--login', 'Content de vous revoir.');
+        self::assertSelectorTextContains('.profile-auth__face--register', 'Créer un compte');
         self::assertSelectorExists('input[name="last_name"]');
         self::assertSelectorExists('input[name="first_name"]');
         self::assertSelectorExists('input[name="address_name"]');
@@ -180,6 +184,8 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('.product-detail__primary.cart-add-button[data-action="product-detail#addToCart"]');
         self::assertSelectorExists('.product-detail__secondary.favorite-button[data-action="favorites#toggle"]');
         self::assertSelectorCount(3, '.product-tabs__nav button');
+        self::assertSelectorNotExists('[data-panel="specifications"]');
+        self::assertSelectorTextContains('[data-panel="ingredients"]', 'Eau, sucre');
         self::assertSelectorCount(0, '.product-formats');
     }
 
@@ -219,9 +225,8 @@ final class FrontNavigationTest extends WebTestCase
 
         $client->request('GET', '/profil');
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'My profile');
-        self::assertSelectorTextContains('.profile-auth__face--login', 'Sign in');
-        self::assertSelectorTextContains('.profile-auth__face--register', 'Registration');
+        self::assertSelectorTextContains('.profile-auth__face--login', 'Welcome back.');
+        self::assertSelectorTextContains('.profile-auth__face--register', 'Create an account');
     }
 
     #[DataProvider('provideEnglishPages')]
@@ -238,7 +243,11 @@ final class FrontNavigationTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('html[lang="en"]');
-        self::assertSelectorTextContains('h1', $title);
+        if ('/profil' === $path) {
+            self::assertSelectorTextContains('.profile-auth__face--login h2', 'Welcome back.');
+        } else {
+            self::assertSelectorTextContains('h1', $title);
+        }
     }
 
     public static function provideEnglishPages(): iterable
