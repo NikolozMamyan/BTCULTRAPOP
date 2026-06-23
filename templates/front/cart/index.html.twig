@@ -37,7 +37,11 @@
                         } only %}
                     {% else %}
                         {% for item in cart.items %}
-                            <article class="cart-line">
+                            <article
+                                class="cart-line"
+                                data-cart-item-id="{{ item.id }}"
+                                data-cart-remove-url="{{ item.removeUrl }}"
+                            >
                                 <a class="cart-line__media" href="{{ item.productUrl ?: '#' }}">
                                     {% if item.image %}
                                         <img src="{{ item.image }}" alt="">

@@ -15,6 +15,7 @@ final readonly class StripeCheckoutService
         private StripeConfigProvider $stripeConfig,
         private UrlGeneratorInterface $urlGenerator,
         private TranslatorInterface $translator,
+        private AssetUrlResolver $assetUrlResolver,
     ) {
     }
 
@@ -75,9 +76,9 @@ final readonly class StripeCheckoutService
         $productData = [
             'name' => $item->getProductName(),
         ];
-        $image = $item->getProductImage();
+        $image = $this->assetUrlResolver->resolveAbsolute($item->getProductImage());
 
-        if (null !== $image && str_starts_with($image, 'http')) {
+        if (null !== $image && str_starts_with($image, 'https://')) {
             $productData['images'] = [$image];
         }
 

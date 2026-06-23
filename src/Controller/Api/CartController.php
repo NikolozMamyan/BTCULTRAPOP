@@ -148,12 +148,15 @@ final class CartController extends AbstractController
         $cart = $cartResolver->resolve($request, $this->getAuthenticatedUser());
         $item = $cartItems->find($id);
 
-        if (!$cart instanceof Cart || !$this->ownsItem($cart, $item)) {
+        if (!$cart instanceof Cart) {
             return $this->error('cart.flash.item_not_found', $translator, Response::HTTP_NOT_FOUND);
         }
 
-        $cartManager->removeItem($cart, $item);
-        $entityManager->flush();
+        if ($this->ownsItem($cart, $item)) {
+            \assert($item instanceof CartItem);
+            $cartManager->removeItem($cart, $item);
+            $entityManager->flush();
+        }
 
         return $this->cartResponse(
             $request,

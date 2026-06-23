@@ -9,6 +9,9 @@ export default class extends Controller {
     };
 
     connect() {
+        this.stateVersion = 0;
+        this.pendingMutations = new Map();
+        this.mutationQueue = Promise.resolve();
         this.boundAddFromEvent = (event) => this.addFromEvent(event);
         window.addEventListener('cart:add', this.boundAddFromEvent);
         this.load();
@@ -19,9 +22,10 @@ export default class extends Controller {
     }
 
     async load() {
+        const versionAtStart = this.stateVersion;
         const response = await this.request('GET', this.urlValue);
 
-        if (response?.cart) {
+        if (response?.cart && versionAtStart === this.stateVersion) {
             this.render(response.cart);
         }
     }
@@ -71,18 +75,46 @@ export default class extends Controller {
     }
 
     async mutate(method, url, body = null, button = null) {
-        this.setBusy(button, true);
+        if (!url) {
+            this.showToast(this.errorValue, true);
+            return;
+        }
 
-        try {
+        const mutationKey = `${method}:${url}`;
+
+        if (this.pendingMutations.has(mutationKey)) {
+            return;
+        }
+
+        ++this.stateVersion;
+        this.pendingMutations.set(mutationKey, { method, url });
+        this.setMutationBusy(url, true, button);
+
+        if (method === 'DELETE') {
+            this.setItemLinesHidden(url, true);
+        }
+
+        const operation = async () => {
             const response = await this.request(method, url, body);
 
             if (response?.cart) {
                 this.render(response.cart);
+                this.showToast(response.message || this.errorValue, false);
+                return;
             }
 
-            this.showToast(response?.message || this.errorValue, !response?.cart);
+            if (method === 'DELETE') {
+                this.setItemLinesHidden(url, false);
+            }
+        };
+        const queuedOperation = this.mutationQueue.then(operation, operation);
+        this.mutationQueue = queuedOperation.catch(() => {});
+
+        try {
+            await queuedOperation;
         } finally {
-            this.setBusy(button, false);
+            this.pendingMutations.delete(mutationKey);
+            this.setMutationBusy(url, false, button);
         }
     }
 
@@ -138,6 +170,7 @@ export default class extends Controller {
         this.setText('cart-page-subtotal', cart.subtotalFormatted);
         this.setText('cart-page-total', cart.totalFormatted);
         this.setShippingText('cart-page-shipping', cart);
+        this.syncPendingMutations();
     }
 
     renderShippingMeter(prefix, cart) {
@@ -215,7 +248,7 @@ export default class extends Controller {
 
     itemTemplate(item) {
         return `
-            <article class="cart-line">
+            <article class="cart-line" data-cart-item-id="${Number(item.id)}" data-cart-remove-url="${this.escapeAttribute(item.removeUrl)}">
                 <a class="cart-line__media" href="${this.escapeAttribute(item.productUrl || '#')}">
                     ${item.image ? `<img src="${this.escapeAttribute(item.image)}" alt="">` : '<i class="fa-solid fa-box"></i>'}
                 </a>
@@ -272,6 +305,45 @@ export default class extends Controller {
         button.disabled = busy;
         button.classList.toggle('is-loading', busy);
         button.setAttribute('aria-busy', String(busy));
+    }
+
+    setMutationBusy(url, busy, fallbackButton = null) {
+        let matched = false;
+
+        document.querySelectorAll('[data-cart-url-param]').forEach((button) => {
+            if (button.dataset.cartUrlParam !== url) {
+                return;
+            }
+
+            matched = true;
+            this.setBusy(button, busy);
+        });
+
+        if (!matched) {
+            this.setBusy(fallbackButton, busy);
+        }
+    }
+
+    setItemLinesHidden(removeUrl, hidden) {
+        document.querySelectorAll('.cart-line[data-cart-remove-url]').forEach((line) => {
+            if (line.dataset.cartRemoveUrl !== removeUrl) {
+                return;
+            }
+
+            line.hidden = hidden;
+            line.classList.toggle('is-removing', hidden);
+            line.setAttribute('aria-hidden', String(hidden));
+        });
+    }
+
+    syncPendingMutations() {
+        this.pendingMutations.forEach(({ method, url }) => {
+            this.setMutationBusy(url, true);
+
+            if (method === 'DELETE') {
+                this.setItemLinesHidden(url, true);
+            }
+        });
     }
 
     animateAdd(button) {

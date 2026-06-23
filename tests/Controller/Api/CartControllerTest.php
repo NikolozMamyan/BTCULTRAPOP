@@ -69,6 +69,20 @@ final class CartControllerTest extends WebTestCase
         self::assertTrue($payload['cart']['empty']);
         self::assertSame(0, $payload['cart']['totalQuantity']);
         self::assertSame(0, $payload['cart']['shippingAmountCents']);
+
+        $client->request(
+            'DELETE',
+            $removeUrl,
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_X_CSRF_TOKEN' => $csrfToken,
+            ],
+        );
+
+        self::assertResponseIsSuccessful();
+        $secondPayload = $this->jsonResponse($client->getResponse()->getContent());
+        self::assertTrue($secondPayload['cart']['empty']);
+        self::assertSame(0, $secondPayload['cart']['totalQuantity']);
         self::assertSame('0,00 €', $payload['cart']['totalFormatted']);
     }
 

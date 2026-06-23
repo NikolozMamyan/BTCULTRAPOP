@@ -64,7 +64,7 @@
 
                     {% set first_filter_group = catalog_filter_items|first %}
                     {% set root_thumbnail = catalog_filter_field == 'category'
-                        ? 'https://ultrapop.com/img/cms/Germany.png'
+                        ? asset('img/categories/all-products.png')
                         : first_filter_group.image|default(catalog_products|first.img|default('')) %}
                     {% set root_thumbnail_fallback = first_filter_group.fallbackImage|default(catalog_products|first.img|default('')) %}
 

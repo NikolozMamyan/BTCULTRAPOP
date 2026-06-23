@@ -13,9 +13,10 @@ final readonly class StorefrontProductCatalog
 {
     private const FALLBACK_IMAGE = 'img/products/fr-default-large_default.jpg';
     private const CATEGORY_THUMBNAILS = [
-        'Boissons' => 'https://ultrapop.com/144-product_main_2x/ultrapop-naruto-chibi-naruto-tropical-33cl.jpg',
-        'Épicerie salée' => 'https://ultrapop.com/116-default_md/komesan-luffy-one-piece-chips-de-riz-barbecue-60g.jpg',
-        'Épicerie sucrée' => 'https://ultrapop.com/60-default_md/yokosan-dragon-ball-super-cereales-miel-350g.jpg',
+        'Boissons' => 'img/categories/boissons-naruto-tropical.png',
+        'Épicerie salée' => 'img/categories/epicerie-salee-komesan-luffy.png',
+        'Épicerie sucrée' => 'img/categories/epicerie-sucree-yokosan-cereales.jpg',
+        'Coffrets' => 'img/categories/coffrets-box-naruto.jpg',
     ];
 
     public function __construct(
@@ -155,15 +156,9 @@ final readonly class StorefrontProductCatalog
             ];
             ++$tree[$parent]['count'];
 
-            if (
-                '' === $tree[$parent]['image']
-                && true === ($product['thumbnail_is_product'] ?? false)
-                && is_string($product['thumbnail'] ?? null)
-            ) {
-                $tree[$parent]['image'] = $product['thumbnail'];
-                $tree[$parent]['fallbackImage'] = is_string($product['img'] ?? null)
-                    ? $product['img']
-                    : '';
+            if ('' === $tree[$parent]['image'] && is_string($product['img'] ?? null)) {
+                $tree[$parent]['image'] = $product['img'];
+                $tree[$parent]['fallbackImage'] = $product['img'];
             }
 
             $leaf = $path[1] ?? null;
@@ -182,7 +177,7 @@ final readonly class StorefrontProductCatalog
         });
 
         return array_map(
-            static function (string $name, array $group): array {
+            function (string $name, array $group): array {
                 uasort($group['children'], static function (array $first, array $second): int {
                     return $first['position'] <=> $second['position'];
                 });
@@ -190,7 +185,8 @@ final readonly class StorefrontProductCatalog
                 return [
                     'name' => $name,
                     'count' => $group['count'],
-                    'image' => self::CATEGORY_THUMBNAILS[$name] ?? $group['image'],
+                    'image' => $this->assetUrlResolver->resolve(self::CATEGORY_THUMBNAILS[$name] ?? '')
+                        ?? $group['image'],
                     'fallbackImage' => $group['fallbackImage'],
                     'children' => array_map(
                         static fn (string $childName, array $child): array => [
@@ -238,8 +234,6 @@ final readonly class StorefrontProductCatalog
             'price' => (float) $product->getPriceTaxIncluded(),
             'old' => null,
             'img' => $this->assetUrlResolver->resolve($cover?->getPath() ?: self::FALLBACK_IMAGE),
-            'thumbnail' => $this->thumbnailUrl($cover?->getPath()),
-            'thumbnail_is_product' => $this->hasProductThumbnail($cover?->getPath()),
             'quantity' => $quantity,
             'in_stock' => $quantity > 0,
             'rating' => null,
@@ -300,30 +294,6 @@ final readonly class StorefrontProductCatalog
         }
 
         return $positions;
-    }
-
-    private function thumbnailUrl(?string $path): string
-    {
-        $path = trim((string) $path);
-
-        if (preg_match('~(?:^|/)img/products/(\d+)-large_default\.jpg$~', $path, $matches)) {
-            $imageId = $matches[1];
-
-            return sprintf(
-                'https://ultrapop.com/img/p/%s/%s-small_default.jpg',
-                implode('/', str_split($imageId)),
-                $imageId,
-            );
-        }
-
-        return $this->assetUrlResolver->resolve($path ?: self::FALLBACK_IMAGE)
-            ?? $this->assetUrlResolver->resolve(self::FALLBACK_IMAGE)
-            ?? '';
-    }
-
-    private function hasProductThumbnail(?string $path): bool
-    {
-        return 1 === preg_match('~(?:^|/)img/products/\d+-large_default\.jpg$~', trim((string) $path));
     }
 
     /**
