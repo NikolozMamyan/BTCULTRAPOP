@@ -6,11 +6,22 @@ export default class extends Controller {
     connect() {
         this.resizeHandler = () => this.updateHeight();
         window.addEventListener('resize', this.resizeHandler);
-        this.updateHeight();
+
+        this.show('login');
+        this.heightTimer = window.setTimeout(() => this.updateHeight(), 150);
+
+        if (document.fonts?.ready) {
+            document.fonts.ready.then(() => {
+                if (this.element.isConnected) {
+                    this.updateHeight();
+                }
+            });
+        }
     }
 
     disconnect() {
         window.removeEventListener('resize', this.resizeHandler);
+        window.clearTimeout(this.heightTimer);
     }
 
     showRegister() {
@@ -22,7 +33,13 @@ export default class extends Controller {
     }
 
     show(face) {
-        this.cardTarget.classList.toggle('is-register', face === 'register');
+        const showRegister = face === 'register';
+
+        this.cardTarget.classList.toggle('is-register', showRegister);
+        this.loginTarget.toggleAttribute('inert', showRegister);
+        this.loginTarget.setAttribute('aria-hidden', showRegister ? 'true' : 'false');
+        this.registerTarget.toggleAttribute('inert', !showRegister);
+        this.registerTarget.setAttribute('aria-hidden', showRegister ? 'false' : 'true');
         this.updateHeight(face);
     }
 

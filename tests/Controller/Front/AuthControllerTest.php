@@ -15,6 +15,22 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class AuthControllerTest extends WebTestCase
 {
+    public function testGuestProfileDisplaysSplitAuthenticationForms(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/profil');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('.split-auth-card');
+        self::assertSelectorExists('.split-auth-image img[src*="/assets/img/auth/login_form"]');
+        self::assertSelectorExists('form[action="/auth/login"][method="post"] input[name="_csrf_token"]');
+        self::assertSelectorExists('form[action="/auth/register"][method="post"] input[name="_csrf_token"]');
+        self::assertSelectorExists('form[action="/auth/register"] input[name="first_name"]');
+        self::assertSelectorExists('form[action="/auth/register"] input[name="address_name"]');
+        self::assertSelectorExists('[data-action="profile-auth#showRegister"]');
+        self::assertSelectorExists('[data-action="profile-auth#showLogin"]');
+    }
+
     public function testRegularUserIsRedirectedToShopAfterLogin(): void
     {
         $client = static::createClient();
