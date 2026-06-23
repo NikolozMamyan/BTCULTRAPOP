@@ -7,6 +7,7 @@
     {% include 'front/boutique/_catalog.html.twig' with {
         products: products,
         categories: categories,
-        max_price: max_price
+        max_price: max_price,
+        show_hero: true
     } only %}
 {% endblock %}

@@ -461,6 +461,8 @@
     "shop.product_count": "%count% products available",
     "shop.available": "Catalog available",
     "shop.products": "products",
+    "shop.loading.title": "More products coming",
+    "shop.loading.remaining": "products left to discover",
     "shop.filters.title": "Shop filters",
     "shop.filters.categories": "Categories",
     "shop.filters.all": "All",

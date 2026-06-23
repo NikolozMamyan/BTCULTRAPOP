@@ -1,3 +1,5 @@
+{% set product_image_deferred = defer_image|default(false) %}
+
 <article
     class="shop-product-card"
     data-shop-filters-target="card"
@@ -46,7 +48,13 @@
         </div>
 
         <a href="{{ path('app_front_product', {id: product.id}) }}" class="shop-product-card__image-link">
-            <img src="{{ product.img }}" alt="{{ product.name }}" loading="lazy">
+            <img
+                src="{{ product_image_deferred ? 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' : product.img }}"
+                {% if product_image_deferred %}data-src="{{ product.img }}"{% endif %}
+                class="{{ product_image_deferred ? 'is-deferred' : '' }}"
+                alt="{{ product.name }}"
+                loading="lazy"
+            >
         </a>
     </div>
 

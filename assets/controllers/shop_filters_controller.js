@@ -3,9 +3,14 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
     static values = {
         filterField: String,
+        heroAllLabel: String,
+        heroImages: Object,
+        pageSize: { type: Number, default: 6 },
     };
 
     static targets = [
+        'activeCategoryImage',
+        'activeCategoryTitle',
         'activeCount',
         'backdrop',
         'card',
@@ -14,12 +19,17 @@ export default class extends Controller {
         'count',
         'empty',
         'grid',
+        'hero',
+        'heroImage',
+        'loader',
         'mobileCount',
         'modal',
         'new',
         'price',
         'priceLabel',
         'promo',
+        'remaining',
+        'results',
         'sort',
         'trigger',
     ];
@@ -29,7 +39,9 @@ export default class extends Controller {
 
         this.selectedCategory = this.initialSelectedCategory(searchParams);
         this.handleKeydown = this.handleKeydown.bind(this);
+        this.handleWindowScroll = () => this.loadOnScroll();
         document.addEventListener('keydown', this.handleKeydown);
+        window.addEventListener('scroll', this.handleWindowScroll, { passive: true });
 
         if (searchParams.get('filter') === 'nouveautes') {
             this.newTarget.checked = true;
@@ -37,11 +49,13 @@ export default class extends Controller {
 
         this.syncCategoryButtons();
         this.syncCategoryGroups();
+        this.syncHero();
         this.filter();
     }
 
     disconnect() {
         document.removeEventListener('keydown', this.handleKeydown);
+        window.removeEventListener('scroll', this.handleWindowScroll);
         document.body.classList.remove('shop-filters-open');
     }
 
@@ -72,6 +86,7 @@ export default class extends Controller {
 
         this.syncCategoryButtons();
         this.syncCategoryGroups();
+        this.syncHero();
         this.filter();
     }
 
@@ -111,6 +126,7 @@ export default class extends Controller {
             button.classList.toggle('is-active', button.dataset.shopFiltersCategoryParam === 'all');
         });
         this.syncCategoryGroups();
+        this.syncHero();
 
         this.filter();
     }
@@ -132,7 +148,7 @@ export default class extends Controller {
 
         this.priceLabelTarget.textContent = maximumPrice;
 
-        const visibleCards = this.cardTargets.filter((card) => {
+        const matchingCards = this.cardTargets.filter((card) => {
             const matchesCategory = this.selectedCategory === 'all'
                 || this.cardMatchesCategory(card, filterField);
             const matchesPrice = Number(card.dataset.price) <= maximumPrice;
@@ -140,16 +156,106 @@ export default class extends Controller {
                 || requestedTags.includes(card.dataset.tag);
             const visible = matchesCategory && matchesPrice && matchesTag;
 
-            card.hidden = !visible;
+            card.dataset.filterMatch = visible ? 'true' : 'false';
+            card.hidden = true;
 
             return visible;
         });
 
         this.sortCards();
-        this.countTarget.textContent = visibleCards.length;
-        this.mobileCountTarget.textContent = visibleCards.length;
-        this.emptyTarget.hidden = visibleCards.length !== 0;
+        this.filteredCards = this.cardTargets.filter(
+            (card) => card.dataset.filterMatch === 'true',
+        );
+        this.renderedCardCount = 0;
+        this.isLoadingMore = false;
+        this.resultsTarget.scrollTop = 0;
+        this.revealNextBatch();
+
+        this.countTarget.textContent = matchingCards.length;
+        this.mobileCountTarget.textContent = matchingCards.length;
+
+        this.emptyTarget.hidden = matchingCards.length !== 0;
         this.updateActiveCount(maximumPrice, promoOnly, newOnly);
+    }
+
+    loadOnScroll() {
+        if (
+            this.isLoadingMore
+            || !this.filteredCards
+            || this.renderedCardCount >= this.filteredCards.length
+        ) {
+            return;
+        }
+
+        const styles = window.getComputedStyle(this.resultsTarget);
+        const hasInternalScroll = ['auto', 'scroll'].includes(styles.overflowY)
+            && this.resultsTarget.scrollHeight > this.resultsTarget.clientHeight;
+        const distanceToEnd = hasInternalScroll
+            ? this.resultsTarget.scrollHeight
+                - this.resultsTarget.scrollTop
+                - this.resultsTarget.clientHeight
+            : this.loaderTarget.getBoundingClientRect().top - window.innerHeight;
+
+        if (distanceToEnd > 320) {
+            return;
+        }
+
+        this.isLoadingMore = true;
+        this.loaderTarget.classList.add('is-loading');
+
+        window.setTimeout(() => {
+            this.revealNextBatch();
+            this.loaderTarget.classList.remove('is-loading');
+            this.isLoadingMore = false;
+        }, 420);
+    }
+
+    revealNextBatch() {
+        if (!this.filteredCards) {
+            return;
+        }
+
+        const nextCount = Math.min(
+            this.renderedCardCount + this.pageSizeValue,
+            this.filteredCards.length,
+        );
+
+        this.filteredCards
+            .slice(this.renderedCardCount, nextCount)
+            .forEach((card, index) => {
+                card.hidden = false;
+                card.style.setProperty('--shop-card-reveal-index', index);
+                this.hydrateCardImage(card);
+            });
+
+        this.renderedCardCount = nextCount;
+        const remaining = Math.max(0, this.filteredCards.length - nextCount);
+
+        this.remainingTarget.textContent = remaining;
+        this.loaderTarget.hidden = remaining === 0;
+    }
+
+    hydrateCardImage(card) {
+        const image = card.querySelector('img[data-src]');
+
+        if (!image) {
+            return;
+        }
+
+        const source = image.dataset.src;
+
+        image.removeAttribute('data-src');
+
+        if (!source) {
+            image.classList.remove('is-deferred');
+
+            return;
+        }
+
+        image.addEventListener('load', () => {
+            image.classList.remove('is-deferred');
+        }, { once: true });
+        image.src = source;
     }
 
     updateActiveCount(maximumPrice, promoOnly, newOnly) {
@@ -228,5 +334,66 @@ export default class extends Controller {
                 group.open = true;
             }
         });
+    }
+
+    syncHero() {
+        if (
+            !this.hasHeroTarget
+            || !this.hasHeroImageTarget
+            || !this.hasHeroImagesValue
+        ) {
+            return;
+        }
+
+        const activeCategory = this.categoryTargets.find(
+            (button) => button.dataset.shopFiltersCategoryParam === this.selectedCategory,
+        );
+        const heroKey = activeCategory?.dataset.shopFiltersHeroKeyParam || 'all';
+        const heroImages = this.heroImagesValue;
+        const source = heroImages[heroKey] || heroImages.all;
+        const label = this.selectedCategory === 'all'
+            ? this.heroAllLabelValue
+            : this.selectedCategory;
+
+        this.heroImageTarget.alt = label;
+        this.heroTarget.setAttribute('aria-label', label);
+        this.heroTarget.dataset.heroKey = heroKey;
+
+        if (this.hasActiveCategoryTitleTarget) {
+            this.activeCategoryTitleTarget.textContent = label;
+        }
+
+        if (!source || new URL(source, window.location.href).href === this.heroImageTarget.src) {
+            if (source && this.hasActiveCategoryImageTarget) {
+                this.activeCategoryImageTarget.src = source;
+            }
+
+            return;
+        }
+
+        this.pendingHeroSource = source;
+        const candidate = new Image();
+
+        candidate.addEventListener('load', () => {
+            if (this.pendingHeroSource !== source) {
+                return;
+            }
+
+            this.heroTarget.classList.add('is-changing');
+
+            requestAnimationFrame(() => {
+                this.heroImageTarget.src = source;
+
+                if (this.hasActiveCategoryImageTarget) {
+                    this.activeCategoryImageTarget.src = source;
+                }
+
+                requestAnimationFrame(() => {
+                    this.heroTarget.classList.remove('is-changing');
+                });
+            });
+        }, { once: true });
+
+        candidate.src = source;
     }
 }

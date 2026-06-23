@@ -461,6 +461,8 @@
     "shop.product_count": "%count% produits disponibles",
     "shop.available": "Catalogue disponible",
     "shop.products": "produits",
+    "shop.loading.title": "La suite arrive",
+    "shop.loading.remaining": "produits à découvrir",
     "shop.filters.title": "Filtres de la boutique",
     "shop.filters.categories": "Catégories",
     "shop.filters.all": "Tout",

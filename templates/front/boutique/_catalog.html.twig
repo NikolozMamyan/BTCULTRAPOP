@@ -7,15 +7,27 @@
 {% set catalog_max_price = max_price|default(120) %}
 {% set catalog_breadcrumb = breadcrumb|default('shop.breadcrumb') %}
 {% set catalog_title = title|default('shop.title') %}
+{% set catalog_show_hero = show_hero|default(false) %}
+{% set catalog_hero_images = {
+    all: asset('img/boutique/boutique_tout.jpg'),
+    drinks: asset('img/boutique/boutique_boissons.jpg'),
+    savory: asset('img/boutique/boutique_salée.jpg'),
+    sweet: asset('img/boutique/boutique_sucrée.jpg')
+} %}
 
 {% if catalog_products %}
-    <section class="shop-catalog">
+    <section class="shop-catalog {{ catalog_show_hero ? 'shop-catalog--with-hero' : '' }}">
         <h1 class="sr-only">{{ catalog_title|trans }}</h1>
         <div
             class="shop-layout max-w-7xl mx-auto px-5"
             data-controller="shop-filters"
             data-shop-filters-all-value="{{ 'shop.filters.all'|trans }}"
             data-shop-filters-filter-field-value="{{ catalog_filter_field }}"
+            data-shop-filters-page-size-value="6"
+            {% if catalog_show_hero %}
+                data-shop-filters-hero-all-label-value="{{ catalog_title|trans }}"
+                data-shop-filters-hero-images-value="{{ catalog_hero_images|json_encode|e('html_attr') }}"
+            {% endif %}
         >
             <button
                 type="button"
@@ -25,6 +37,25 @@
                 aria-label="{{ 'shop.filters.close'|trans }}"
                 tabindex="-1"
             ></button>
+
+            {% if catalog_show_hero %}
+                <section
+                    class="shop-category-hero"
+                    data-shop-filters-target="hero"
+                    aria-label="{{ catalog_title|trans }}"
+                >
+                    <div class="shop-category-hero__media">
+                        <img
+                            src="{{ catalog_hero_images.all }}"
+                            alt="{{ catalog_title|trans }}"
+                            data-shop-filters-target="heroImage"
+                            width="1800"
+                            height="1200"
+                            fetchpriority="high"
+                        >
+                    </div>
+                </section>
+            {% endif %}
 
             <aside
                 id="shop-filters-modal"
@@ -74,6 +105,7 @@
                             class="shop-category-button shop-category-button--root is-active"
                             data-shop-filters-target="category"
                             data-shop-filters-category-param="all"
+                            data-shop-filters-hero-key-param="all"
                             data-action="shop-filters#selectCategory"
                         >
                             <span class="shop-category-button__label">
@@ -100,6 +132,11 @@
                         </button>
                         {% if catalog_filter_field == 'category' %}
                             {% for filter_group in catalog_filter_items %}
+                                {% set group_hero_key = filter_group.name == 'Boissons'
+                                    ? 'drinks'
+                                    : (filter_group.name == 'Épicerie salée'
+                                        ? 'savory'
+                                        : (filter_group.name == 'Épicerie sucrée' ? 'sweet' : 'all')) %}
                                 {% set group_subtitle = filter_group.name == 'Boissons'
                                     ? 'shop.filters.group.drinks'
                                     : (filter_group.name == 'Épicerie salée'
@@ -138,6 +175,7 @@
                                             class="shop-category-button shop-category-button--parent"
                                             data-shop-filters-target="category"
                                             data-shop-filters-category-param="{{ filter_group.name }}"
+                                            data-shop-filters-hero-key-param="{{ group_hero_key }}"
                                             data-action="shop-filters#selectCategory"
                                         >
                                             <span class="shop-category-button__label">
@@ -152,6 +190,7 @@
                                                 class="shop-category-button shop-category-button--child"
                                                 data-shop-filters-target="category"
                                                 data-shop-filters-category-param="{{ filter_item.name }}"
+                                                data-shop-filters-hero-key-param="{{ group_hero_key }}"
                                                 data-action="shop-filters#selectCategory"
                                                 title="{{ filter_item.name }}"
                                             >
@@ -234,13 +273,37 @@
                 </div>
             </aside>
 
-            <div class="shop-results">
+            <div
+                class="shop-results"
+                data-shop-filters-target="results"
+            >
                 <div class="shop-results-toolbar">
                     <div class="shop-results-summary">
-                        <p>
-                            <strong data-shop-filters-target="count">{{ catalog_products|length }}</strong>
-                            {{ 'shop.products'|trans }}
-                        </p>
+                        {% if catalog_show_hero %}
+                            <div class="shop-active-category" aria-live="polite">
+                                <img
+                                    src="{{ catalog_hero_images.all }}"
+                                    alt=""
+                                    data-shop-filters-target="activeCategoryImage"
+                                    width="64"
+                                    height="44"
+                                >
+                                <span class="shop-active-category__copy">
+                                    <strong data-shop-filters-target="activeCategoryTitle">
+                                        {{ catalog_title|trans }}
+                                    </strong>
+                                    <small>
+                                        <b data-shop-filters-target="count">{{ catalog_products|length }}</b>
+                                        {{ 'shop.products'|trans }}
+                                    </small>
+                                </span>
+                            </div>
+                        {% else %}
+                            <p>
+                                <strong data-shop-filters-target="count">{{ catalog_products|length }}</strong>
+                                {{ 'shop.products'|trans }}
+                            </p>
+                        {% endif %}
                         <button
                             type="button"
                             class="shop-filter-trigger"
@@ -267,13 +330,33 @@
 
                 <div class="shop-products-grid" data-shop-filters-target="grid">
                     {% for product in catalog_products %}
-                        {% include 'front/boutique/_product_card.html.twig' with {product: product} only %}
+                        {% include 'front/boutique/_product_card.html.twig' with {
+                            product: product,
+                            defer_image: true
+                        } only %}
                     {% endfor %}
                 </div>
 
                 <div class="shop-no-results" data-shop-filters-target="empty" hidden>
                     <i class="fa-solid fa-box-open"></i>
                     <p>{{ 'shop.filters.no_results'|trans }}</p>
+                </div>
+
+                <div
+                    class="shop-infinite-loader"
+                    data-shop-filters-target="loader"
+                    role="status"
+                    aria-live="polite"
+                    hidden
+                >
+                    <span class="shop-infinite-loader__spinner" aria-hidden="true"></span>
+                    <span>
+                        <strong>{{ 'shop.loading.title'|trans }}</strong>
+                        <small>
+                            <b data-shop-filters-target="remaining">0</b>
+                            {{ 'shop.loading.remaining'|trans }}
+                        </small>
+                    </span>
                 </div>
             </div>
         </div>

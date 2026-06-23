@@ -124,6 +124,18 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorCount(3, '.shop-filter-card');
         self::assertSelectorExists('[data-controller="shop-filters"]');
         self::assertSelectorExists('.shop-layout[data-shop-filters-filter-field-value="category"]');
+        self::assertSelectorExists('.shop-category-hero[data-shop-filters-target="hero"]');
+        self::assertSelectorExists('.shop-category-hero__media img[data-shop-filters-target="heroImage"][src*="/assets/img/boutique/boutique_tout-"]');
+        self::assertSelectorNotExists('.shop-category-hero__caption');
+        self::assertSelectorExists('.shop-results-toolbar--contextual');
+        self::assertSelectorExists('.shop-active-category img[data-shop-filters-target="activeCategoryImage"]');
+        self::assertSelectorTextContains('[data-shop-filters-target="activeCategoryTitle"]', 'Toute la boutique');
+        self::assertSelectorExists('.shop-results[data-shop-filters-target="results"]');
+        self::assertSelectorExists('.shop-infinite-loader[data-shop-filters-target="loader"]');
+        self::assertSelectorExists('[data-shop-filters-page-size-value="6"]');
+        self::assertSelectorExists('.shop-category-button[data-shop-filters-hero-key-param="drinks"]');
+        self::assertSelectorExists('.shop-category-button[data-shop-filters-hero-key-param="savory"]');
+        self::assertSelectorExists('.shop-category-button[data-shop-filters-hero-key-param="sweet"]');
         self::assertGreaterThan(1, $crawler->filter('.shop-category-button')->count());
         self::assertSelectorCount(4, '.shop-category-group');
         self::assertSelectorExists('.shop-category-group[open]');
