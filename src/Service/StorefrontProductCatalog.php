@@ -23,6 +23,7 @@ final readonly class StorefrontProductCatalog
         private ProductRepository $products,
         private UserFavoriteRepository $favorites,
         private AssetUrlResolver $assetUrlResolver,
+        private ProductSlugger $productSlugger,
     ) {
     }
 
@@ -224,10 +225,14 @@ final readonly class StorefrontProductCatalog
 
         return [
             'id' => $product->getId(),
+            'slug' => $this->productSlugger->slug($product),
             'name' => $product->getName(),
             'description' => $product->getDescription(),
             'ingredients' => $product->getIngredients(),
+            'seo_title' => $product->getSeoTitle(),
+            'seo_description' => $product->getSeoDescription(),
             'reference' => $product->getReference(),
+            'ean' => $product->getEan(),
             'cat' => $category?->getName() ?? '',
             'category_path' => $category?->getPathNames() ?? [],
             'category_position_path' => $this->categoryPositionPath($category),
@@ -241,6 +246,7 @@ final readonly class StorefrontProductCatalog
             'pop' => min(100, $quantity),
             'tag' => $this->tagForStatus($product->getStatus()),
             'favorite' => false,
+            'updated_at' => $product->getUpdatedAt(),
         ];
     }
 

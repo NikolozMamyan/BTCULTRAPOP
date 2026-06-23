@@ -1,6 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}{% block admin_title %}{{ 'admin.title'|trans }}{% endblock %} | ULTRAPOP{% endblock %}
+{% block meta_robots %}noindex, nofollow, noarchive{% endblock %}
 {% block body_class %}admin-body{% endblock %}
 
 {% block body %}

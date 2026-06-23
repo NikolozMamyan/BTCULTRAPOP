@@ -1,0 +1,24 @@
+# ULTRAPOP
+
+> Boutique française de boissons, snacks, nouilles, bonbons et céréales sous licences manga et pop culture officielles.
+
+## Pages principales
+
+- [Accueil]({{ seo_origin ~ path('app_front_home') }}): présentation de l’univers ULTRAPOP.
+- [Boutique]({{ seo_origin ~ path('app_front_boutique') }}): catalogue complet des produits disponibles.
+- [Licences]({{ seo_origin ~ path('app_front_licences') }}): navigation par univers et licences.
+- [Promotions]({{ seo_origin ~ path('app_front_soldes') }}): produits actuellement en promotion.
+
+## Informations utiles
+
+- Les prix sont affichés en euros TTC.
+- La disponibilité et le stock sont indiqués sur chaque fiche produit.
+- Les compositions alimentaires sont affichées dans l’onglet Ingrédients lorsqu’elles sont disponibles.
+- Les pages panier, compte client, paiement, API et administration ne sont pas des pages publiques à référencer.
+- URL du sitemap XML : {{ seo_origin ~ path('app_seo_sitemap') }}
+
+## Catalogue
+
+{% for product in products -%}
+- [{{ product.name }}]({{ product.url }}) — {{ product.category }}{% if product.license %}, licence {{ product.license }}{% endif %}{% if product.description %}. {{ product.description }}{% endif %}
+{% endfor %}

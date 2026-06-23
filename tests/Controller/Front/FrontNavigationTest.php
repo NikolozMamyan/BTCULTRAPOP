@@ -9,6 +9,8 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class FrontNavigationTest extends WebTestCase
 {
+    private const PRODUCT_PATH = '/boutique/produit/1648-ultrapop-dragon-ball-z-vegeta-ice-tea-peche-33cl';
+
     #[DataProvider('providePages')]
     public function testFrontPageRendersStorefront(string $path, string $title, string $page): void
     {
@@ -44,7 +46,7 @@ final class FrontNavigationTest extends WebTestCase
         yield 'shop' => ['/boutique', 'Toute la boutique', 'shop'];
         yield 'licences' => ['/licences', 'Licences', 'shop'];
         yield 'sales' => ['/soldes', 'Soldes', 'shop'];
-        yield 'product' => ['/boutique/product/1648', 'ULTRA ICE TEA - Vegeta', 'product'];
+        yield 'product' => [self::PRODUCT_PATH, 'ULTRA ICE TEA - Vegeta', 'product'];
         yield 'wishlist' => ['/favoris', 'Mes favoris', 'wishlist'];
         yield 'profile' => ['/profil', 'Mon profil', 'profile'];
         yield 'cart' => ['/cart', 'Mon panier', 'cart'];
@@ -120,7 +122,10 @@ final class FrontNavigationTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorCount(84, '.shop-product-card');
         self::assertSelectorTextContains('.shop-product-card:first-child', 'ULTRA ICE TEA - Vegeta');
-        self::assertSelectorExists('.shop-product-card a[href="/boutique/product/1648"]');
+        self::assertSelectorExists('.shop-product-card a[href="' . self::PRODUCT_PATH . '"]');
+        self::assertSelectorExists('link[rel="canonical"][href$="/boutique"]');
+        self::assertSelectorExists('meta[property="og:type"][content="website"]');
+        self::assertSelectorTextContains('.shop-seo-copy', 'boutique food dédiée aux univers manga');
         self::assertSelectorExists('.shop-product-card .favorite-button[data-action="favorites#toggle"]');
         self::assertSelectorExists('.shop-product-card__add.cart-add-button[data-action="cart#add"]');
         self::assertSelectorExists('.shop-product-card button[data-action="product-preview-open"] .fa-magnifying-glass-plus');
@@ -174,7 +179,7 @@ final class FrontNavigationTest extends WebTestCase
     {
         $client = static::createClient();
         $this->skipIfStorefrontCatalogIsUnavailable();
-        $client->request('GET', '/boutique/product/1648');
+        $crawler = $client->request('GET', self::PRODUCT_PATH);
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'ULTRA ICE TEA - Vegeta');
@@ -191,6 +196,24 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorCount(3, '.product-review-card');
         self::assertSelectorTextContains('[data-panel="reviews"]', 'Données fictives de préproduction');
         self::assertSelectorCount(0, '.product-formats');
+        self::assertSelectorExists('link[rel="canonical"][href$="' . self::PRODUCT_PATH . '"]');
+        self::assertSelectorExists('meta[property="og:type"][content="product"]');
+        self::assertSelectorExists('meta[property="og:image"][content*="164-large_default"]');
+        self::assertStringContainsString('"@type":"Product"', $crawler->html());
+        self::assertStringContainsString('"priceCurrency":"EUR"', $crawler->html());
+        self::assertStringNotContainsString('"aggregateRating"', $crawler->html());
+    }
+
+    public function testLegacyAndIncorrectProductUrlsRedirectToCanonicalUrl(): void
+    {
+        $client = static::createClient();
+        $this->skipIfStorefrontCatalogIsUnavailable();
+
+        $client->request('GET', '/boutique/product/1648');
+        self::assertResponseRedirects(self::PRODUCT_PATH, 301);
+
+        $client->request('GET', '/boutique/produit/1648-mauvais-slug');
+        self::assertResponseRedirects(self::PRODUCT_PATH, 301);
     }
 
     public function testCartPageDisplaysTheCartLayout(): void
@@ -260,7 +283,7 @@ final class FrontNavigationTest extends WebTestCase
         yield 'shop' => ['/boutique', 'The entire shop'];
         yield 'licenses' => ['/licences', 'Licenses'];
         yield 'sales' => ['/soldes', 'Sales'];
-        yield 'product' => ['/boutique/product/1648', 'ULTRA ICE TEA - Vegeta'];
+        yield 'product' => [self::PRODUCT_PATH, 'ULTRA ICE TEA - Vegeta'];
         yield 'favorites' => ['/favoris', 'My favorites'];
         yield 'profile' => ['/profil', 'My profile'];
         yield 'cart' => ['/cart', 'My cart'];

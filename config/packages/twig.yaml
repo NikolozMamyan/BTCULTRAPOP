@@ -1,5 +1,7 @@
 twig:
     file_name_pattern: '*.twig'
+    globals:
+        seo_origin: '%env(SEO_ORIGIN)%'
 
 when@test:
     twig:

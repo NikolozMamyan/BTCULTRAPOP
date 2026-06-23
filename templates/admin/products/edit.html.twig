@@ -11,7 +11,7 @@
                 <p>{{ 'admin.product.edit.subtitle'|trans({'%reference%': product.reference}) }}</p>
             </div>
             <div class="admin-heading-actions">
-                <a href="{{ path('app_front_product', {id: product.id}) }}" target="_blank" rel="noreferrer" class="admin-secondary-button">
+                <a href="{{ path('app_front_product_legacy', {id: product.id}) }}" target="_blank" rel="noreferrer" class="admin-secondary-button">
                     <i class="fa-solid fa-up-right-from-square"></i>
                     {{ 'admin.product.action.view_front'|trans }}
                 </a>

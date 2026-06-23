@@ -14,6 +14,7 @@ final readonly class StorefrontSearchProvider
         private ProductRepository $products,
         private UrlGeneratorInterface $urlGenerator,
         private AssetUrlResolver $assetUrlResolver,
+        private ProductSlugger $productSlugger,
     ) {
     }
 
@@ -46,7 +47,10 @@ final readonly class StorefrontSearchProvider
             'price' => $price,
             'priceFormatted' => number_format($price, 2, ',', ' ') . ' €',
             'inStock' => $quantity > 0,
-            'url' => $this->urlGenerator->generate('app_front_product', ['id' => $product->getId()]),
+            'url' => $this->urlGenerator->generate(
+                'app_front_product',
+                $this->productSlugger->routeParameters($product),
+            ),
         ];
     }
 }

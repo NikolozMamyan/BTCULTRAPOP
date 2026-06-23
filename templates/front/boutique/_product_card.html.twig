@@ -10,7 +10,7 @@
     data-popularity="{{ product.pop }}"
     data-rating="{{ product.rating|default(0) ?: 0 }}"
     data-tag="{{ product.tag|default('') }}"
-    data-product-url="{{ path('app_front_product', {id: product.id}) }}"
+    data-product-url="{{ path('app_front_product', {id: product.id, slug: product.slug}) }}"
     tabindex="0"
 >
     <div class="shop-product-card__visual">
@@ -40,14 +40,14 @@
                 data-action="product-preview-open"
                 data-product-preview-image="{{ product.img }}"
                 data-product-preview-title="{{ product.name }}"
-                data-product-preview-url="{{ path('app_front_product', {id: product.id}) }}"
+                data-product-preview-url="{{ path('app_front_product', {id: product.id, slug: product.slug}) }}"
                 aria-label="{{ 'product.preview'|trans({'%name%': product.name}) }}"
             >
                 <i class="fa-solid fa-magnifying-glass-plus"></i>
             </button>
         </div>
 
-        <a href="{{ path('app_front_product', {id: product.id}) }}" class="shop-product-card__image-link">
+        <a href="{{ path('app_front_product', {id: product.id, slug: product.slug}) }}" class="shop-product-card__image-link">
             <img
                 src="{{ product_image_deferred ? 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' : product.img }}"
                 {% if product_image_deferred %}data-src="{{ product.img }}"{% endif %}
@@ -60,7 +60,7 @@
 
     <div class="shop-product-card__body">
         <span class="shop-product-card__category">{{ product.cat }}</span>
-        <h2><a href="{{ path('app_front_product', {id: product.id}) }}">{{ product.name }}</a></h2>
+        <h2><a href="{{ path('app_front_product', {id: product.id, slug: product.slug}) }}">{{ product.name }}</a></h2>
 
         <div class="shop-product-card__stock {{ product.in_stock ? 'is-in-stock' : 'is-out-of-stock' }}">
             <i class="fa-solid {{ product.in_stock ? 'fa-circle-check' : 'fa-circle-xmark' }}"></i>

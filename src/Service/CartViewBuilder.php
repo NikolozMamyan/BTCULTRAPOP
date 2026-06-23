@@ -14,6 +14,7 @@ final readonly class CartViewBuilder
         private UrlGeneratorInterface $urlGenerator,
         private ShippingRateCalculator $shippingRateCalculator,
         private AssetUrlResolver $assetUrlResolver,
+        private ProductSlugger $productSlugger,
     ) {
     }
 
@@ -93,7 +94,12 @@ final readonly class CartViewBuilder
             'quantity' => $item->getQuantity(),
             'unitPriceFormatted' => $this->formatCents($item->getUnitPriceTaxIncludedCents()),
             'totalFormatted' => $this->formatCents($item->getTotalTaxIncludedCents()),
-            'productUrl' => null === $productId ? null : $this->urlGenerator->generate('app_front_product', ['id' => $productId]),
+            'productUrl' => null === $product
+                ? null
+                : $this->urlGenerator->generate(
+                    'app_front_product',
+                    $this->productSlugger->routeParameters($product),
+                ),
             'updateUrl' => $this->urlGenerator->generate('app_api_cart_item_update', ['id' => $item->getId()]),
             'removeUrl' => $this->urlGenerator->generate('app_api_cart_item_remove', ['id' => $item->getId()]),
         ];

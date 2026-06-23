@@ -1,6 +1,66 @@
 {% extends 'front/base.html.twig' %}
 
-{% block title %}{{ product.name }} | ULTRAPOP{% endblock %}
+{% block title %}{{ product.seo_title ?: product.name }} | ULTRAPOP{% endblock %}
+{% block meta_description %}{{ product.seo_description ?: product.description ?: 'product.description'|trans({'%name%': product.name}) }}{% endblock %}
+{% block canonical_url %}{{ seo_origin ~ path('app_front_product', {id: product.id, slug: product.slug}) }}{% endblock %}
+{% block og_type %}product{% endblock %}
+{% block og_image %}{{ product.img starts with 'http://' or product.img starts with 'https://' ? product.img : seo_origin ~ product.img }}{% endblock %}
+{% block structured_data %}
+    {% set product_schema = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: product.name,
+        description: product.seo_description ?: product.description,
+        image: [product.img starts with 'http://' or product.img starts with 'https://' ? product.img : seo_origin ~ product.img],
+        sku: product.reference,
+        category: product.cat,
+        brand: {
+            '@type': 'Brand',
+            name: 'ULTRAPOP'
+        },
+        offers: {
+            '@type': 'Offer',
+            url: seo_origin ~ path('app_front_product', {id: product.id, slug: product.slug}),
+            priceCurrency: 'EUR',
+            price: product.price|number_format(2, '.', ''),
+            availability: product.in_stock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            itemCondition: 'https://schema.org/NewCondition',
+            seller: {
+                '@type': 'Organization',
+                name: 'ULTRAPOP'
+            }
+        }
+    } %}
+    {% if product.ean %}
+        {% set product_schema = product_schema|merge({gtin13: product.ean}) %}
+    {% endif %}
+    {% set breadcrumb_schema = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'common.home'|trans,
+                item: seo_origin ~ path('app_front_home')
+            },
+            {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'common.shop'|trans,
+                item: seo_origin ~ path('app_front_boutique')
+            },
+            {
+                '@type': 'ListItem',
+                position: 3,
+                name: product.name,
+                item: seo_origin ~ path('app_front_product', {id: product.id, slug: product.slug})
+            }
+        ]
+    } %}
+    <script type="application/ld+json">{{ product_schema|json_encode|raw }}</script>
+    <script type="application/ld+json">{{ breadcrumb_schema|json_encode|raw }}</script>
+{% endblock %}
 {% block storefront_data %}data-page="product"{% endblock %}
 
 {% block main %}

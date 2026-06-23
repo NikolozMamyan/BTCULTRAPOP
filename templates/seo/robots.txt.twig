@@ -1,0 +1,16 @@
+{% if indexable -%}
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /cart
+Disallow: /checkout/
+Disallow: /favoris
+Disallow: /profil
+
+Sitemap: {{ seo_origin ~ path('app_seo_sitemap') }}
+{% else -%}
+User-agent: *
+Disallow: /
+{% endif %}

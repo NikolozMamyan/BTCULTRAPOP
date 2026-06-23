@@ -1,7 +1,8 @@
 {
     "meta.description": "ULTRAPOP, la boutique dédiée aux fans de pop culture.",
     "page.home.title": "ULTRAPOP — Boutique Pop Culture 2026",
-    "page.shop.title": "Boutique | ULTRAPOP",
+    "page.shop.title": "Boutique manga et produits japonais | ULTRAPOP",
+    "page.shop.meta_description": "Découvre les boissons, snacks et produits alimentaires sous licences manga officielles : One Piece, Naruto, Dragon Ball, Demon Slayer et plus encore.",
     "page.licenses.title": "Licences | ULTRAPOP",
     "page.sales.title": "Soldes | ULTRAPOP",
     "page.product.title": "Produit indisponible | ULTRAPOP",
@@ -537,6 +538,8 @@
     "product.no_reviews": "Aucun avis n’a encore été publié pour ce produit.",
     "product.related_eyebrow": "À découvrir aussi",
     "product.related": "Produits associés",
+    "shop.seo.title": "La boutique food dédiée aux univers manga",
+    "shop.seo.description": "Explore une sélection de boissons, chips, nouilles, bonbons et céréales inspirée des licences manga les plus populaires. ULTRAPOP réunit gourmandise, collection et pop culture dans des produits officiels faciles à offrir ou à découvrir.",
     "licenses.empty_eyebrow": "Licences à venir",
     "licenses.empty_title": "Les univers se préparent",
     "licenses.empty_text": "Les licences seront affichées dès que les premiers produits seront disponibles.",

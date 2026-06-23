@@ -6789,6 +6789,27 @@ body.is-page-loading {
     margin-top: clamp(3rem, 7vw, 6rem);
 }
 
+.shop-seo-copy {
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.shop-seo-copy h2 {
+    margin-bottom: .65rem;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: clamp(1.25rem, 3vw, 1.65rem);
+    font-weight: 850;
+}
+
+.shop-seo-copy p {
+    max-width: 850px;
+    color: var(--text-light);
+    font-size: .82rem;
+    line-height: 1.8;
+}
+
 .product-related__heading {
     display: flex;
     align-items: flex-end;

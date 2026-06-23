@@ -3,6 +3,7 @@
 namespace App\Controller\Front;
 
 use App\Entity\User;
+use App\Service\ProductSlugger;
 use App\Service\StorefrontProductCatalog;
 use App\Service\StorefrontProductReviews;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,17 +24,51 @@ final class BoutiqueController extends AbstractController
         ]);
     }
 
-    #[Route('/boutique/product/{id}', name: 'app_front_product', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function product(
+    #[Route('/boutique/product/{id}', name: 'app_front_product_legacy', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function legacyProduct(
         int $id,
         StorefrontProductCatalog $catalog,
+        ProductSlugger $productSlugger,
+    ): Response {
+        $product = $catalog->findEntity($id);
+
+        if (null === $product) {
+            return $this->render('front/boutique/not_found.html.twig', [], new Response('', Response::HTTP_NOT_FOUND));
+        }
+
+        return $this->redirectToRoute(
+            'app_front_product',
+            $productSlugger->routeParameters($product),
+            Response::HTTP_MOVED_PERMANENTLY,
+        );
+    }
+
+    #[Route(
+        '/boutique/produit/{id}-{slug}',
+        name: 'app_front_product',
+        requirements: ['id' => '\d+', 'slug' => '[a-z0-9]+(?:-[a-z0-9]+)*'],
+        methods: ['GET'],
+    )]
+    public function product(
+        int $id,
+        string $slug,
+        StorefrontProductCatalog $catalog,
         StorefrontProductReviews $productReviews,
+        ProductSlugger $productSlugger,
     ): Response
     {
         $product = $catalog->findEntity($id);
 
         if (null === $product) {
             return $this->render('front/boutique/not_found.html.twig', [], new Response('', Response::HTTP_NOT_FOUND));
+        }
+
+        if ($slug !== $productSlugger->slug($product)) {
+            return $this->redirectToRoute(
+                'app_front_product',
+                $productSlugger->routeParameters($product),
+                Response::HTTP_MOVED_PERMANENTLY,
+            );
         }
 
         $reviews = $productReviews->forProduct($product);

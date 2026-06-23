@@ -1,6 +1,33 @@
 {% extends 'front/base.html.twig' %}
 
 {% block title %}{{ 'page.shop.title'|trans }}{% endblock %}
+{% block meta_description %}{{ 'page.shop.meta_description'|trans }}{% endblock %}
+{% block canonical_url %}{{ seo_origin ~ path('app_front_boutique') }}{% endblock %}
+{% block og_image %}{{ seo_origin ~ asset('img/boutique/boutique_tout.jpg') }}{% endblock %}
+{% block structured_data %}
+    {% set product_items = [] %}
+    {% for product in products %}
+        {% set product_items = product_items|merge([{
+            '@type': 'ListItem',
+            position: loop.index,
+            name: product.name,
+            url: seo_origin ~ path('app_front_product', {id: product.id, slug: product.slug})
+        }]) %}
+    {% endfor %}
+    {% set shop_schema = {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: 'shop.title'|trans,
+        description: 'page.shop.meta_description'|trans,
+        url: seo_origin ~ path('app_front_boutique'),
+        mainEntity: {
+            '@type': 'ItemList',
+            numberOfItems: products|length,
+            itemListElement: product_items
+        }
+    } %}
+    <script type="application/ld+json">{{ shop_schema|json_encode|raw }}</script>
+{% endblock %}
 {% block storefront_data %}data-page="shop"{% endblock %}
 
 {% block main %}
@@ -10,4 +37,9 @@
         max_price: max_price,
         show_hero: true
     } only %}
+
+    <section class="shop-seo-copy max-w-7xl mx-auto px-5" aria-labelledby="shop-seo-title">
+        <h2 id="shop-seo-title">{{ 'shop.seo.title'|trans }}</h2>
+        <p>{{ 'shop.seo.description'|trans }}</p>
+    </section>
 {% endblock %}

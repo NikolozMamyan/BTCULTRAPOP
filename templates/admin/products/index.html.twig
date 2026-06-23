@@ -113,7 +113,7 @@
                                 {{ ('admin.product.status.' ~ product.status.value)|trans }}
                             </span>
                             <div class="admin-product-actions">
-                                <a href="{{ path('app_front_product', {id: product.id}) }}" target="_blank" rel="noreferrer" title="{{ 'admin.product.action.view_front'|trans }}">
+                                <a href="{{ path('app_front_product_legacy', {id: product.id}) }}" target="_blank" rel="noreferrer" title="{{ 'admin.product.action.view_front'|trans }}">
                                     <i class="fa-solid fa-up-right-from-square"></i>
                                 </a>
                                 <a href="{{ path('app_admin_products_edit', {id: product.id}) }}" title="{{ 'admin.product.action.edit'|trans }}">
