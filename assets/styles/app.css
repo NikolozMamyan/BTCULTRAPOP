@@ -6656,6 +6656,13 @@ body.is-page-loading {
     font-weight: 750;
 }
 
+.product-reviews__notice {
+    margin-top: .55rem;
+    color: #94a3b8;
+    font-size: .58rem;
+    font-weight: 650;
+}
+
 .product-reviews__distribution {
     display: flex;
     justify-content: center;
@@ -6735,21 +6742,13 @@ body.is-page-loading {
     font-weight: 900;
 }
 
-.product-review-card__identity strong,
-.product-review-card__identity small {
+.product-review-card__identity strong {
     display: block;
 }
 
 .product-review-card__identity strong {
     color: var(--text-dark);
     font-size: .78rem;
-}
-
-.product-review-card__identity small {
-    margin-top: .2rem;
-    color: var(--success-color);
-    font-size: .62rem;
-    font-weight: 750;
 }
 
 .product-review-card time {

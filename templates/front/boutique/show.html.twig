@@ -172,6 +172,7 @@
                                 {% endfor %}
                             </div>
                             <span>{{ 'product.reviews.based_on'|trans({'%count%': reviews.count}) }}</span>
+                            {# <small class="product-reviews__notice">{{ 'product.reviews.preproduction_notice'|trans }}</small> #}
                         </div>
                         <div class="product-reviews__distribution">
                             {% for rating in 5..1 %}
@@ -195,9 +196,6 @@
                                         <span>{{ review.author|first|upper }}</span>
                                         <div>
                                             <strong>{{ review.author }}</strong>
-                                            {% if review.editorial %}
-                                                <small><i class="fa-solid fa-circle-check"></i> {{ 'product.reviews.editorial'|trans }}</small>
-                                            {% endif %}
                                         </div>
                                     </div>
                                     <time datetime="{{ review.created_at|date('Y-m-d') }}">{{ review.created_at|date('d/m/Y') }}</time>

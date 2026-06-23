@@ -533,7 +533,7 @@
     "product.reviews.rating_label": "Average rating: %rating% out of 5",
     "product.reviews.based_on": "Based on %count% reviews",
     "product.reviews.stars": "%count% stars",
-    "product.reviews.editorial": "Editorial review",
+    "product.reviews.preproduction_notice": "Fictional preproduction data",
     "product.no_reviews": "No reviews have been published for this product yet.",
     "product.related_eyebrow": "You may also like",
     "product.related": "Related products",
