@@ -6462,62 +6462,313 @@ body.is-page-loading {
 .product-tabs {
     margin-top: clamp(3rem, 7vw, 6rem);
     border: 1px solid var(--border-color);
-    border-radius: 18px;
+    border-radius: 24px;
     background: #fff;
+    box-shadow: 0 16px 45px rgba(32, 50, 99, .06);
+    overflow: hidden;
+}
+
+.product-tabs__nav-wrapper {
+    padding: .75rem;
+    border-bottom: 1px solid var(--border-color);
+    background: #f8fafc;
 }
 
 .product-tabs__nav {
     display: flex;
-    gap: 1.5rem;
-    padding: 0 1.75rem;
-    border-bottom: 1px solid var(--border-color);
+    max-width: 680px;
+    margin: 0 auto;
+    gap: .4rem;
+    padding: .35rem;
+    border-radius: 16px;
+    background: #eef2f7;
 }
 
 .product-tabs__nav button {
-    position: relative;
-    min-height: 58px;
+    display: inline-flex;
+    min-width: 0;
+    min-height: 44px;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    padding: .7rem 1rem;
+    border-radius: 12px;
     color: var(--text-light);
-    font-size: .78rem;
+    font-size: .76rem;
     font-weight: 850;
-}
-
-.product-tabs__nav button::after {
-    position: absolute;
-    right: 0;
-    bottom: -1px;
-    left: 0;
-    height: 3px;
-    border-radius: 3px 3px 0 0;
-    background: var(--primary-color);
-    content: "";
-    opacity: 0;
+    transition: color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 
 .product-tabs__nav button.is-active {
-    color: var(--text-dark);
+    background: #fff;
+    box-shadow: 0 5px 16px rgba(32, 50, 99, .1);
+    color: var(--primary-color);
+    transform: translateY(-1px);
 }
 
-.product-tabs__nav button.is-active::after {
-    opacity: 1;
+.product-tabs__nav button span {
+    display: inline-grid;
+    min-width: 20px;
+    height: 20px;
+    place-items: center;
+    padding: 0 .35rem;
+    border-radius: 999px;
+    background: rgba(232, 33, 24, .09);
+    color: var(--primary-color);
+    font-size: .62rem;
 }
 
 .product-tabs__panel {
-    min-height: 180px;
-    padding: 2rem;
+    min-height: 220px;
+    padding: clamp(1.5rem, 4vw, 2.75rem);
+    animation: product-tab-enter .35s cubic-bezier(.16, 1, .3, 1);
+}
+
+@keyframes product-tab-enter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.product-tab-copy,
+.product-ingredients-heading {
+    display: grid;
+    max-width: 920px;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.product-tab-copy__icon {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 15px;
+    background: rgba(232, 33, 24, .08);
+    color: var(--primary-color);
+}
+
+.product-tab-copy__icon.is-green {
+    background: rgba(16, 185, 129, .1);
+    color: var(--success-color);
+}
+
+.product-tab-copy__eyebrow {
+    display: block;
+    margin-bottom: .35rem;
+    color: var(--primary-color);
+    font-size: .65rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
 }
 
 .product-tabs__panel h3 {
-    margin-bottom: .8rem;
+    margin-bottom: .65rem;
     font-family: "Bricolage Grotesque", sans-serif;
-    font-size: 1.15rem;
-    font-weight: 800;
+    font-size: clamp(1.15rem, 3vw, 1.5rem);
+    font-weight: 850;
 }
 
-.product-tabs__panel > p {
-    max-width: 850px;
+.product-tab-copy p,
+.product-ingredients-heading p,
+.product-review-card p {
     color: var(--text-light);
     font-size: .82rem;
     line-height: 1.8;
+}
+
+.product-ingredient-tags {
+    display: flex;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+    gap: .65rem;
+}
+
+.product-ingredient-tag {
+    display: inline-flex;
+    max-width: 100%;
+    align-items: flex-start;
+    gap: .45rem;
+    padding: .58rem .9rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    color: var(--text-dark);
+    font-size: .74rem;
+    font-weight: 650;
+    line-height: 1.5;
+}
+
+.product-ingredient-tag i {
+    margin-top: .2rem;
+    color: var(--success-color);
+    font-size: .62rem;
+}
+
+.product-reviews__overview {
+    display: grid;
+    grid-template-columns: minmax(210px, .75fr) minmax(280px, 1.5fr);
+    gap: clamp(1.25rem, 4vw, 3rem);
+}
+
+.product-reviews__score {
+    display: flex;
+    min-height: 220px;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    flex-direction: column;
+    background: #f8fafc;
+    text-align: center;
+}
+
+.product-reviews__score > strong {
+    font-family: "Bricolage Grotesque", sans-serif;
+    color: var(--text-dark);
+    font-size: clamp(3rem, 7vw, 4.2rem);
+    font-weight: 900;
+    line-height: 1;
+}
+
+.product-review-stars {
+    display: flex;
+    gap: .2rem;
+    margin: .7rem 0;
+    color: var(--secondary-color);
+    font-size: 1rem;
+}
+
+.product-reviews__score > span {
+    color: var(--text-light);
+    font-size: .72rem;
+    font-weight: 750;
+}
+
+.product-reviews__distribution {
+    display: flex;
+    justify-content: center;
+    gap: .8rem;
+    flex-direction: column;
+}
+
+.product-rating-row {
+    display: grid;
+    grid-template-columns: 70px minmax(0, 1fr) 38px;
+    align-items: center;
+    gap: .8rem;
+    color: var(--text-light);
+    font-size: .7rem;
+    font-weight: 750;
+}
+
+.product-rating-row strong {
+    color: var(--text-dark);
+    text-align: right;
+}
+
+.product-rating-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: #edf1f6;
+    overflow: hidden;
+}
+
+.product-rating-bar span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--secondary-color), #ff9f1c);
+}
+
+.product-reviews__list {
+    display: grid;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.product-review-card {
+    padding: 1.25rem;
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    background: linear-gradient(145deg, #fff, #fbfcff);
+}
+
+.product-review-card header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.product-review-card__identity {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: .7rem;
+}
+
+.product-review-card__identity > span {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 13px;
+    background: linear-gradient(135deg, var(--primary-color), #ff625c);
+    color: #fff;
+    font-size: .78rem;
+    font-weight: 900;
+}
+
+.product-review-card__identity strong,
+.product-review-card__identity small {
+    display: block;
+}
+
+.product-review-card__identity strong {
+    color: var(--text-dark);
+    font-size: .78rem;
+}
+
+.product-review-card__identity small {
+    margin-top: .2rem;
+    color: var(--success-color);
+    font-size: .62rem;
+    font-weight: 750;
+}
+
+.product-review-card time {
+    flex: 0 0 auto;
+    color: var(--text-light);
+    font-size: .64rem;
+}
+
+.product-review-stars.is-small {
+    margin: .9rem 0 .55rem;
+    font-size: .68rem;
+}
+
+.product-review-card h4 {
+    margin-bottom: .35rem;
+    color: var(--text-dark);
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: .88rem;
+    font-weight: 850;
 }
 
 .product-no-reviews {
@@ -8733,16 +8984,25 @@ body.is-page-loading {
 
     .product-tabs__nav {
         overflow-x: auto;
-        gap: 1.2rem;
-        padding: 0 1.25rem;
+        justify-content: flex-start;
     }
 
     .product-tabs__nav button {
-        flex: 0 0 auto;
+        min-width: max-content;
+        flex: 1 0 auto;
     }
 
     .product-tabs__panel {
         padding: 1.5rem;
+    }
+
+    .product-reviews__overview,
+    .product-reviews__list {
+        grid-template-columns: 1fr;
+    }
+
+    .product-reviews__score {
+        min-height: 190px;
     }
 
     .product-related__heading {
@@ -8762,6 +9022,16 @@ body.is-page-loading {
 
     .product-detail__visual {
         min-height: 0;
+    }
+
+    .product-tab-copy,
+    .product-ingredients-heading {
+        grid-template-columns: 1fr;
+    }
+
+    .product-tab-copy__icon {
+        width: 42px;
+        height: 42px;
     }
 
     .product-hero h1 {

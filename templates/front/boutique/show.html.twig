@@ -112,35 +112,112 @@
         </article>
 
         <section class="product-tabs">
-            <div class="product-tabs__nav" role="tablist">
-                <button type="button" class="is-active" data-product-detail-target="tab" data-product-detail-panel-param="description" data-action="product-detail#selectTab">
-                    {{ 'product.tabs.description'|trans }}
-                </button>
-                {% if product.ingredients %}
-                    <button type="button" data-product-detail-target="tab" data-product-detail-panel-param="ingredients" data-action="product-detail#selectTab">
-                        {{ 'product.tabs.ingredients'|trans }}
+            <div class="product-tabs__nav-wrapper" role="tablist">
+                <div class="product-tabs__nav">
+                    <button type="button" class="is-active" data-product-detail-target="tab" data-product-detail-panel-param="description" data-action="product-detail#selectTab">
+                        {{ 'product.tabs.description'|trans }}
                     </button>
-                {% endif %}
-                <button type="button" data-product-detail-target="tab" data-product-detail-panel-param="reviews" data-action="product-detail#selectTab">
-                    {{ 'product.tabs.reviews'|trans }}
-                </button>
+                    {% if product.ingredients %}
+                        <button type="button" data-product-detail-target="tab" data-product-detail-panel-param="ingredients" data-action="product-detail#selectTab">
+                            {{ 'product.tabs.ingredients'|trans }}
+                        </button>
+                    {% endif %}
+                    <button type="button" data-product-detail-target="tab" data-product-detail-panel-param="reviews" data-action="product-detail#selectTab">
+                        {{ 'product.tabs.reviews'|trans }}
+                        {% if reviews.count > 0 %}<span>{{ reviews.count }}</span>{% endif %}
+                    </button>
+                </div>
             </div>
 
             <div class="product-tabs__panel is-active" data-product-detail-target="panel" data-panel="description">
-                <h3>{{ 'product.tabs.description'|trans }}</h3>
-                <p>{{ product.description ?: 'product.long_description'|trans({'%name%': product.name, '%category%': product.cat}) }}</p>
+                <div class="product-tab-copy">
+                    <span class="product-tab-copy__icon"><i class="fa-solid fa-book-open"></i></span>
+                    <div>
+                        <span class="product-tab-copy__eyebrow">{{ product.license }}</span>
+                        <h3>{{ 'product.description_heading'|trans }}</h3>
+                        <p>{{ product.description ?: 'product.long_description'|trans({'%name%': product.name, '%category%': product.cat}) }}</p>
+                    </div>
+                </div>
             </div>
             {% if product.ingredients %}
                 <div class="product-tabs__panel" data-product-detail-target="panel" data-panel="ingredients" hidden>
-                    <h3>{{ 'product.tabs.ingredients'|trans }}</h3>
-                    <p class="product-ingredients">{{ product.ingredients|nl2br }}</p>
+                    <div class="product-ingredients-heading">
+                        <span class="product-tab-copy__icon is-green"><i class="fa-solid fa-leaf"></i></span>
+                        <div>
+                            <h3>{{ 'product.ingredients_heading'|trans }}</h3>
+                            <p>{{ 'product.ingredients_intro'|trans }}</p>
+                        </div>
+                    </div>
+                    <div class="product-ingredient-tags">
+                        {% set ingredient_tags = product.ingredients|replace({"\r\n": ' ', "\n": ' ', ';': ','})|split(',') %}
+                        {% for ingredient in ingredient_tags %}
+                            {% if ingredient|trim %}
+                                <span class="product-ingredient-tag">
+                                    <i class="fa-solid fa-check"></i>
+                                    {{ ingredient|trim }}
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
             {% endif %}
             <div class="product-tabs__panel" data-product-detail-target="panel" data-panel="reviews" hidden>
-                <div class="product-no-reviews">
-                    <i class="fa-regular fa-comment-dots"></i>
-                    <p>{{ 'product.no_reviews'|trans }}</p>
-                </div>
+                {% if reviews.count > 0 %}
+                    <div class="product-reviews__overview">
+                        <div class="product-reviews__score">
+                            <strong>{{ reviews.average|number_format(1, ',', '') }}</strong>
+                            <div class="product-review-stars" aria-label="{{ 'product.reviews.rating_label'|trans({'%rating%': reviews.average}) }}">
+                                {% for star in 1..5 %}
+                                    <i class="{{ reviews.average >= star ? 'fa-solid fa-star' : (reviews.average >= star - 0.5 ? 'fa-solid fa-star-half-stroke' : 'fa-regular fa-star') }}"></i>
+                                {% endfor %}
+                            </div>
+                            <span>{{ 'product.reviews.based_on'|trans({'%count%': reviews.count}) }}</span>
+                        </div>
+                        <div class="product-reviews__distribution">
+                            {% for rating in 5..1 %}
+                                {% set row = reviews.distribution[rating] %}
+                                <div class="product-rating-row">
+                                    <span>{{ 'product.reviews.stars'|trans({'%count%': rating}) }}</span>
+                                    <div class="product-rating-bar">
+                                        <span style="width: {{ row.percentage }}%"></span>
+                                    </div>
+                                    <strong>{{ row.percentage }}%</strong>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="product-reviews__list">
+                        {% for review in reviews.items %}
+                            <article class="product-review-card">
+                                <header>
+                                    <div class="product-review-card__identity">
+                                        <span>{{ review.author|first|upper }}</span>
+                                        <div>
+                                            <strong>{{ review.author }}</strong>
+                                            {% if review.editorial %}
+                                                <small><i class="fa-solid fa-circle-check"></i> {{ 'product.reviews.editorial'|trans }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <time datetime="{{ review.created_at|date('Y-m-d') }}">{{ review.created_at|date('d/m/Y') }}</time>
+                                </header>
+                                <div class="product-review-stars is-small" aria-hidden="true">
+                                    {% for star in 1..5 %}
+                                        <i class="{{ review.rating >= star ? 'fa-solid' : 'fa-regular' }} fa-star"></i>
+                                    {% endfor %}
+                                </div>
+                                {% if review.title %}<h4>{{ review.title }}</h4>{% endif %}
+                                <p>{{ review.content }}</p>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="product-no-reviews">
+                        <i class="fa-regular fa-comment-dots"></i>
+                        <p>{{ 'product.no_reviews'|trans }}</p>
+                    </div>
+                {% endif %}
             </div>
         </section>
 

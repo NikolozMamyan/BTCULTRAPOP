@@ -184,8 +184,12 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('.product-detail__primary.cart-add-button[data-action="product-detail#addToCart"]');
         self::assertSelectorExists('.product-detail__secondary.favorite-button[data-action="favorites#toggle"]');
         self::assertSelectorCount(3, '.product-tabs__nav button');
+        self::assertSelectorExists('.product-tabs__nav-wrapper');
         self::assertSelectorNotExists('[data-panel="specifications"]');
         self::assertSelectorTextContains('[data-panel="ingredients"]', 'Eau, sucre');
+        self::assertSelectorTextContains('[data-panel="reviews"]', '4,5');
+        self::assertSelectorCount(2, '.product-review-card');
+        self::assertSelectorTextContains('.product-review-card', 'Avis éditorial');
         self::assertSelectorCount(0, '.product-formats');
     }
 

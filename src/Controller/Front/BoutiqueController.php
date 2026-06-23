@@ -4,6 +4,7 @@ namespace App\Controller\Front;
 
 use App\Entity\User;
 use App\Service\StorefrontProductCatalog;
+use App\Service\StorefrontProductReviews;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -23,7 +24,11 @@ final class BoutiqueController extends AbstractController
     }
 
     #[Route('/boutique/product/{id}', name: 'app_front_product', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function product(int $id, StorefrontProductCatalog $catalog): Response
+    public function product(
+        int $id,
+        StorefrontProductCatalog $catalog,
+        StorefrontProductReviews $productReviews,
+    ): Response
     {
         $product = $catalog->findEntity($id);
 
@@ -31,8 +36,14 @@ final class BoutiqueController extends AbstractController
             return $this->render('front/boutique/not_found.html.twig', [], new Response('', Response::HTTP_NOT_FOUND));
         }
 
+        $reviews = $productReviews->forProduct($product);
+        $presentedProduct = $catalog->presentForUser($product, $this->getAuthenticatedUser());
+        $presentedProduct['rating'] = $reviews['average'];
+        $presentedProduct['review_count'] = $reviews['count'];
+
         return $this->render('front/boutique/show.html.twig', [
-            'product' => $catalog->presentForUser($product, $this->getAuthenticatedUser()),
+            'product' => $presentedProduct,
+            'reviews' => $reviews,
             'related_products' => $catalog->related($product, user: $this->getAuthenticatedUser()),
         ]);
     }
