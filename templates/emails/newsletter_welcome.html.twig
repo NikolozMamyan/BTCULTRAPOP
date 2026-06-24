@@ -1,0 +1,15 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block title %}Newsletter ULTRAPOP{% endblock %}
+
+{% block content %}
+    <p style="margin:0 0 8px;color:#e82118;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;">Newsletter</p>
+    <h1 style="margin:0 0 18px;font-size:30px;line-height:1.2;">Bienvenue dans la communauté !</h1>
+    <p style="margin:0 0 16px;color:#475467;font-size:16px;line-height:1.7;">
+        Ton inscription avec l’adresse <strong>{{ subscriber.email }}</strong> est bien enregistrée.
+    </p>
+    <p style="margin:0 0 28px;color:#475467;font-size:16px;line-height:1.7;">
+        Tu recevras nos nouveautés, offres exclusives et sélections pop culture directement dans ta boîte mail.
+    </p>
+    <a href="{{ url('app_front_boutique') }}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:#ffcc07;color:#203263;font-weight:800;text-decoration:none;">Voir les nouveautés</a>
+{% endblock %}

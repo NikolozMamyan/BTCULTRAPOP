@@ -95,6 +95,44 @@ final class AuthControllerTest extends WebTestCase
         self::assertSelectorTextContains('.profile-flash--error', 'conditions générales de vente');
     }
 
+    public function testRegistrationSendsAWelcomeEmail(): void
+    {
+        $client = static::createClient();
+        $this->skipIfDatabaseIsUnavailable();
+
+        $email = sprintf('welcome-%s@example.com', bin2hex(random_bytes(4)));
+        $crawler = $client->request('GET', '/profil');
+        $token = $crawler->filter('form[action="/auth/register"] input[name="_csrf_token"]')->attr('value');
+
+        try {
+            $client->request('POST', '/auth/register', [
+                '_csrf_token' => $token,
+                'last_name' => 'Welcome',
+                'first_name' => 'Nina',
+                'email' => $email,
+                'password' => 'password-secure',
+                'address_name' => 'Maison',
+                'street' => '10 rue Test',
+                'postal_code' => '75001',
+                'city' => 'Paris',
+                'accept_terms' => '1',
+            ]);
+
+            self::assertResponseRedirects('/profil');
+            self::assertEmailCount(1);
+
+            $message = self::getMailerMessage();
+            self::assertNotNull($message);
+            self::assertEmailHeaderSame($message, 'To', $email);
+            self::assertEmailHeaderSame($message, 'Subject', 'Bienvenue dans la communauté ULTRAPOP');
+            self::assertEmailHtmlBodyContains($message, 'Bienvenue Nina');
+        } finally {
+            $connection = static::getContainer()->get(Connection::class);
+            \assert($connection instanceof Connection);
+            $connection->delete('app_user', ['email' => $email]);
+        }
+    }
+
     public function testSavedAddressIsCollapsedIntoCardOnCartPage(): void
     {
         $client = static::createClient();

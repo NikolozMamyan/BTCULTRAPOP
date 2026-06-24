@@ -27,6 +27,17 @@
         {% include 'front/components/navigation/_announcement.html.twig' %}
         {% include 'front/components/navigation/_header.html.twig' %}
 
+        {% for message in app.flashes('newsletter_success') %}
+            <div role="status" class="mx-auto mt-4 max-w-3xl rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-center text-sm font-semibold text-emerald-800">
+                <i class="fa-solid fa-circle-check mr-2"></i>{{ message|trans }}
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('newsletter_error') %}
+            <div role="alert" class="mx-auto mt-4 max-w-3xl rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-center text-sm font-semibold text-red-700">
+                <i class="fa-solid fa-circle-exclamation mr-2"></i>{{ message|trans }}
+            </div>
+        {% endfor %}
+
         <main class="relative">
             {% block main %}{% endblock %}
         </main>

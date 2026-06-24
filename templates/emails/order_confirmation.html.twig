@@ -1,0 +1,42 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block title %}Commande {{ order.orderNumber }} confirmée{% endblock %}
+
+{% block content %}
+    <p style="margin:0 0 8px;color:#10b981;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;">Paiement validé</p>
+    <h1 style="margin:0 0 18px;font-size:30px;line-height:1.2;">Merci pour ta commande !</h1>
+    <p style="margin:0 0 24px;color:#475467;font-size:16px;line-height:1.7;">
+        Bonjour {{ order.customerName }}, le paiement de la commande <strong>{{ order.orderNumber }}</strong> a bien été validé. Notre équipe prépare maintenant ton colis.
+    </p>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:24px;">
+        {% for item in order.items %}
+            <tr>
+                <td style="padding:13px 0;border-bottom:1px solid #eaecf0;color:#203263;font-weight:700;">
+                    {{ item.productName }}
+                    <div style="margin-top:4px;color:#98a2b3;font-size:12px;font-weight:400;">Quantité : {{ item.quantity }}</div>
+                </td>
+                <td align="right" style="padding:13px 0;border-bottom:1px solid #eaecf0;color:#203263;font-weight:800;white-space:nowrap;">
+                    {{ (item.totalTaxIncludedCents / 100)|number_format(2, ',', ' ') }} €
+                </td>
+            </tr>
+        {% endfor %}
+        {% if order.shippingAmountTaxIncludedCents > 0 %}
+            <tr>
+                <td style="padding:13px 0;border-bottom:1px solid #eaecf0;color:#475467;">Livraison</td>
+                <td align="right" style="padding:13px 0;border-bottom:1px solid #eaecf0;color:#203263;font-weight:700;">{{ (order.shippingAmountTaxIncludedCents / 100)|number_format(2, ',', ' ') }} €</td>
+            </tr>
+        {% endif %}
+        <tr>
+            <td style="padding:18px 0 0;font-size:18px;font-weight:900;">Total</td>
+            <td align="right" style="padding:18px 0 0;color:#e82118;font-size:20px;font-weight:900;">{{ (order.totalTaxIncludedCents / 100)|number_format(2, ',', ' ') }} €</td>
+        </tr>
+    </table>
+
+    <div style="padding:18px;border-radius:14px;background:#f9fafb;color:#475467;font-size:14px;line-height:1.7;">
+        <strong style="color:#203263;">Livraison</strong><br>
+        {{ order.shippingName }}<br>
+        {{ order.shippingStreet }}<br>
+        {{ order.shippingPostalCode }} {{ order.shippingCity }}
+    </div>
+{% endblock %}

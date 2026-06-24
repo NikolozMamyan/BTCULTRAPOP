@@ -6,10 +6,13 @@ use App\Entity\Address;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Security\UserSessionManager;
+use App\Service\Mailer\SimpleMailerService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -54,6 +57,8 @@ final class AuthController extends AbstractController
         UserPasswordHasherInterface $passwordHasher,
         UserSessionManager $userSessionManager,
         ValidatorInterface $validator,
+        SimpleMailerService $mailer,
+        LoggerInterface $logger,
     ): RedirectResponse {
         if (!$this->isCsrfTokenValid('auth_register', $request->request->getString('_csrf_token'))) {
             $this->addFlash('error', 'auth.flash.invalid_csrf');
@@ -113,6 +118,26 @@ final class AuthController extends AbstractController
 
         $entityManager->persist($user);
         $entityManager->flush();
+
+        try {
+            $mailer->sendTemplateMessage(
+                subject: 'Bienvenue dans la communauté ULTRAPOP',
+                htmlTemplate: 'emails/welcome.html.twig',
+                context: [
+                    'user' => $user,
+                ],
+                textMessage: sprintf(
+                    "Bonjour %s,\n\nTon compte ULTRAPOP est maintenant créé. Tu peux retrouver nos boissons, snacks et produits sous licences directement sur la boutique.\n\nÀ bientôt sur ULTRAPOP !",
+                    $user->getFirstName(),
+                ),
+                to: [$user->getEmail()],
+            );
+        } catch (TransportExceptionInterface $exception) {
+            $logger->error('Unable to send the registration welcome email.', [
+                'user_id' => $user->getId(),
+                'exception' => $exception,
+            ]);
+        }
 
         $response = $this->redirectToRoute('app_front_profil');
         $response->headers->setCookie($userSessionManager->createSession($user, $request));

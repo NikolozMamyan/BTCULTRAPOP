@@ -140,6 +140,9 @@ class Order
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $cancelledAt = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $confirmationEmailSentAt = null;
+
     public function __construct()
     {
         $this->items = new ArrayCollection();
@@ -529,6 +532,18 @@ class Order
     public function getCancelledAt(): ?\DateTimeImmutable
     {
         return $this->cancelledAt;
+    }
+
+    public function getConfirmationEmailSentAt(): ?\DateTimeImmutable
+    {
+        return $this->confirmationEmailSentAt;
+    }
+
+    public function markConfirmationEmailSent(?\DateTimeImmutable $sentAt = null): self
+    {
+        $this->confirmationEmailSentAt = $sentAt ?? new \DateTimeImmutable();
+
+        return $this;
     }
 
     #[ORM\PreUpdate]

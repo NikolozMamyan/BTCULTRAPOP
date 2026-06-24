@@ -20,5 +20,10 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    App\Service\Mailer\SimpleMailerService:
+        arguments:
+            $defaultFrom: '%env(MAILER_DEFAULT_FROM)%'
+            $defaultRecipients: '%env(csv:MAILER_DEFAULT_RECIPIENTS)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

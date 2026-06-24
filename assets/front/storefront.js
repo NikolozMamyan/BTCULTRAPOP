@@ -298,12 +298,6 @@ function initializeStorefront() {
     document.querySelectorAll('[data-action="carousel-prev"]').forEach((button) => on(button, 'click', () => goToSlide(slideIndex - 1)));
     document.querySelectorAll('[data-action="carousel-next"]').forEach((button) => on(button, 'click', () => goToSlide(slideIndex + 1)));
     document.querySelectorAll('[data-action="back-to-top"]').forEach((button) => on(button, 'click', () => window.scrollTo({ top: 0, behavior: 'smooth' })));
-    on(document.getElementById('newsletter-form'), 'submit', (event) => {
-        event.preventDefault();
-        document.getElementById('nl-success')?.classList.remove('hidden');
-        event.target.reset();
-    });
-
     on(document, 'keydown', (event) => {
         if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
             event.preventDefault();

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}ULTRAPOP{% endblock %}</title>
+</head>
+<body style="margin:0;background:#f5f7fb;color:#203263;font-family:Arial,sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f5f7fb;padding:32px 16px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 35px rgba(32,50,99,.08);">
+                    <tr>
+                        <td style="background:#203263;padding:24px 32px;">
+                            <a href="{{ url('app_front_home') }}" style="display:inline-block;text-decoration:none;">
+                                <img
+                                    src="{{ absolute_url(asset('img/logo/logotype-white.svg')) }}"
+                                    width="176"
+                                    alt="ULTRAPOP"
+                                    style="display:block;width:176px;max-width:100%;height:auto;border:0;"
+                                >
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:36px 32px;">
+                            {% block content %}{% endblock %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:20px 32px;background:#f9fafb;color:#667085;font-size:12px;line-height:1.6;">
+                            ULTRAPOP — LNS TRADE, 13 quai Kléber, 67000 Strasbourg<br>
+                            <a href="{{ url('app_front_contact') }}" style="color:#e82118;">Contacter le service client</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

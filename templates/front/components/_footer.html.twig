@@ -31,10 +31,14 @@
         <div class="col-span-2 md:col-span-1">
             <h4 class="font-bold mb-4 text-sm">{{ 'footer.newsletter'|trans }}</h4>
             <p class="text-white/60 text-sm mb-3">{{ 'footer.newsletter_text'|trans }}</p>
-            <div class="flex bg-white/10 rounded-full overflow-hidden p-1">
-                <input type="email" placeholder="{{ 'common.email'|trans }}" class="min-w-0 bg-transparent px-4 text-sm outline-none flex-1 text-white placeholder-white/40">
-                <button type="button" class="bg-primary hover:bg-primary-d w-9 h-9 rounded-full shrink-0" aria-label="{{ 'footer.subscribe'|trans }}"><i class="fa-solid fa-arrow-right"></i></button>
-            </div>
+            <form action="{{ path('app_newsletter_subscribe') }}" method="post" class="flex bg-white/10 rounded-full overflow-hidden p-1">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('newsletter_subscribe') }}">
+                <input type="hidden" name="source" value="footer">
+                <input type="hidden" name="redirect" value="{{ app.request.requestUri }}">
+                <label for="footer-newsletter-email" class="sr-only">{{ 'common.email'|trans }}</label>
+                <input id="footer-newsletter-email" name="email" type="email" required autocomplete="email" placeholder="{{ 'common.email'|trans }}" class="min-w-0 bg-transparent px-4 text-sm outline-none flex-1 text-white placeholder-white/40">
+                <button type="submit" class="bg-primary hover:bg-primary-d w-9 h-9 rounded-full shrink-0" aria-label="{{ 'footer.subscribe'|trans }}"><i class="fa-solid fa-arrow-right"></i></button>
+            </form>
         </div>
     </div>
     <div class="border-t border-white/10">

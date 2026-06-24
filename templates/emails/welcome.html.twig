@@ -1,0 +1,15 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block title %}Bienvenue chez ULTRAPOP{% endblock %}
+
+{% block content %}
+    <p style="margin:0 0 8px;color:#e82118;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;">Compte créé</p>
+    <h1 style="margin:0 0 18px;font-size:30px;line-height:1.2;">Bienvenue {{ user.firstName }} !</h1>
+    <p style="margin:0 0 16px;color:#475467;font-size:16px;line-height:1.7;">
+        Ton compte ULTRAPOP est prêt. Tu peux maintenant retrouver plus facilement tes commandes, tes favoris et tes points fidélité.
+    </p>
+    <p style="margin:0 0 28px;color:#475467;font-size:16px;line-height:1.7;">
+        Découvre nos boissons, snacks et produits sous licences inspirés de tes univers préférés.
+    </p>
+    <a href="{{ url('app_front_boutique') }}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:#e82118;color:#fff;font-weight:800;text-decoration:none;">Découvrir la boutique</a>
+{% endblock %}

@@ -143,6 +143,14 @@ final class CartOrderManagerTest extends TestCase
         self::assertSame(PaymentStatus::PAID, $order->getPaymentStatus());
         self::assertSame(27, $user->getLoyaltyPoints());
         self::assertSame(3, $product->getQuantity());
+        self::assertNull($order->getConfirmationEmailSentAt());
+
+        $order->markConfirmationEmailSent(new \DateTimeImmutable('2026-06-16 10:01:00'));
+
+        self::assertSame(
+            '2026-06-16 10:01:00',
+            $order->getConfirmationEmailSentAt()?->format('Y-m-d H:i:s'),
+        );
 
         $orderManager->markPaid($order);
 

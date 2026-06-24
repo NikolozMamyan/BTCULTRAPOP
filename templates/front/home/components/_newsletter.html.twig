@@ -1,15 +1,18 @@
-<section class="max-w-7xl mx-auto px-5 mt-20 reveal">
+<section id="newsletter" class="max-w-7xl mx-auto px-5 mt-20 reveal">
     <div class="relative rounded-lg-c overflow-hidden bg-text-dark text-white p-10 md:p-14 text-center">
         <div class="blob bg-primary/50 w-72 h-72 -top-24 -left-10"></div>
         <div class="blob bg-secondary/40 w-72 h-72 -bottom-24 -right-10"></div>
         <div class="relative z-10 max-w-xl mx-auto">
             <h2 class="font-display text-2xl md:text-4xl font-extrabold mb-3">{{ 'home.newsletter.title'|trans }}</h2>
             <p class="text-white/70 mb-7 text-sm md:text-base">{{ 'home.newsletter.text'|trans }}</p>
-            <form id="newsletter-form" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <input type="email" required placeholder="{{ 'home.newsletter.placeholder'|trans }}" class="flex-1 px-5 py-3.5 rounded-full text-text-dark outline-none text-sm">
-                <button class="bg-primary hover:bg-primary-d px-7 py-3.5 rounded-full font-bold text-sm transition-colors shrink-0">{{ 'home.newsletter.subscribe'|trans }}</button>
+            <form action="{{ path('app_newsletter_subscribe') }}" method="post" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('newsletter_subscribe') }}">
+                <input type="hidden" name="source" value="home">
+                <input type="hidden" name="redirect" value="{{ path('app_front_home') }}#newsletter">
+                <label for="home-newsletter-email" class="sr-only">{{ 'common.email'|trans }}</label>
+                <input id="home-newsletter-email" name="email" type="email" required autocomplete="email" placeholder="{{ 'home.newsletter.placeholder'|trans }}" class="flex-1 px-5 py-3.5 rounded-full text-text-dark outline-none text-sm">
+                <button type="submit" class="bg-primary hover:bg-primary-d px-7 py-3.5 rounded-full font-bold text-sm transition-colors shrink-0">{{ 'home.newsletter.subscribe'|trans }}</button>
             </form>
-            <p id="nl-success" class="hidden text-secondary font-semibold text-sm mt-4"><i class="fa-solid fa-circle-check mr-2"></i>{{ 'home.newsletter.success'|trans }}</p>
         </div>
     </div>
 </section>

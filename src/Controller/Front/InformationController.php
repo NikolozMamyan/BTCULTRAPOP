@@ -5,8 +5,8 @@ namespace App\Controller\Front;
 use App\Entity\User;
 use App\Form\ContactType;
 use App\Model\ContactMessage;
-use App\Service\ContactMessageSender;
 use App\Service\ContactSubmissionGuard;
+use App\Service\Mailer\SimpleMailerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -48,7 +48,7 @@ final class InformationController extends AbstractController
     #[Route('/contact', name: 'app_front_contact', methods: ['GET', 'POST'])]
     public function contact(
         Request $request,
-        ContactMessageSender $sender,
+        SimpleMailerService $mailer,
         ContactSubmissionGuard $submissionGuard,
     ): Response {
         $message = new ContactMessage();
@@ -73,7 +73,20 @@ final class InformationController extends AbstractController
             }
 
             try {
-                $sender->send($message);
+                $mailer->sendTemplateMessage(
+                    subject: sprintf('[ULTRAPOP] %s', $message->subject),
+                    htmlTemplate: 'emails/contact.html.twig',
+                    context: [
+                        'contact' => $message,
+                    ],
+                    textMessage: sprintf(
+                        "Nouveau message depuis le formulaire ULTRAPOP\n\nObjet : %s\nEmail : %s\n\nMessage :\n%s",
+                        $message->subject,
+                        $message->email,
+                        $message->message,
+                    ),
+                    replyTo: [$message->email],
+                );
                 $this->addFlash('success', 'contact.flash.sent');
 
                 return $this->redirectToRoute('app_front_contact');

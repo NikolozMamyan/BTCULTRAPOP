@@ -26,12 +26,12 @@ final readonly class StripeWebhookHandler
     /**
      * @throws SignatureVerificationException
      */
-    public function handle(string $payload, string $signature): void
+    public function handle(string $payload, string $signature): ?Order
     {
         $event = Webhook::constructEvent($payload, $signature, $this->stripeConfig->webhookSecret());
 
         if ($this->events->findOneBy(['eventId' => $event->id]) instanceof StripeWebhookEvent) {
-            return;
+            return $this->handleEvent($event);
         }
 
         $webhookEvent = (new StripeWebhookEvent())
@@ -39,10 +39,12 @@ final readonly class StripeWebhookHandler
             ->setType((string) $event->type);
         $this->entityManager->persist($webhookEvent);
 
-        $this->handleEvent($event);
+        $order = $this->handleEvent($event);
 
         $webhookEvent->markProcessed();
         $this->entityManager->flush();
+
+        return $order;
     }
 
     public function synchronizeCheckoutSession(object $session, string $eventType = 'checkout.session.completed'): ?Order
@@ -87,7 +89,7 @@ final readonly class StripeWebhookHandler
         return $order;
     }
 
-    private function handleEvent(Event $event): void
+    private function handleEvent(Event $event): ?Order
     {
         if (!in_array($event->type, [
             'checkout.session.completed',
@@ -95,16 +97,16 @@ final readonly class StripeWebhookHandler
             'checkout.session.async_payment_failed',
             'checkout.session.expired',
         ], true)) {
-            return;
+            return null;
         }
 
         $session = $event->data->object;
 
         if (!is_object($session)) {
-            return;
+            return null;
         }
 
-        $this->synchronizeCheckoutSession($session, (string) $event->type);
+        return $this->synchronizeCheckoutSession($session, (string) $event->type);
     }
 
     private function resolveOrderFromSession(object $session): ?Order
