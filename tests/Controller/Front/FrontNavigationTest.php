@@ -70,6 +70,8 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('input[name="street"]');
         self::assertSelectorExists('input[name="postal_code"]');
         self::assertSelectorExists('input[name="city"]');
+        self::assertSelectorExists('input[name="accept_terms"][required]');
+        self::assertSelectorExists('.profile-auth__terms a[href="/conditions-generales-de-vente"]');
         self::assertSelectorCount(2, '[data-language-locale-param]');
 
         $client->request('GET', '/favoris');

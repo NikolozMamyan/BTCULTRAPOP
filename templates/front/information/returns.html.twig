@@ -1,0 +1,66 @@
+{% extends 'front/information/base.html.twig' %}
+
+{% block information_meta_title %}Retours et droit de rétractation | ULTRAPOP{% endblock %}
+{% block information_meta_description %}Modalités de retour, droit de rétractation de 14 jours et remboursement des commandes ULTRAPOP.{% endblock %}
+{% block information_canonical %}{{ seo_origin ~ path('app_front_returns') }}{% endblock %}
+{% block information_breadcrumb %}Retours et rétractation{% endblock %}
+{% block information_icon %}fa-solid fa-rotate-left{% endblock %}
+{% block information_eyebrow %}Retours et remboursements{% endblock %}
+{% block information_title %}Retours et rétractation{% endblock %}
+{% block information_intro %}Les étapes à suivre pour demander un retour ou exercer votre droit de rétractation.{% endblock %}
+
+{% block information_content %}
+    <section class="information-section">
+        <span class="information-section__number">01</span>
+        <div>
+            <h2>Délai de rétractation</h2>
+            <p>Pour les produits éligibles, le Client consommateur dispose de quatorze jours à compter de la réception de la commande pour notifier sa décision de se rétracter, sans avoir à motiver sa décision.</p>
+            <p>Après cette notification, les produits doivent être retournés au plus tard dans les quatorze jours. Les frais directs de retour restent à la charge du Client, sauf erreur de préparation, produit endommagé ou défaut de conformité imputable au Vendeur.</p>
+        </div>
+    </section>
+
+    <section class="information-section">
+        <span class="information-section__number">02</span>
+        <div>
+            <h2>Produits exclus ou soumis à conditions</h2>
+            <p>Le droit de rétractation ne s’applique notamment pas aux produits susceptibles de se détériorer ou de se périmer rapidement. Pour des raisons d’hygiène et de protection de la santé, les produits alimentaires descellés après la livraison et ne pouvant être remis en vente ne peuvent pas être retournés.</p>
+            <p>Les produits retournés doivent être complets, non utilisés, dans leur emballage d’origine intact et dans un état permettant leur remise en vente.</p>
+        </div>
+    </section>
+
+    <section class="information-section">
+        <span class="information-section__number">03</span>
+        <div>
+            <h2>Comment effectuer une demande</h2>
+            <ol class="information-steps">
+                <li><span>1</span><p>Contactez-nous depuis la <a href="{{ path('app_front_contact') }}">page de contact</a> en indiquant votre numéro de commande.</p></li>
+                <li><span>2</span><p>Précisez les produits concernés et votre souhait d’exercer le droit de rétractation.</p></li>
+                <li><span>3</span><p>Attendez les instructions de retour avant d’expédier le colis.</p></li>
+                <li><span>4</span><p>Conservez la preuve d’expédition jusqu’à la clôture de la demande.</p></li>
+            </ol>
+        </div>
+    </section>
+
+    <section class="information-section">
+        <span class="information-section__number">04</span>
+        <div>
+            <h2>Remboursement</h2>
+            <p>Le remboursement des sommes dues, y compris les frais de livraison standard initiaux lorsque la loi l’impose, intervient au plus tard dans les quatorze jours suivant la notification de la rétractation. ULTRAPOP peut différer le remboursement jusqu’à récupération du bien ou réception d’une preuve d’expédition.</p>
+            <p>Le remboursement est effectué avec le même moyen de paiement que celui utilisé lors de la commande, sauf accord exprès pour un autre moyen sans frais supplémentaire.</p>
+        </div>
+    </section>
+
+    <section class="withdrawal-model">
+        <span>Modèle de demande</span>
+        <h2>Formulaire type de rétractation</h2>
+        <p>À adresser uniquement si vous souhaitez vous rétracter d’un produit éligible :</p>
+        <blockquote>
+            À l’attention de LNS TRADE – ULTRAPOP, 13 quai Kléber, 67000 Strasbourg, customer@ultrapop.com.<br><br>
+            Je vous notifie par la présente ma rétractation du contrat portant sur la vente du ou des biens suivants : […]<br>
+            Commandé(s) le : […] / reçu(s) le : […]<br>
+            Numéro de commande : […]<br>
+            Nom et adresse du consommateur : […]<br>
+            Date et signature, en cas d’envoi papier : […]
+        </blockquote>
+    </section>
+{% endblock %}

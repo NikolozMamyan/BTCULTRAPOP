@@ -1,0 +1,104 @@
+{% extends 'front/information/base.html.twig' %}
+
+{% block information_meta_title %}Contact et service client | ULTRAPOP{% endblock %}
+{% block information_meta_description %}Contactez le service client ULTRAPOP pour une question sur un produit, une commande, une livraison ou un retour.{% endblock %}
+{% block information_canonical %}{{ seo_origin ~ path('app_front_contact') }}{% endblock %}
+{% block information_breadcrumb %}Contact{% endblock %}
+{% block information_icon %}fa-solid fa-envelope{% endblock %}
+{% block information_eyebrow %}Service client{% endblock %}
+{% block information_title %}Contactez-nous{% endblock %}
+{% block information_intro %}Une question sur un produit, une commande ou une livraison ? Envoyez-nous un message.{% endblock %}
+
+{% block information_content %}
+    <div class="contact-layout">
+        <div class="contact-form-card">
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="information-flash information-flash--{{ type }}">
+                        <i class="fa-solid {{ type == 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation' }}"></i>
+                        <span>{{ message|trans }}</span>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <div class="contact-form-card__heading">
+                <span>Écrivez-nous</span>
+                <h2>Comment pouvons-nous vous aider ?</h2>
+                <p>Pour une commande existante, indiquez son numéro dans l’objet ou dans votre message.</p>
+            </div>
+
+            {{ form_start(contact_form, {
+                action: path('app_front_contact'),
+                attr: {class: 'contact-form'}
+            }) }}
+                <div class="contact-form__field">
+                    {{ form_label(contact_form.subject) }}
+                    <div class="contact-form__control">
+                        <i class="fa-solid fa-tag"></i>
+                        {{ form_widget(contact_form.subject) }}
+                    </div>
+                    {{ form_errors(contact_form.subject) }}
+                </div>
+
+                <div class="contact-form__field">
+                    {{ form_label(contact_form.email) }}
+                    <div class="contact-form__control">
+                        <i class="fa-solid fa-at"></i>
+                        {{ form_widget(contact_form.email) }}
+                    </div>
+                    {{ form_errors(contact_form.email) }}
+                </div>
+
+                <div class="contact-form__field">
+                    {{ form_label(contact_form.message) }}
+                    <div class="contact-form__control contact-form__control--textarea">
+                        <i class="fa-solid fa-message"></i>
+                        {{ form_widget(contact_form.message) }}
+                    </div>
+                    {{ form_errors(contact_form.message) }}
+                </div>
+
+                {{ form_widget(contact_form.website) }}
+
+                <div class="contact-form__privacy">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Les informations transmises sont utilisées uniquement pour répondre à votre demande. Consultez notre <a href="{{ path('app_front_privacy') }}">politique de confidentialité</a>.</span>
+                </div>
+
+                <button type="submit" class="contact-form__submit">
+                    Envoyer le message
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            {{ form_end(contact_form) }}
+        </div>
+
+        <aside class="contact-details">
+            <div class="contact-details__brand">
+                <span><i class="fa-solid fa-headset"></i></span>
+                <div>
+                    <small>Service client</small>
+                    <strong>ULTRAPOP</strong>
+                </div>
+            </div>
+            <p>Notre équipe répond aux questions relatives aux produits, commandes, paiements, livraisons et retours.</p>
+            <address>
+                <a href="mailto:customer@ultrapop.com">
+                    <i class="fa-solid fa-envelope"></i>
+                    <span><small>Email</small>customer@ultrapop.com</span>
+                </a>
+                <a href="tel:+33144882300">
+                    <i class="fa-solid fa-phone"></i>
+                    <span><small>Téléphone</small>+33 (0)1 44 88 23 00</span>
+                </a>
+                <div>
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span><small>Adresse</small>13 quai Kléber<br>67000 Strasbourg, France</span>
+                </div>
+            </address>
+            <div class="contact-details__note">
+                <i class="fa-solid fa-circle-info"></i>
+                <p>Pour faciliter le traitement d’une demande après-vente, indiquez votre numéro de commande. Notre équipe pourra ensuite vous demander des photos du produit ou du colis.</p>
+            </div>
+        </aside>
+    </div>
+{% endblock %}

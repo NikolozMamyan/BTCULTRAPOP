@@ -1,4 +1,11 @@
 {
     "user.email.unique": "Un compte utilise déjà cette adresse email.",
     "product.ean.digits": "L’EAN doit contenir uniquement des chiffres."
+    ,"contact.validation.subject_required": "Veuillez indiquer le sujet de votre demande."
+    ,"contact.validation.subject_too_long": "Le sujet ne peut pas dépasser 160 caractères."
+    ,"contact.validation.email_required": "Veuillez indiquer votre adresse e-mail."
+    ,"contact.validation.email_invalid": "Veuillez saisir une adresse e-mail valide."
+    ,"contact.validation.message_required": "Veuillez saisir votre message."
+    ,"contact.validation.message_too_short": "Votre message doit contenir au moins 10 caractères."
+    ,"contact.validation.message_too_long": "Votre message ne peut pas dépasser 5 000 caractères."
 }

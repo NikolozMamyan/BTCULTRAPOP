@@ -31,6 +31,7 @@ final class FavoriteControllerTest extends WebTestCase
                 'street' => '10 rue Test',
                 'postal_code' => '75001',
                 'city' => 'Paris',
+                'accept_terms' => '1',
             ]);
 
             self::assertResponseRedirects('/profil');

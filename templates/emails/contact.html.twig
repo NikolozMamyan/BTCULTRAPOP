@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Nouveau message ULTRAPOP</title>
+</head>
+<body style="margin:0;padding:30px;background:#f5f7fb;font-family:Arial,sans-serif;color:#203263">
+    <div style="max-width:680px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:18px;overflow:hidden">
+        <div style="padding:24px 28px;background:#203263;color:#fff">
+            <strong style="font-size:22px">ULTRAPOP</strong>
+            <p style="margin:6px 0 0;color:#cbd5e1">Nouveau message depuis le formulaire de contact</p>
+        </div>
+        <div style="padding:28px">
+            <p><strong>Objet :</strong> {{ contact.subject }}</p>
+            <p><strong>Email :</strong> <a href="mailto:{{ contact.email }}">{{ contact.email }}</a></p>
+            <div style="margin-top:24px;padding:20px;background:#f8fafc;border-radius:12px;white-space:pre-wrap;line-height:1.6">{{ contact.message }}</div>
+        </div>
+    </div>
+</body>
+</html>

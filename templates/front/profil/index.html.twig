@@ -352,6 +352,15 @@
                                         </span>
                                     </label>
                                 </fieldset>
+                                <label class="profile-auth__terms">
+                                    <input type="checkbox" name="accept_terms" value="1" required>
+                                    <span>
+                                        {{ 'auth.register.terms_prefix'|trans }}
+                                        <a href="{{ path('app_front_terms') }}" target="_blank" rel="noopener">{{ 'auth.register.terms_link'|trans }}</a>
+                                        {{ 'auth.register.privacy_prefix'|trans }}
+                                        <a href="{{ path('app_front_privacy') }}" target="_blank" rel="noopener">{{ 'auth.register.privacy_link'|trans }}</a>.
+                                    </span>
+                                </label>
                                 <button type="submit" class="profile-auth__submit">
                                     <span>{{ 'auth.register.submit'|trans }}</span>
                                     <i class="fa-solid fa-check"></i>

@@ -27,6 +27,9 @@ final class AuthControllerTest extends WebTestCase
         self::assertSelectorExists('form[action="/auth/register"][method="post"] input[name="_csrf_token"]');
         self::assertSelectorExists('form[action="/auth/register"] input[name="first_name"]');
         self::assertSelectorExists('form[action="/auth/register"] input[name="address_name"]');
+        self::assertSelectorExists('form[action="/auth/register"] input[name="accept_terms"][required]');
+        self::assertSelectorExists('.profile-auth__terms a[href="/conditions-generales-de-vente"]');
+        self::assertSelectorExists('.profile-auth__terms a[href="/politique-de-confidentialite"]');
         self::assertSelectorExists('[data-action="profile-auth#showRegister"]');
         self::assertSelectorExists('[data-action="profile-auth#showLogin"]');
     }
@@ -68,6 +71,28 @@ final class AuthControllerTest extends WebTestCase
             \assert($connection instanceof Connection);
             $connection->delete('app_user', ['email' => $email]);
         }
+    }
+
+    public function testRegistrationRequiresExplicitTermsAcceptance(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/profil');
+        $token = $crawler->filter('form[action="/auth/register"] input[name="_csrf_token"]')->attr('value');
+
+        $client->request('POST', '/auth/register', [
+            '_csrf_token' => $token,
+            'last_name' => 'Sans',
+            'first_name' => 'Accord',
+            'email' => 'sans-accord@example.com',
+            'password' => 'password-secure',
+            'street' => '10 rue Test',
+            'postal_code' => '75001',
+            'city' => 'Paris',
+        ]);
+
+        self::assertResponseRedirects('/profil');
+        $client->followRedirect();
+        self::assertSelectorTextContains('.profile-flash--error', 'conditions générales de vente');
     }
 
     public function testSavedAddressIsCollapsedIntoCardOnCartPage(): void
@@ -143,6 +168,7 @@ final class AuthControllerTest extends WebTestCase
             self::assertSelectorTextContains('.checkout-address-card', '12 rue de la Livraison');
             self::assertSelectorExists('.checkout-address-card__edit[data-action="checkout-address#edit"]');
             self::assertSelectorExists('#checkout-address-editor[hidden]');
+            self::assertSelectorNotExists('input[name="checkout_address[acceptTerms]"]');
         } finally {
             $connection = static::getContainer()->get(Connection::class);
             \assert($connection instanceof Connection);

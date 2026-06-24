@@ -59,6 +59,12 @@ final readonly class StorefrontSeoCatalog
             $this->page('app_front_boutique', 'daily', '0.9'),
             $this->page('app_front_licences', 'weekly', '0.7'),
             $this->page('app_front_soldes', 'daily', '0.7'),
+            $this->page('app_front_delivery', 'monthly', '0.5'),
+            $this->page('app_front_returns', 'monthly', '0.5'),
+            $this->page('app_front_terms', 'monthly', '0.4'),
+            $this->page('app_front_legal', 'monthly', '0.4'),
+            $this->page('app_front_privacy', 'monthly', '0.4'),
+            $this->page('app_front_contact', 'monthly', '0.6'),
         ];
     }
 

@@ -1,0 +1,94 @@
+{% extends 'front/information/base.html.twig' %}
+
+{% block information_meta_title %}Conditions générales de vente | ULTRAPOP{% endblock %}
+{% block information_meta_description %}Conditions générales applicables aux commandes passées sur la boutique ULTRAPOP exploitée par LNS TRADE SARL.{% endblock %}
+{% block information_canonical %}{{ seo_origin ~ path('app_front_terms') }}{% endblock %}
+{% block information_breadcrumb %}Conditions générales de vente{% endblock %}
+{% block information_icon %}fa-solid fa-file-contract{% endblock %}
+{% block information_eyebrow %}Cadre contractuel{% endblock %}
+{% block information_title %}Conditions générales de vente{% endblock %}
+{% block information_intro %}Les règles applicables aux achats effectués sur la boutique ULTRAPOP.{% endblock %}
+
+{% block information_content %}
+    <p class="information-updated"><i class="fa-regular fa-calendar"></i> Dernière mise à jour : 24 juin 2026</p>
+
+    <section class="information-section"><span class="information-section__number">01</span><div>
+        <h2>Objet et champ d’application</h2>
+        <p>Les présentes Conditions Générales de Vente régissent les ventes conclues sur le site ULTRAPOP entre LNS TRADE SARL, ci-après « le Vendeur », et toute personne physique agissant en qualité de consommateur ou toute personne morale procédant à un achat, ci-après « le Client ».</p>
+        <p>Toute commande implique l’acceptation sans réserve des présentes CGV dans leur version applicable au moment de la commande.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">02</span><div>
+        <h2>Produits</h2>
+        <p>Les produits proposés sont ceux présentés sur le site au moment de la consultation, dans la limite des stocks disponibles. Chaque fiche fournit les caractéristiques essentielles, le prix, la disponibilité et, pour les denrées concernées, les informations de composition disponibles.</p>
+        <p>Les photographies sont présentées avec le plus grand soin mais ne constituent pas un engagement contractuel quant aux variations mineures de présentation ou d’emballage décidées par le fabricant.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">03</span><div>
+        <h2>Prix</h2>
+        <p>Les prix sont indiqués en euros, toutes taxes comprises, hors frais de livraison. Les frais applicables sont affichés dans le panier avant la validation de la commande.</p>
+        <p>ULTRAPOP peut modifier ses prix à tout moment. Les produits sont toutefois facturés sur la base du tarif affiché lors de la validation de la commande, sous réserve d’une erreur manifeste de prix.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">04</span><div>
+        <h2>Commande</h2>
+        <p>Le processus de commande comprend la sélection des produits, la vérification du panier, la saisie ou validation de l’adresse de livraison, l’acceptation des présentes CGV, le paiement puis la confirmation de la commande.</p>
+        <p>Le Vendeur se réserve le droit de refuser ou d’annuler une commande en cas de fraude suspectée, d’incident de paiement, d’indisponibilité du produit ou de litige antérieur non résolu.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">05</span><div>
+        <h2>Paiement</h2>
+        <p>Le paiement est exigible au moment de la commande. Le site accepte les moyens de paiement affichés sur la page de paiement sécurisée, notamment la carte bancaire. Les transactions sont traitées par Stripe ; ULTRAPOP ne conserve pas les données complètes de carte bancaire.</p>
+        <p>La commande n’est considérée comme définitive qu’après confirmation du paiement par le prestataire.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">06</span><div>
+        <h2>Livraison</h2>
+        <ul class="information-list">
+            <li><strong>Zone :</strong> France métropolitaine, sauf indication contraire lors de la commande.</li>
+            <li><strong>Préparation :</strong> généralement sous deux jours ouvrés après confirmation du paiement.</li>
+            <li><strong>Délai :</strong> au plus tard quatorze jours calendaires, sauf délai spécifique communiqué avant la commande.</li>
+            <li><strong>Frais :</strong> calculés dans le panier ; livraison standard offerte dès 50 € TTC d’achats.</li>
+        </ul>
+        <p>Le risque de perte ou d’endommagement est transféré au Client lors de la prise de possession physique du bien, conformément au Code de la consommation.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">07</span><div>
+        <h2>Droit de rétractation et retours</h2>
+        <p>Le Client consommateur dispose, pour les produits éligibles, d’un délai de quatorze jours à compter de leur réception pour exercer son droit de rétractation. Les modalités, exclusions applicables aux produits périssables ou descellés et le formulaire type figurent sur la page <a href="{{ path('app_front_returns') }}">Retours et rétractation</a>.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">08</span><div>
+        <h2>Garanties légales</h2>
+        <p>Le Client consommateur bénéficie de la garantie légale de conformité prévue aux articles L. 217-3 et suivants du Code de la consommation et de la garantie contre les vices cachés prévue aux articles 1641 et suivants du Code civil.</p>
+        <p>Ces garanties s’appliquent indépendamment de toute éventuelle garantie commerciale. Pour les exercer, le Client doit contacter le service client avec son numéro de commande et les éléments permettant d’identifier le défaut.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">09</span><div>
+        <h2>Responsabilité et force majeure</h2>
+        <p>Le Vendeur répond de la bonne exécution de ses obligations légales et contractuelles. Sa responsabilité ne peut être engagée en cas de dommage résultant d’une mauvaise utilisation du produit, du non-respect des précautions ou informations du fabricant, ou d’un événement de force majeure au sens du droit français.</p>
+        <p>Aucune stipulation des présentes CGV ne limite les droits impératifs reconnus au consommateur.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">10</span><div>
+        <h2>Propriété intellectuelle</h2>
+        <p>Les éléments propres au site ULTRAPOP restent la propriété de LNS TRADE ou de leurs titulaires respectifs. Les marques, personnages et visuels sous licence demeurent la propriété de leurs ayants droit. Toute reproduction non autorisée est interdite.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">11</span><div>
+        <h2>Données personnelles</h2>
+        <p>Les traitements de données liés aux commandes, au compte client et au service après-vente sont décrits dans la <a href="{{ path('app_front_privacy') }}">Politique de confidentialité</a>.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">12</span><div>
+        <h2>Droit applicable, réclamations et médiation</h2>
+        <p>Les présentes CGV sont soumises au droit français, sans priver le consommateur des protections impératives dont il bénéficie. En cas de différend, le Client doit d’abord adresser une réclamation au service client.</p>
+        <p>À défaut de résolution amiable, le consommateur peut recourir gratuitement à MÉDIATION CONSOMMATION DÉVELOPPEMENT, Centre d’Affaires Stéphanois, Immeuble L’Horizon, Esplanade de France, 3 rue J. Constant Milleret, 42000 Saint-Étienne — <a href="https://www.medconsodev.eu" target="_blank" rel="noopener noreferrer">www.medconsodev.eu</a>.</p>
+        <p>Tout litige relève des juridictions compétentes selon les règles de droit commun applicables.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">13</span><div>
+        <h2>Service client</h2>
+        <p>LNS TRADE – ULTRAPOP, 13 quai Kléber, 67000 Strasbourg — <a href="mailto:customer@ultrapop.com">customer@ultrapop.com</a> — +33 (0)1 44 88 23 00.</p>
+    </div></section>
+{% endblock %}

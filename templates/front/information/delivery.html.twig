@@ -1,0 +1,77 @@
+{% extends 'front/information/base.html.twig' %}
+
+{% block information_meta_title %}Livraison et expédition | ULTRAPOP{% endblock %}
+{% block information_meta_description %}Délais d’expédition, suivi, frais de livraison et préparation des colis ULTRAPOP en France.{% endblock %}
+{% block information_canonical %}{{ seo_origin ~ path('app_front_delivery') }}{% endblock %}
+{% block information_breadcrumb %}Livraison{% endblock %}
+{% block information_icon %}fa-solid fa-truck-fast{% endblock %}
+{% block information_eyebrow %}Expéditions et suivi{% endblock %}
+{% block information_title %}Livraison{% endblock %}
+{% block information_intro %}Tout savoir sur la préparation, l’expédition et le suivi de votre commande ULTRAPOP.{% endblock %}
+
+{% block information_content %}
+    <div class="information-highlight-grid">
+        <div>
+            <i class="fa-solid fa-box"></i>
+            <strong>Préparation rapide</strong>
+            <span>Expédition généralement sous 2 jours ouvrés après confirmation du paiement.</span>
+        </div>
+        <div>
+            <i class="fa-solid fa-location-dot"></i>
+            <strong>Suivi en ligne</strong>
+            <span>Un lien de suivi est communiqué dès la prise en charge du colis.</span>
+        </div>
+        <div>
+            <i class="fa-solid fa-gift"></i>
+            <strong>Offerte dès 50 €</strong>
+            <span>La livraison standard est offerte à partir de 50 € TTC d’achats.</span>
+        </div>
+    </div>
+
+    <section class="information-section">
+        <span class="information-section__number">01</span>
+        <div>
+            <h2>Expédition de votre colis</h2>
+            <p>Les colis sont généralement expédiés dans un délai de deux jours ouvrés après réception et confirmation du paiement. La livraison est proposée en France métropolitaine, selon les modes disponibles au moment de la commande.</p>
+            <p>Les expéditions sont généralement confiées à UPS ou à un transporteur équivalent. Lorsqu’un numéro de suivi est disponible, un lien permettant de suivre le colis en ligne est adressé au Client. Une remise contre signature peut être proposée selon le transporteur, la destination ou la valeur de la commande et peut entraîner des frais supplémentaires.</p>
+        </div>
+    </section>
+
+    <section class="information-section">
+        <span class="information-section__number">02</span>
+        <div>
+            <h2>Délais de livraison</h2>
+            <p>La date ou le délai estimatif de livraison est communiqué avant la validation de la commande. Sauf indication contraire affichée lors de la commande, la livraison intervient au plus tard dans un délai de quatorze jours calendaires après sa validation.</p>
+            <div class="information-note">
+                <i class="fa-solid fa-circle-info"></i>
+                <p>Les délais de transport sont indicatifs et peuvent varier lors des périodes de forte activité, en cas d’intempéries ou de situation exceptionnelle indépendante de notre volonté.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="information-section">
+        <span class="information-section__number">03</span>
+        <div>
+            <h2>Frais de préparation et de transport</h2>
+            <p>Les frais d’expédition comprennent les frais de préparation, d’emballage et de transport. Les frais de préparation sont fixes, tandis que les frais de transport dépendent notamment du montant de la commande et des conditions affichées dans le panier.</p>
+            <p>Nous recommandons de regrouper les articles dans une seule commande. Deux commandes validées séparément ne peuvent pas être regroupées automatiquement et leurs frais de livraison respectifs restent applicables.</p>
+        </div>
+    </section>
+
+    <section class="information-section">
+        <span class="information-section__number">04</span>
+        <div>
+            <h2>Emballage et transfert des risques</h2>
+            <p>Les dimensions des boîtes sont adaptées au contenu et une attention particulière est portée à la protection des produits, notamment des articles fragiles.</p>
+            <p>Le risque de perte ou d’endommagement est transféré au Client lorsqu’il prend physiquement possession du colis, ou lorsqu’un tiers qu’il a désigné en prend possession. Si le Client choisit lui-même un transporteur autre que celui proposé par ULTRAPOP, le transfert des risques intervient lors de la remise du colis à ce transporteur.</p>
+        </div>
+    </section>
+
+    <div class="information-cta">
+        <div>
+            <span>Une question sur votre colis ?</span>
+            <strong>Notre service client peut vous aider.</strong>
+        </div>
+        <a href="{{ path('app_front_contact') }}">Nous contacter <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+{% endblock %}

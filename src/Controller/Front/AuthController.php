@@ -61,6 +61,12 @@ final class AuthController extends AbstractController
             return $this->redirectToRoute('app_front_profil');
         }
 
+        if (!$request->request->getBoolean('accept_terms')) {
+            $this->addFlash('error', 'auth.flash.terms_required');
+
+            return $this->redirectToRoute('app_front_profil');
+        }
+
         $email = $request->request->getString('email');
         $password = $request->request->getString('password');
 

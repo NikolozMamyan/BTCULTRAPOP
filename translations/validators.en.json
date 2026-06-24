@@ -1,4 +1,11 @@
 {
     "user.email.unique": "An account already uses this email address.",
     "product.ean.digits": "The EAN must contain digits only."
+    ,"contact.validation.subject_required": "Please enter a subject."
+    ,"contact.validation.subject_too_long": "The subject cannot exceed 160 characters."
+    ,"contact.validation.email_required": "Please enter your email address."
+    ,"contact.validation.email_invalid": "Please enter a valid email address."
+    ,"contact.validation.message_required": "Please enter your message."
+    ,"contact.validation.message_too_short": "Your message must contain at least 10 characters."
+    ,"contact.validation.message_too_long": "Your message cannot exceed 5,000 characters."
 }

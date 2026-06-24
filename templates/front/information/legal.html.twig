@@ -1,0 +1,59 @@
+{% extends 'front/information/base.html.twig' %}
+
+{% block information_meta_title %}Mentions légales | ULTRAPOP{% endblock %}
+{% block information_meta_description %}Informations légales relatives à l’éditeur et à l’hébergeur du site ULTRAPOP.{% endblock %}
+{% block information_canonical %}{{ seo_origin ~ path('app_front_legal') }}{% endblock %}
+{% block information_breadcrumb %}Mentions légales{% endblock %}
+{% block information_icon %}fa-solid fa-scale-balanced{% endblock %}
+{% block information_eyebrow %}Éditeur et hébergement{% endblock %}
+{% block information_title %}Mentions légales{% endblock %}
+{% block information_intro %}Informations relatives à l’éditeur, au directeur de publication et à l’hébergement du site.{% endblock %}
+
+{% block information_content %}
+    <p class="information-updated"><i class="fa-regular fa-calendar"></i> Dernière mise à jour : 24 juin 2026</p>
+
+    <div class="legal-identity-grid">
+        <section>
+            <span><i class="fa-solid fa-building"></i></span>
+            <h2>Éditeur du site</h2>
+            <dl>
+                <div><dt>Dénomination</dt><dd>LNS TRADE</dd></div>
+                <div><dt>Forme juridique</dt><dd>SARL</dd></div>
+                <div><dt>Capital social</dt><dd>1 000 €</dd></div>
+                <div><dt>Siège social</dt><dd>13 quai Kléber, 67000 Strasbourg, France</dd></div>
+                <div><dt>SIRET</dt><dd>803 854 447 00031</dd></div>
+                <div><dt>TVA intracommunautaire</dt><dd>FR84 803854447</dd></div>
+                <div><dt>Téléphone</dt><dd>+33 (0)1 44 88 23 00</dd></div>
+                <div><dt>Email</dt><dd><a href="mailto:info@lnstrade.fr">info@lnstrade.fr</a></dd></div>
+            </dl>
+        </section>
+        <section>
+            <span><i class="fa-solid fa-user-tie"></i></span>
+            <h2>Directeur de publication</h2>
+            <p>Eric Uzan, en qualité de dirigeant de LNS TRADE.</p>
+        </section>
+        <section>
+            <span><i class="fa-solid fa-server"></i></span>
+            <h2>Hébergement</h2>
+            <p><strong>OVH SAS</strong><br>2 rue Kellermann<br>59100 Roubaix – France</p>
+            <p>+33 (0)9 72 10 10 07<br><a href="https://www.ovhcloud.com/fr/" target="_blank" rel="noopener noreferrer">www.ovhcloud.com/fr</a></p>
+        </section>
+    </div>
+
+    <section class="information-section"><span class="information-section__number">01</span><div>
+        <h2>Propriété intellectuelle</h2>
+        <p>Les textes, créations graphiques, interfaces, logos, éléments logiciels et contenus propres au site sont la propriété de LNS TRADE ou sont exploités avec l’autorisation de leurs titulaires. Les marques, personnages, illustrations et univers sous licence demeurent la propriété de leurs ayants droit respectifs.</p>
+        <p>Toute reproduction, représentation, modification, publication, transmission ou adaptation, totale ou partielle, est interdite sans autorisation écrite préalable, sauf exceptions prévues par la loi.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">02</span><div>
+        <h2>Limitation de responsabilité</h2>
+        <p>LNS TRADE met en œuvre les moyens raisonnables nécessaires pour assurer l’exactitude des informations et la disponibilité du site. Elle ne peut toutefois garantir une disponibilité continue ni l’absence totale d’erreur ou d’interruption.</p>
+        <p>Cette limitation ne saurait exclure les responsabilités qui ne peuvent légalement être limitées ou exclues.</p>
+    </div></section>
+
+    <section class="information-section"><span class="information-section__number">03</span><div>
+        <h2>Données personnelles</h2>
+        <p>Les modalités de collecte, d’utilisation et de protection des données personnelles sont détaillées dans notre <a href="{{ path('app_front_privacy') }}">Politique de confidentialité</a>.</p>
+    </div></section>
+{% endblock %}
