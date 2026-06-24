@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">Livraison ULTRAPOP</title>
+  <desc id="description">Camion de livraison rouge et jaune</desc>
+  <defs>
+    <linearGradient id="background" x1="52" y1="48" x2="458" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff7dc"/>
+      <stop offset="1" stop-color="#ffe8e6"/>
+    </linearGradient>
+    <linearGradient id="truck" x1="101" y1="177" x2="410" y2="363" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ed1c24"/>
+      <stop offset="1" stop-color="#c90f17"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="92" fill="url(#background)"/>
+  <circle cx="414" cy="100" r="46" fill="#ffcc07"/>
+  <path d="M105 171h220c18 0 32 14 32 32v45h39c12 0 23 6 30 16l35 52c5 8 8 17 8 27v30c0 15-12 27-27 27h-20c-8 31-36 54-70 54s-62-23-70-54H219c-8 31-36 54-70 54s-62-23-70-54H68c-15 0-27-12-27-27V235c0-35 29-64 64-64Z" fill="url(#truck)"/>
+  <path d="M357 274h36c8 0 15 4 20 11l23 34h-79v-45Z" fill="#fff" opacity=".95"/>
+  <path d="M105 171h220c18 0 32 14 32 32v170H41V235c0-35 29-64 64-64Z" fill="url(#truck)"/>
+  <path d="M96 229h206" stroke="#fff" stroke-width="18" stroke-linecap="round" opacity=".92"/>
+  <path d="m132 275 56 46 84-92" fill="none" stroke="#ffcc07" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="149" cy="400" r="36" fill="#203263"/>
+  <circle cx="149" cy="400" r="15" fill="#fff"/>
+  <circle cx="352" cy="400" r="36" fill="#203263"/>
+  <circle cx="352" cy="400" r="15" fill="#fff"/>
+</svg>

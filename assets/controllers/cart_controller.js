@@ -31,11 +31,29 @@ export default class extends Controller {
     }
 
     async add(event) {
+        const quantityInput = event.currentTarget
+            .closest('[data-product-purchase]')
+            ?.querySelector('[data-product-quantity]');
+
         await this.addProduct({
             productId: event.params.productId,
-            quantity: event.params.quantity || 1,
+            quantity: quantityInput
+                ? this.normalizeQuantityInput(quantityInput)
+                : (event.params.quantity || 1),
             button: event.currentTarget,
         });
+    }
+
+    incrementProductQuantity(event) {
+        this.stepProductQuantity(event.currentTarget, 1);
+    }
+
+    decrementProductQuantity(event) {
+        this.stepProductQuantity(event.currentTarget, -1);
+    }
+
+    normalizeProductQuantity(event) {
+        this.normalizeQuantityInput(event.currentTarget);
     }
 
     async addFromEvent(event) {
@@ -82,6 +100,32 @@ export default class extends Controller {
 
     async updateItem(url, quantity, button = null) {
         await this.mutate('PATCH', url, { quantity }, button);
+    }
+
+    stepProductQuantity(button, step) {
+        const input = button
+            .closest('[data-product-purchase]')
+            ?.querySelector('[data-product-quantity]');
+
+        if (!input) {
+            return;
+        }
+
+        const currentQuantity = this.normalizeQuantityInput(input);
+        this.normalizeQuantityInput(input, currentQuantity + step);
+    }
+
+    normalizeQuantityInput(input, requestedQuantity = Number(input.value)) {
+        const minimum = Math.max(1, Number(input.min) || 1);
+        const maximum = Math.max(minimum, Number(input.max) || 99);
+        const normalizedQuantity = Number.isFinite(requestedQuantity)
+            ? Math.trunc(requestedQuantity)
+            : minimum;
+        const quantity = Math.min(maximum, Math.max(minimum, normalizedQuantity));
+
+        input.value = String(quantity);
+
+        return quantity;
     }
 
     async mutate(method, url, body = null, button = null) {

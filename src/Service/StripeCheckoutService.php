@@ -115,12 +115,19 @@ final readonly class StripeCheckoutService
      */
     private function shippingLineItem(Order $order): array
     {
+        $productData = [
+            'name' => $this->translator->trans('checkout.shipping_line'),
+        ];
+        $image = $this->assetUrlResolver->resolveAbsolute('img/checkout/shipping-truck.svg');
+
+        if (null !== $image && str_starts_with($image, 'https://')) {
+            $productData['images'] = [$image];
+        }
+
         return [
             'price_data' => [
                 'currency' => strtolower($order->getCurrency()),
-                'product_data' => [
-                    'name' => $this->translator->trans('checkout.shipping_line'),
-                ],
+                'product_data' => $productData,
                 'unit_amount' => $order->getShippingAmountTaxIncludedCents(),
             ],
             'quantity' => 1,

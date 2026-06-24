@@ -1,7 +1,9 @@
 {% set product_image_deferred = defer_image|default(false) %}
+{% set show_quantity_selector = quantity_selector|default(false) and product.in_stock %}
+{% set max_quantity = product.quantity > 99 ? 99 : product.quantity %}
 
 <article
-    class="shop-product-card"
+    class="shop-product-card {{ show_quantity_selector ? 'shop-product-card--quantity' : '' }}"
     data-shop-filters-target="card"
     data-category="{{ product.cat }}"
     data-category-path="{{ product.category_path|default([])|join('|') }}"
@@ -75,15 +77,55 @@
         </div>
     </div>
 
-    <button
-        type="button"
-        class="shop-product-card__add cart-add-button"
-        data-action="cart#add"
-        data-cart-product-id-param="{{ product.id }}"
-        data-cart-quantity-param="1"
-        {{ product.in_stock ? '' : 'disabled' }}
-    >
-        <i class="fa-solid fa-bag-shopping"></i>
-        {{ 'product.add'|trans }}
-    </button>
+    {% if show_quantity_selector %}
+        <div class="shop-product-card__purchase" data-product-purchase>
+            <div class="shop-product-card__quantity" aria-label="{{ 'product.quantity'|trans }}">
+                <button
+                    type="button"
+                    data-action="cart#decrementProductQuantity"
+                    aria-label="{{ 'product.quantity_less'|trans }}"
+                >
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+                <input
+                    type="number"
+                    value="1"
+                    min="1"
+                    max="{{ max_quantity }}"
+                    inputmode="numeric"
+                    data-product-quantity
+                    data-action="change->cart#normalizeProductQuantity blur->cart#normalizeProductQuantity"
+                    aria-label="{{ 'product.quantity'|trans }}"
+                >
+                <button
+                    type="button"
+                    data-action="cart#incrementProductQuantity"
+                    aria-label="{{ 'product.quantity_more'|trans }}"
+                >
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+            <button
+                type="button"
+                class="shop-product-card__add cart-add-button"
+                data-action="cart#add"
+                data-cart-product-id-param="{{ product.id }}"
+            >
+                <i class="fa-solid fa-bag-shopping"></i>
+                {{ 'product.add'|trans }}
+            </button>
+        </div>
+    {% else %}
+        <button
+            type="button"
+            class="shop-product-card__add cart-add-button"
+            data-action="cart#add"
+            data-cart-product-id-param="{{ product.id }}"
+            data-cart-quantity-param="1"
+            {{ product.in_stock ? '' : 'disabled' }}
+        >
+            <i class="fa-solid fa-bag-shopping"></i>
+            {{ 'product.add'|trans }}
+        </button>
+    {% endif %}
 </article>

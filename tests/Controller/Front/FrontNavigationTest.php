@@ -130,6 +130,10 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorTextContains('.shop-seo-copy', 'boutique food dédiée aux univers manga');
         self::assertSelectorExists('.shop-product-card .favorite-button[data-action="favorites#toggle"]');
         self::assertSelectorExists('.shop-product-card__add.cart-add-button[data-action="cart#add"]');
+        self::assertSelectorExists('.shop-product-card--quantity [data-product-purchase]');
+        self::assertSelectorExists('.shop-product-card__quantity input[data-product-quantity][min="1"][value="1"]');
+        self::assertSelectorExists('.shop-product-card__quantity button[data-action="cart#decrementProductQuantity"]');
+        self::assertSelectorExists('.shop-product-card__quantity button[data-action="cart#incrementProductQuantity"]');
         self::assertSelectorExists('.shop-product-card button[data-action="product-preview-open"] .fa-magnifying-glass-plus');
         self::assertSelectorTextContains('.shop-product-card:first-child', '1,31 €');
         self::assertSelectorCount(3, '.shop-filter-card');
