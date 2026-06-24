@@ -26,6 +26,7 @@ final readonly class StripeCheckoutService
 
     public function createSession(Order $order): Session
     {
+        $stripe = $this->stripe();
         $lineItems = array_map(
             fn (OrderItem $item): array => $this->lineItem($item),
             $order->getItems()->toArray(),
@@ -60,7 +61,24 @@ final readonly class StripeCheckoutService
             $payload['customer_email'] = $order->getCustomerEmail();
         }
 
-        return $this->stripe()->checkout->sessions->create($payload);
+        if ($order->getDiscountAmountTaxIncludedCents() > 0) {
+            $coupon = $stripe->coupons->create([
+                'amount_off' => $order->getDiscountAmountTaxIncludedCents(),
+                'currency' => strtolower($order->getCurrency()),
+                'duration' => 'once',
+                'name' => mb_substr(sprintf(
+                    'ULTRAPOP %s',
+                    $order->getPromoCodeSnapshot() ?? $order->getOrderNumber(),
+                ), 0, 40),
+                'metadata' => [
+                    'order_number' => $order->getOrderNumber(),
+                    'promo_code' => $order->getPromoCodeSnapshot() ?? '',
+                ],
+            ]);
+            $payload['discounts'] = [['coupon' => $coupon->id]];
+        }
+
+        return $stripe->checkout->sessions->create($payload);
     }
 
     public function retrieveSession(string $sessionId): Session

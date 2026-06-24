@@ -48,6 +48,10 @@ final class CartManager
     public function removeItem(Cart $cart, CartItem $item): void
     {
         $cart->removeItem($item);
+
+        if (0 === $cart->getItems()->count()) {
+            $cart->setPromoCode(null);
+        }
     }
 
     public function merge(Cart $source, Cart $target): void
@@ -84,6 +88,11 @@ final class CartManager
             $source->removeItem($sourceItem);
         }
 
+        if (null === $target->getPromoCode() && null !== $source->getPromoCode()) {
+            $target->setPromoCode($source->getPromoCode());
+        }
+
+        $source->setPromoCode(null);
         $source->abandon();
     }
 

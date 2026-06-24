@@ -1,0 +1,87 @@
+{{ form_start(form, {attr: {class: 'admin-category-form'}}) }}
+    <article class="admin-panel admin-form-card">
+        <div class="admin-form-card__heading">
+            <span><i class="fa-solid fa-ticket"></i></span>
+            <div>
+                <strong>{{ 'admin.promo.form.identity_title'|trans }}</strong>
+                <small>{{ 'admin.promo.form.identity_text'|trans }}</small>
+            </div>
+        </div>
+
+        {{ form_errors(form) }}
+
+        <div class="admin-form-grid admin-form-grid--three">
+            <div class="admin-field">
+                {{ form_label(form.code) }}
+                {{ form_widget(form.code) }}
+                {{ form_errors(form.code) }}
+            </div>
+            <div class="admin-field">
+                {{ form_label(form.discountType) }}
+                {{ form_widget(form.discountType) }}
+                {{ form_errors(form.discountType) }}
+            </div>
+            <div class="admin-field">
+                {{ form_label(form.value) }}
+                {{ form_widget(form.value) }}
+                {{ form_errors(form.value) }}
+                <small>{{ 'admin.promo.form.value_help'|trans }}</small>
+            </div>
+        </div>
+
+        <div class="admin-form-grid admin-form-grid--two">
+            <div class="admin-field">
+                {{ form_label(form.validFrom) }}
+                {{ form_widget(form.validFrom) }}
+                {{ form_errors(form.validFrom) }}
+            </div>
+            <div class="admin-field">
+                {{ form_label(form.validUntil) }}
+                {{ form_widget(form.validUntil) }}
+                {{ form_errors(form.validUntil) }}
+            </div>
+        </div>
+
+        <div class="admin-form-grid admin-form-grid--two">
+            <div class="admin-field">
+                {{ form_label(form.maxUses) }}
+                {{ form_widget(form.maxUses) }}
+                {{ form_errors(form.maxUses) }}
+                <small>{{ 'admin.promo.form.max_uses_help'|trans }}</small>
+            </div>
+            <div class="admin-field">
+                {{ form_label(form.assignedUser) }}
+                {{ form_widget(form.assignedUser) }}
+                {{ form_errors(form.assignedUser) }}
+                <small>{{ 'admin.promo.form.assigned_user_help'|trans }}</small>
+            </div>
+        </div>
+
+        <div class="admin-field admin-field--switch">
+            {{ form_widget(form.active) }}
+            {{ form_label(form.active) }}
+            {{ form_errors(form.active) }}
+        </div>
+
+        {% if promo_code.id %}
+            <div class="admin-category-warning">
+                <i class="fa-solid fa-chart-simple"></i>
+                <span>{{ 'admin.promo.form.usage_status'|trans({
+                    '%used%': promo_code.usedCount,
+                    '%reserved%': promo_code.reservedCount,
+                    '%maximum%': promo_code.maxUses ?: 'admin.promo.form.unlimited'|trans
+                }) }}</span>
+            </div>
+        {% endif %}
+
+        <div class="admin-product-form__actions">
+            <button type="submit" class="admin-action-button">
+                <i class="fa-solid fa-floppy-disk"></i>
+                {{ submit_label|trans }}
+            </button>
+            <a href="{{ path('app_admin_promo_codes_index') }}" class="admin-secondary-button">
+                {{ 'admin.promo.form.cancel'|trans }}
+            </a>
+        </div>
+    </article>
+{{ form_end(form) }}

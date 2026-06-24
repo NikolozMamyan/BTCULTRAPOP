@@ -14,6 +14,7 @@ use App\Repository\OrderRepository;
 use App\Service\CartResolver;
 use App\Service\CartViewBuilder;
 use App\Service\OrderManager;
+use App\Service\PromoCodeManager;
 use App\Service\ShippingRateCalculator;
 use App\Service\StripeCheckoutService;
 use App\Service\StripeWebhookHandler;
@@ -34,6 +35,7 @@ final class CheckoutController extends AbstractController
         CartViewBuilder $cartViewBuilder,
         OrderManager $orderManager,
         ShippingRateCalculator $shippingRateCalculator,
+        PromoCodeManager $promoCodeManager,
         StripeCheckoutService $stripeCheckout,
         EntityManagerInterface $entityManager,
     ): Response {
@@ -73,6 +75,7 @@ final class CheckoutController extends AbstractController
         $order = null;
 
         try {
+            $discountAmount = $promoCodeManager->discountForCart($cart, true);
             $order = $orderManager->createGuestFromCart(
                 cart: $cart,
                 shippingAddress: $address,
@@ -80,6 +83,7 @@ final class CheckoutController extends AbstractController
                 shippingAmountTaxIncludedCents: $shippingRateCalculator->amountForSubtotal(
                     $cart->getTotalTaxIncludedCents(),
                 ),
+                discountAmountTaxIncludedCents: $discountAmount,
             );
             $entityManager->persist($order);
             $entityManager->flush();
@@ -93,15 +97,20 @@ final class CheckoutController extends AbstractController
 
             return $this->redirect((string) $session->url, Response::HTTP_SEE_OTHER);
         } catch (StripeConfigurationException) {
-            $this->restoreCartAfterCheckoutFailure($cart, $order);
+            $this->restoreCartAfterCheckoutFailure($cart, $order, $orderManager);
             $entityManager->flush();
             $this->addFlash('error', 'checkout.flash.stripe_not_configured');
         } catch (ApiErrorException) {
-            $this->restoreCartAfterCheckoutFailure($cart, $order);
+            $this->restoreCartAfterCheckoutFailure($cart, $order, $orderManager);
             $entityManager->flush();
             $this->addFlash('error', 'checkout.flash.stripe_error');
-        } catch (\InvalidArgumentException) {
-            $this->addFlash('error', 'checkout.flash.invalid_cart');
+        } catch (\InvalidArgumentException $exception) {
+            $this->restoreCartAfterCheckoutFailure($cart, $order, $orderManager);
+            $entityManager->flush();
+            $message = str_starts_with($exception->getMessage(), 'promo.')
+                ? $exception->getMessage()
+                : 'checkout.flash.invalid_cart';
+            $this->addFlash('error', $message);
         }
 
         return $this->redirectToRoute('app_front_cart');
@@ -133,7 +142,12 @@ final class CheckoutController extends AbstractController
     }
 
     #[Route('/cancel', name: 'app_checkout_cancel', methods: ['GET'])]
-    public function cancel(Request $request, OrderRepository $orders, EntityManagerInterface $entityManager): Response
+    public function cancel(
+        Request $request,
+        OrderRepository $orders,
+        OrderManager $orderManager,
+        EntityManagerInterface $entityManager,
+    ): Response
     {
         $order = null;
         $orderNumber = trim($request->query->getString('order'));
@@ -142,7 +156,7 @@ final class CheckoutController extends AbstractController
             $order = $orders->findOneBy(['orderNumber' => $orderNumber]);
 
             if ($order instanceof Order && OrderStatus::PENDING_PAYMENT === $order->getStatus()) {
-                $order->cancel();
+                $orderManager->cancel($order);
                 $entityManager->flush();
             }
         }
@@ -159,10 +173,13 @@ final class CheckoutController extends AbstractController
         return $user instanceof User ? $user : null;
     }
 
-    private function restoreCartAfterCheckoutFailure(Cart $cart, ?Order $order): void
+    private function restoreCartAfterCheckoutFailure(Cart $cart, ?Order $order, OrderManager $orderManager): void
     {
         $cart->setStatus(CartStatus::ACTIVE);
-        $order?->cancel();
+
+        if ($order instanceof Order) {
+            $orderManager->cancel($order);
+        }
     }
 
     private function stripeObjectId(mixed $value): ?string

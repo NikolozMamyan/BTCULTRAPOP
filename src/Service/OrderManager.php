@@ -14,8 +14,10 @@ use App\Model\CheckoutAddress;
 
 final class OrderManager
 {
-    public function __construct(private readonly ?OrderNumberGenerator $orderNumberGenerator = null)
-    {
+    public function __construct(
+        private readonly ?OrderNumberGenerator $orderNumberGenerator = null,
+        private readonly ?PromoCodeManager $promoCodeManager = null,
+    ) {
     }
 
     public function createFromCart(
@@ -46,13 +48,15 @@ final class OrderManager
             ->setShippingCountryCode($shippingAddress->getCountryCode())
             ->setShippingPhone($shippingAddress->getPhone())
             ->setShippingAmountTaxIncludedCents($shippingAmountTaxIncludedCents)
-            ->setDiscountAmountTaxIncludedCents($discountAmountTaxIncludedCents);
+            ->setDiscountAmountTaxIncludedCents($discountAmountTaxIncludedCents)
+            ->setPromoCode($discountAmountTaxIncludedCents > 0 ? $cart->getPromoCode() : null);
 
         foreach ($cart->getItems() as $cartItem) {
             $order->addItem($this->createOrderItem($cartItem));
         }
 
         $order->refreshTotals();
+        $this->reservePromotion($order);
         $cart->markConverted();
 
         return $order;
@@ -87,13 +91,15 @@ final class OrderManager
             ->setShippingCountryCode($shippingAddress->countryCode)
             ->setShippingPhone($shippingAddress->phone)
             ->setShippingAmountTaxIncludedCents($shippingAmountTaxIncludedCents)
-            ->setDiscountAmountTaxIncludedCents($discountAmountTaxIncludedCents);
+            ->setDiscountAmountTaxIncludedCents($discountAmountTaxIncludedCents)
+            ->setPromoCode($discountAmountTaxIncludedCents > 0 ? $cart->getPromoCode() : null);
 
         foreach ($cart->getItems() as $cartItem) {
             $order->addItem($this->createOrderItem($cartItem));
         }
 
         $order->refreshTotals();
+        $this->reservePromotion($order);
         $cart->markConverted();
 
         return $order;
@@ -105,6 +111,7 @@ final class OrderManager
             return;
         }
 
+        $this->promoCodeManager?->redeemForOrder($order);
         $order->markPaid($paidAt);
         $order->getUser()?->addLoyaltyPoints($order->getLoyaltyPointsEarned());
 
@@ -115,6 +122,18 @@ final class OrderManager
                 $product->setQuantity(max(0, $product->getQuantity() - $item->getQuantity()));
             }
         }
+    }
+
+    public function markPaymentFailed(Order $order, ?string $reason = null): void
+    {
+        $this->promoCodeManager?->releaseForOrder($order);
+        $order->markPaymentFailed($reason);
+    }
+
+    public function cancel(Order $order, ?\DateTimeImmutable $cancelledAt = null): void
+    {
+        $this->promoCodeManager?->releaseForOrder($order);
+        $order->cancel($cancelledAt);
     }
 
     private function createOrderItem(CartItem $cartItem): OrderItem
@@ -149,6 +168,19 @@ final class OrderManager
         }
 
         return number_format((($taxIncludedCents - $taxExcludedCents) / $taxExcludedCents) * 100, 2, '.', '');
+    }
+
+    private function reservePromotion(Order $order): void
+    {
+        if (null === $order->getPromoCode()) {
+            return;
+        }
+
+        if (!$this->promoCodeManager instanceof PromoCodeManager) {
+            throw new \LogicException('PromoCodeManager is required to reserve a promotional code.');
+        }
+
+        $this->promoCodeManager->reserveForOrder($order);
     }
 
     private function generateOrderNumber(): string

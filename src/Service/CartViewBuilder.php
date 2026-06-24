@@ -15,6 +15,7 @@ final readonly class CartViewBuilder
         private ShippingRateCalculator $shippingRateCalculator,
         private AssetUrlResolver $assetUrlResolver,
         private ProductSlugger $productSlugger,
+        private PromoCodeManager $promoCodeManager,
     ) {
     }
 
@@ -32,8 +33,10 @@ final readonly class CartViewBuilder
         }
 
         $subtotal = $cart->getTotalTaxIncludedCents();
+        $discount = $this->promoCodeManager->discountForCart($cart);
         $shipping = $this->shippingRateCalculator->quote($subtotal);
         $shippingAmount = $shipping['amountCents'];
+        $promoCode = $cart->getPromoCode();
 
         return [
             'items' => array_map(fn (CartItem $item): array => $this->item($item), $cart->getItems()->toArray()),
@@ -46,8 +49,12 @@ final readonly class CartViewBuilder
                 ? $this->translator->trans('overlay.free')
                 : $this->formatCents($shippingAmount),
             'shippingFree' => $shipping['free'],
-            'totalCents' => $subtotal + $shippingAmount,
-            'totalFormatted' => $this->formatCents($subtotal + $shippingAmount),
+            'promoCode' => $promoCode?->getCode(),
+            'hasDiscount' => $discount > 0,
+            'discountCents' => $discount,
+            'discountFormatted' => '-' . $this->formatCents($discount),
+            'totalCents' => max(0, $subtotal + $shippingAmount - $discount),
+            'totalFormatted' => $this->formatCents(max(0, $subtotal + $shippingAmount - $discount)),
             'shippingProgress' => $shipping['progress'],
             'shippingMessage' => $this->shippingMessage($shipping),
             'shippingCheckpoints' => $this->shippingCheckpoints($shipping),
@@ -69,6 +76,10 @@ final readonly class CartViewBuilder
             'shippingAmountFormatted' => $this->formatCents(0),
             'shippingDisplay' => '—',
             'shippingFree' => false,
+            'promoCode' => null,
+            'hasDiscount' => false,
+            'discountCents' => 0,
+            'discountFormatted' => $this->formatCents(0),
             'totalCents' => 0,
             'totalFormatted' => $this->formatCents(0),
             'shippingProgress' => 0,

@@ -1,0 +1,25 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.promo.new.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section>
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.promo.new.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.promo.new.title'|trans }}</h1>
+                <p>{{ 'admin.promo.new.subtitle'|trans }}</p>
+            </div>
+            <a href="{{ path('app_admin_promo_codes_index') }}" class="admin-secondary-button">
+                <i class="fa-solid fa-arrow-left"></i>
+                {{ 'admin.promo.back_to_list'|trans }}
+            </a>
+        </div>
+
+        {% include 'admin/promo_codes/_form.html.twig' with {
+            form: form,
+            promo_code: promo_code,
+            submit_label: 'admin.promo.form.create_submit'
+        } only %}
+    </section>
+{% endblock %}

@@ -56,6 +56,16 @@ export default class extends Controller {
         await this.mutate('DELETE', event.params.url, null, event.currentTarget);
     }
 
+    async applyPromo(event) {
+        event.preventDefault();
+        await this.submitPromo(event.currentTarget);
+    }
+
+    async removePromo(event) {
+        event.preventDefault();
+        await this.submitPromo(event.currentTarget);
+    }
+
     async addProduct({ productId, quantity = 1, button = null }) {
         if (!productId) {
             this.showToast(this.errorValue, true);
@@ -144,6 +154,38 @@ export default class extends Controller {
         }
     }
 
+    async submitPromo(form) {
+        const button = form.querySelector('button[type="submit"]');
+
+        if (!form.action || button?.disabled) {
+            return;
+        }
+
+        this.setBusy(button, true);
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                },
+                body: new FormData(form),
+            });
+            const payload = await response.json();
+
+            if (payload?.cart) {
+                this.render(payload.cart);
+            }
+
+            this.showToast(payload?.message || this.errorValue, !response.ok);
+        } catch (error) {
+            this.showToast(this.errorValue, true);
+        } finally {
+            this.setBusy(button, false);
+        }
+    }
+
     render(cart) {
         document.querySelectorAll('.cart-count').forEach((badge) => {
             badge.textContent = String(cart.totalQuantity);
@@ -170,7 +212,60 @@ export default class extends Controller {
         this.setText('cart-page-subtotal', cart.subtotalFormatted);
         this.setText('cart-page-total', cart.totalFormatted);
         this.setShippingText('cart-page-shipping', cart);
+        this.renderDiscount('cart-discount-row', 'cart-discount', cart);
+        this.renderDiscount('cart-page-discount-row', 'cart-page-discount', cart);
+        this.setText('cart-page-promo-code', cart.promoCode || '');
+        this.setText('cart-page-active-discount', cart.discountFormatted);
+        this.renderPromoControls(cart);
         this.syncPendingMutations();
+    }
+
+    renderDiscount(rowId, amountId, cart) {
+        const row = document.getElementById(rowId);
+
+        if (row) {
+            row.classList.toggle('hidden', !cart.hasDiscount);
+        }
+
+        this.setText(amountId, cart.discountFormatted);
+    }
+
+    renderPromoControls(cart) {
+        const container = document.getElementById('cart-promo');
+
+        if (!container) {
+            return;
+        }
+
+        if (cart.promoCode) {
+            container.innerHTML = `
+                <div class="cart-promo__active">
+                    <span>
+                        <i class="fa-solid fa-ticket"></i>
+                        <strong>${this.escape(cart.promoCode)}</strong>
+                        <small id="cart-page-active-discount">${this.escape(cart.discountFormatted)}</small>
+                    </span>
+                    <form action="${this.escapeAttribute(container.dataset.removeUrl)}" method="post" data-action="submit->cart#removePromo">
+                        <input type="hidden" name="_csrf_token" value="${this.escapeAttribute(container.dataset.csrfToken)}">
+                        <button type="submit" aria-label="${this.escapeAttribute(container.dataset.removeLabel)}">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </form>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = `
+            <form action="${this.escapeAttribute(container.dataset.applyUrl)}" method="post" class="cart-promo__form" data-action="submit->cart#applyPromo">
+                <input type="hidden" name="_csrf_token" value="${this.escapeAttribute(container.dataset.csrfToken)}">
+                <label for="cart-promo-code">${this.escape(container.dataset.label)}</label>
+                <div>
+                    <input id="cart-promo-code" name="promo_code" type="text" required autocomplete="off" placeholder="${this.escapeAttribute(container.dataset.placeholder)}">
+                    <button type="submit">${this.escape(container.dataset.applyLabel)}</button>
+                </div>
+            </form>
+        `;
     }
 
     renderShippingMeter(prefix, cart) {

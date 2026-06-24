@@ -29,6 +29,10 @@ class Cart
     #[ORM\Column(length: 20, enumType: CartStatus::class)]
     private CartStatus $status = CartStatus::ACTIVE;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?PromoCode $promoCode = null;
+
     /**
      * @var Collection<int, CartItem>
      */
@@ -102,6 +106,18 @@ class Cart
     public function isActive(): bool
     {
         return CartStatus::ACTIVE === $this->status;
+    }
+
+    public function getPromoCode(): ?PromoCode
+    {
+        return $this->promoCode;
+    }
+
+    public function setPromoCode(?PromoCode $promoCode): self
+    {
+        $this->promoCode = $promoCode;
+
+        return $this;
     }
 
     public function markConverted(): self

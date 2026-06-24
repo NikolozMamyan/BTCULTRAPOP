@@ -75,6 +75,7 @@ final readonly class AdminOrderProvider
             'subtotal_tax_excluded' => $this->formatCents($order->getTotalTaxExcludedCents()),
             'shipping_amount' => $this->formatCents($order->getShippingAmountTaxIncludedCents()),
             'discount' => $this->formatCents($order->getDiscountAmountTaxIncludedCents()),
+            'promo_code' => $order->getPromoCodeSnapshot(),
             'loyalty_points' => $order->getLoyaltyPointsEarned(),
             'paid_at' => $order->getPaidAt(),
             'cancelled_at' => $order->getCancelledAt(),

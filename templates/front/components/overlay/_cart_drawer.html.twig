@@ -15,6 +15,10 @@
         <div class="flex justify-between text-sm"><span class="text-text-light">{{ 'overlay.subtotal'|trans }}</span><span id="cart-subtotal" class="font-bold">0,00€</span></div>
         <div class="flex justify-between text-sm"><span class="text-text-light">{{ 'overlay.delivery'|trans }}</span><span id="cart-shipping" class="font-bold">—</span></div>
         <div class="flex justify-between text-lg font-extrabold border-t border-border-c pt-3"><span>{{ 'overlay.total'|trans }}</span><span id="cart-total" class="text-primary">0,00€</span></div>
+        <div id="cart-discount-row" class="hidden flex justify-between text-sm text-success">
+            <span>{{ 'promo.cart.discount'|trans }}</span>
+            <span id="cart-discount" class="font-bold">0,00 €</span>
+        </div>
         <a href="{{ path('app_front_cart') }}" class="cart-drawer__checkout">
             <span>{{ 'cart.go_to_cart'|trans }}</span>
             <i class="fa-solid fa-arrow-right"></i>

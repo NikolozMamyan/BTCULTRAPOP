@@ -78,6 +78,24 @@
 
             <aside class="cart-page__summary" aria-label="{{ 'cart.summary'|trans }}">
                 <h2>{{ 'cart.summary'|trans }}</h2>
+                {% for message in app.flashes('promo_success') %}
+                    <div class="cart-promo-flash cart-promo-flash--success">
+                        <i class="fa-solid fa-circle-check"></i>
+                        {{ message|trans }}
+                    </div>
+                {% endfor %}
+                {% for message in app.flashes('promo_error') %}
+                    <div class="cart-promo-flash cart-promo-flash--error">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        {{ message|trans }}
+                    </div>
+                {% endfor %}
+                {% for message in app.flashes('error') %}
+                    <div class="cart-promo-flash cart-promo-flash--error">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        {{ message|trans }}
+                    </div>
+                {% endfor %}
                 <div class="cart-page__shipping">
                     {% include 'front/components/cart/_shipping_meter.html.twig' with {
                         prefix: 'page',
@@ -93,11 +111,53 @@
                         <dt>{{ 'overlay.delivery'|trans }}</dt>
                         <dd id="cart-page-shipping" class="{{ cart.shippingFree ? 'is-free' : '' }}">{{ cart.shippingDisplay }}</dd>
                     </div>
+                    <div id="cart-page-discount-row" class="cart-promo-discount {{ cart.hasDiscount ? '' : 'hidden' }}">
+                        <dt>{{ 'promo.cart.discount'|trans }} <small id="cart-page-promo-code">{{ cart.promoCode }}</small></dt>
+                        <dd id="cart-page-discount">{{ cart.discountFormatted }}</dd>
+                    </div>
                     <div class="cart-page__summary-total">
                         <dt>{{ 'overlay.total'|trans }}</dt>
                         <dd id="cart-page-total">{{ cart.totalFormatted }}</dd>
                     </div>
                 </dl>
+                {% if not cart.empty %}
+                    <div
+                        id="cart-promo"
+                        class="cart-promo"
+                        data-apply-url="{{ path('app_front_cart_promo_apply') }}"
+                        data-remove-url="{{ path('app_front_cart_promo_remove') }}"
+                        data-csrf-token="{{ csrf_token('cart_promo') }}"
+                        data-label="{{ 'promo.cart.label'|trans }}"
+                        data-placeholder="{{ 'promo.cart.placeholder'|trans }}"
+                        data-apply-label="{{ 'promo.cart.apply'|trans }}"
+                        data-remove-label="{{ 'promo.cart.remove'|trans }}"
+                    >
+                        {% if cart.promoCode %}
+                            <div class="cart-promo__active">
+                                <span>
+                                    <i class="fa-solid fa-ticket"></i>
+                                    <strong>{{ cart.promoCode }}</strong>
+                                    <small id="cart-page-active-discount">{{ cart.discountFormatted }}</small>
+                                </span>
+                                <form action="{{ path('app_front_cart_promo_remove') }}" method="post" data-action="submit->cart#removePromo">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('cart_promo') }}">
+                                    <button type="submit" aria-label="{{ 'promo.cart.remove'|trans }}">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        {% else %}
+                            <form action="{{ path('app_front_cart_promo_apply') }}" method="post" class="cart-promo__form" data-action="submit->cart#applyPromo">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('cart_promo') }}">
+                                <label for="cart-promo-code">{{ 'promo.cart.label'|trans }}</label>
+                                <div>
+                                    <input id="cart-promo-code" name="promo_code" type="text" required autocomplete="off" placeholder="{{ 'promo.cart.placeholder'|trans }}">
+                                    <button type="submit">{{ 'promo.cart.apply'|trans }}</button>
+                                </div>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endif %}
                 {% if not cart.empty and checkout_form is defined %}
                     {{ form_start(checkout_form, {attr: {
                         class: 'checkout-address-form',

@@ -172,7 +172,10 @@
                 </div>
                 <div>
                     <span>{{ 'admin.order.discount'|trans }}</span>
-                    <strong>{{ order.discount }}</strong>
+                    <strong>
+                        {{ order.discount }}
+                        {% if order.promo_code %}<small>({{ order.promo_code }})</small>{% endif %}
+                    </strong>
                 </div>
                 <div class="admin-order-totals__grand">
                     <span>{{ 'overlay.total'|trans }}</span>

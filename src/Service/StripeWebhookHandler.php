@@ -67,13 +67,13 @@ final readonly class StripeWebhookHandler
         }
 
         if ('checkout.session.async_payment_failed' === $eventType) {
-            $order->markPaymentFailed('stripe.async_payment_failed');
+            $this->orderManager->markPaymentFailed($order, 'stripe.async_payment_failed');
 
             return $order;
         }
 
         if ('checkout.session.expired' === $eventType && PaymentStatus::PAID !== $order->getPaymentStatus()) {
-            $order->cancel();
+            $this->orderManager->cancel($order);
 
             return $order;
         }

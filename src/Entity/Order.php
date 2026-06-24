@@ -58,6 +58,20 @@ class Order
     #[Assert\PositiveOrZero]
     private int $discountAmountTaxIncludedCents = 0;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?PromoCode $promoCode = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\Length(max: 50)]
+    private ?string $promoCodeSnapshot = null;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $promoReservationActive = false;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $promoUsageRecorded = false;
+
     #[ORM\Column(options: ['default' => 0])]
     #[Assert\PositiveOrZero]
     private int $loyaltyPointsEarned = 0;
@@ -259,6 +273,56 @@ class Order
     public function setDiscountAmountTaxIncludedCents(int $discountAmountTaxIncludedCents): self
     {
         $this->discountAmountTaxIncludedCents = max(0, $discountAmountTaxIncludedCents);
+
+        return $this;
+    }
+
+    public function getPromoCode(): ?PromoCode
+    {
+        return $this->promoCode;
+    }
+
+    public function setPromoCode(?PromoCode $promoCode): self
+    {
+        $this->promoCode = $promoCode;
+        $this->promoCodeSnapshot = $promoCode?->getCode();
+
+        return $this;
+    }
+
+    public function getPromoCodeSnapshot(): ?string
+    {
+        return $this->promoCodeSnapshot;
+    }
+
+    public function isPromoReservationActive(): bool
+    {
+        return $this->promoReservationActive;
+    }
+
+    public function markPromoReservationActive(): self
+    {
+        $this->promoReservationActive = true;
+
+        return $this;
+    }
+
+    public function releasePromoReservation(): self
+    {
+        $this->promoReservationActive = false;
+
+        return $this;
+    }
+
+    public function isPromoUsageRecorded(): bool
+    {
+        return $this->promoUsageRecorded;
+    }
+
+    public function markPromoUsageRecorded(): self
+    {
+        $this->promoUsageRecorded = true;
+        $this->promoReservationActive = false;
 
         return $this;
     }
