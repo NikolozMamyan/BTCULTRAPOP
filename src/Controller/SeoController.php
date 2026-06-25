@@ -25,6 +25,7 @@ final class SeoController extends AbstractController
         $response = new Response($this->renderView('seo/sitemap.xml.twig', [
             'pages' => $seoCatalog->publicPages(),
             'products' => $seoCatalog->products(),
+            'blog_posts' => $seoCatalog->blogPosts(),
         ]));
         $response->headers->set('Content-Type', 'application/xml; charset=UTF-8');
         $response->setPublic();
@@ -38,6 +39,7 @@ final class SeoController extends AbstractController
     {
         return $this->textResponse($this->renderView('seo/llms.txt.twig', [
             'products' => $seoCatalog->products(),
+            'blog_posts' => $seoCatalog->blogPosts(),
         ]));
     }
 

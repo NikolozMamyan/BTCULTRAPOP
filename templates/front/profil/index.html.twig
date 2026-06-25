@@ -114,6 +114,122 @@
                     </div>
                 </div>
 
+                <section class="profile-hub" aria-label="{{ 'profile.hub_label'|trans }}">
+                    <a class="profile-hub-card profile-hub-card--orders" href="#profile-orders">
+                        <span class="profile-hub-card__icon"><i class="fa-solid fa-box-open"></i></span>
+                        <span class="profile-hub-card__content">
+                            <small>{{ 'profile.orders_eyebrow'|trans }}</small>
+                            <strong>{{ 'profile.orders_title'|trans }}</strong>
+                            <span>{{ 'profile.orders_count'|trans({'%count%': profile_orders|length}) }}</span>
+                        </span>
+                        <span class="profile-hub-card__action"><i class="fa-solid fa-arrow-down"></i></span>
+                    </a>
+
+                    <a class="profile-hub-card profile-hub-card--blog" href="{{ path('app_front_blog') }}">
+                        <span class="profile-hub-card__icon"><i class="fa-solid fa-newspaper"></i></span>
+                        <span class="profile-hub-card__content">
+                            <small>{{ 'profile.blog_eyebrow'|trans }}</small>
+                            <strong>{{ 'profile.blog_title'|trans }}</strong>
+                            <span>{{ 'profile.blog_text'|trans }}</span>
+                        </span>
+                        <span class="profile-hub-card__action"><i class="fa-solid fa-arrow-right"></i></span>
+                    </a>
+                </section>
+
+                <section class="profile-orders" id="profile-orders" aria-labelledby="profile-orders-title">
+                    <div class="profile-orders__heading">
+                        <div>
+                            <span class="profile-card__eyebrow">{{ 'profile.orders_eyebrow'|trans }}</span>
+                            <h3 id="profile-orders-title">{{ 'profile.orders_title'|trans }}</h3>
+                            <p>{{ 'profile.orders_text'|trans }}</p>
+                        </div>
+                        {% if profile_orders %}
+                            <span class="profile-orders__count">{{ 'profile.orders_count'|trans({'%count%': profile_orders|length}) }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if profile_orders %}
+                        <div class="profile-orders__list">
+                            {% for order in profile_orders %}
+                                <details class="profile-order-card">
+                                    <summary class="profile-order-card__summary">
+                                        <span class="profile-order-card__package"><i class="fa-solid fa-box"></i></span>
+                                        <span class="profile-order-card__identity">
+                                            <small>{{ order.created_at|date('d/m/Y') }}</small>
+                                            <strong>{{ order.number }}</strong>
+                                            <span>{{ 'profile.order_articles'|trans({'%count%': order.total_quantity}) }}</span>
+                                        </span>
+                                        <span class="profile-order-card__status profile-order-card__status--{{ order.status_tone }}">
+                                            {{ order.status_key|trans }}
+                                        </span>
+                                        <strong class="profile-order-card__total">{{ order.total }}</strong>
+                                        <span class="profile-order-card__chevron"><i class="fa-solid fa-chevron-down"></i></span>
+                                    </summary>
+
+                                    <div class="profile-order-card__details">
+                                        <div class="profile-order-items">
+                                            {% for item in order.items %}
+                                                <article class="profile-order-item">
+                                                    <span class="profile-order-item__image">
+                                                        <img src="{{ item.image }}" alt="">
+                                                    </span>
+                                                    <span class="profile-order-item__content">
+                                                        <strong>{{ item.name }}</strong>
+                                                        {% if item.reference %}<small>{{ 'profile.order_reference'|trans }} {{ item.reference }}</small>{% endif %}
+                                                        <span>{{ item.quantity }} × {{ item.unit_price }}</span>
+                                                    </span>
+                                                    <strong>{{ item.total }}</strong>
+                                                </article>
+                                            {% endfor %}
+                                        </div>
+
+                                        <aside class="profile-order-summary">
+                                            <div>
+                                                <span>{{ 'profile.order_payment'|trans }}</span>
+                                                <strong>{{ order.payment_status_key|trans }}</strong>
+                                            </div>
+                                            <div>
+                                                <span>{{ 'profile.order_shipping'|trans }}</span>
+                                                <strong>{{ order.shipping_amount }}</strong>
+                                            </div>
+                                            {% if order.discount_cents > 0 %}
+                                                <div class="is-discount">
+                                                    <span>{{ 'profile.order_discount'|trans }}</span>
+                                                    <strong>-{{ order.discount }}</strong>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <span>{{ 'profile.order_points'|trans }}</span>
+                                                <strong>+{{ order.loyalty_points }}</strong>
+                                            </div>
+                                            <div class="profile-order-summary__address">
+                                                <span>{{ 'profile.order_delivery_address'|trans }}</span>
+                                                <strong>
+                                                    {{ order.shipping.name }}<br>
+                                                    {{ order.shipping.street }}<br>
+                                                    {{ order.shipping.postal_code }} {{ order.shipping.city }}
+                                                </strong>
+                                            </div>
+                                        </aside>
+                                    </div>
+                                </details>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="profile-orders__empty">
+                            <span><i class="fa-solid fa-bag-shopping"></i></span>
+                            <div>
+                                <strong>{{ 'profile.orders_empty_title'|trans }}</strong>
+                                <p>{{ 'profile.orders_empty_text'|trans }}</p>
+                            </div>
+                            <a href="{{ path('app_front_boutique') }}">
+                                {{ 'profile.orders_empty_action'|trans }}
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    {% endif %}
+                </section>
+
                 <section class="profile-addresses" aria-labelledby="profile-addresses-title">
                     <div class="profile-addresses__heading">
                         <div>

@@ -13,6 +13,7 @@
 - [Conditions générales de vente]({{ seo_origin ~ path('app_front_terms') }}): cadre contractuel des commandes.
 - [Politique de confidentialité]({{ seo_origin ~ path('app_front_privacy') }}): traitements de données et cookies.
 - [Contact]({{ seo_origin ~ path('app_front_contact') }}): formulaire et coordonnées du service client.
+- [Blog]({{ seo_origin ~ path('app_front_blog') }}): actualités manga, analyses et culture pop.
 
 ## Informations utiles
 
@@ -26,4 +27,10 @@
 
 {% for product in products -%}
 - [{{ product.name }}]({{ product.url }}) — {{ product.category }}{% if product.license %}, licence {{ product.license }}{% endif %}{% if product.description %}. {{ product.description }}{% endif %}
+{% endfor %}
+
+## Blog
+
+{% for post in blog_posts -%}
+- [{{ post.title }}]({{ post.url }}) — {{ post.category }}. {{ post.description }}
 {% endfor %}

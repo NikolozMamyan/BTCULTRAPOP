@@ -5,6 +5,7 @@ namespace App\Controller\Front;
 use App\Entity\Address;
 use App\Entity\User;
 use App\Repository\AddressRepository;
+use App\Service\ProfileOrderProvider;
 use App\Service\UserAvatarUploader;
 use App\Service\UserAddressManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,10 +19,13 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ProfilController extends AbstractController
 {
     #[Route('/profil', name: 'app_front_profil', methods: ['GET'])]
-    public function index(): Response
+    public function index(ProfileOrderProvider $orderProvider): Response
     {
+        $user = $this->getAuthenticatedUser();
+
         return $this->render('front/profil/index.html.twig', [
-            'user_identifier' => $this->getUser()?->getUserIdentifier(),
+            'user_identifier' => $user?->getUserIdentifier(),
+            'profile_orders' => $user instanceof User ? $orderProvider->forUser($user) : [],
         ]);
     }
 

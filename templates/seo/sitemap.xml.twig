@@ -24,4 +24,18 @@
 {% endif %}
     </url>
 {% endfor %}
+{% for post in blog_posts %}
+    <url>
+        <loc>{{ post.url }}</loc>
+        <lastmod>{{ post.lastmod|date('Y-m-d') }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+{% if post.image %}
+        <image:image>
+            <image:loc>{{ post.image }}</image:loc>
+            <image:title>{{ post.title }}</image:title>
+        </image:image>
+{% endif %}
+    </url>
+{% endfor %}
 </urlset>

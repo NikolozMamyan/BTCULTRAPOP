@@ -2,7 +2,9 @@
 
 namespace App\Service;
 
+use App\Entity\BlogPost;
 use App\Entity\Product;
+use App\Repository\BlogPostRepository;
 use App\Repository\ProductRepository;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -11,6 +13,7 @@ final readonly class StorefrontSeoCatalog
 {
     public function __construct(
         private ProductRepository $products,
+        private BlogPostRepository $blogPosts,
         private ProductSlugger $productSlugger,
         private AssetUrlResolver $assetUrlResolver,
         private UrlGeneratorInterface $urlGenerator,
@@ -57,6 +60,7 @@ final readonly class StorefrontSeoCatalog
         return [
             $this->page('app_front_home', 'weekly', '1.0'),
             $this->page('app_front_boutique', 'daily', '0.9'),
+            $this->page('app_front_blog', 'weekly', '0.8'),
             $this->page('app_front_licences', 'weekly', '0.7'),
             $this->page('app_front_soldes', 'daily', '0.7'),
             $this->page('app_front_delivery', 'monthly', '0.5'),
@@ -66,6 +70,31 @@ final readonly class StorefrontSeoCatalog
             $this->page('app_front_privacy', 'monthly', '0.4'),
             $this->page('app_front_contact', 'monthly', '0.6'),
         ];
+    }
+
+    /**
+     * @return list<array{
+     *     title: string,
+     *     description: string,
+     *     category: string,
+     *     url: string,
+     *     image: ?string,
+     *     lastmod: \DateTimeImmutable
+     * }>
+     */
+    public function blogPosts(): array
+    {
+        return array_map(
+            fn (BlogPost $post): array => [
+                'title' => $post->getTitle(),
+                'description' => $post->getSeoDescription() ?: $post->getExcerpt(),
+                'category' => $post->getCategory(),
+                'url' => $this->absoluteUrl('app_front_blog_show', ['slug' => $post->getSlug()]),
+                'image' => $this->absoluteAssetUrl($post->getCoverImage()),
+                'lastmod' => $post->getUpdatedAt(),
+            ],
+            $this->blogPosts->findPublished(),
+        );
     }
 
     /**

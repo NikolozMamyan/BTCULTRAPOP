@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Order;
+use App\Entity\User;
 use App\Enum\OrderStatus;
 use App\Enum\PaymentStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -74,6 +75,38 @@ final class OrderRepository extends ServiceEntityRepository
             ->setParameter('paid', PaymentStatus::PAID)
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    /**
+     * @return list<Order>
+     */
+    public function findRecentForUser(User $user, int $limit = 20): array
+    {
+        $limit = max(1, min(50, $limit));
+        $idRows = $this->createQueryBuilder('o')
+            ->select('o.id')
+            ->andWhere('o.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('o.createdAt', 'DESC')
+            ->addOrderBy('o.id', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getScalarResult();
+        $ids = array_map('intval', array_column($idRows, 'id'));
+
+        if ([] === $ids) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('o')
+            ->leftJoin('o.items', 'item')
+            ->addSelect('item')
+            ->andWhere('o.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->orderBy('o.createdAt', 'DESC')
+            ->addOrderBy('o.id', 'DESC')
+            ->getQuery()
+            ->getResult();
     }
 
     private function orderStatus(string $status): ?OrderStatus

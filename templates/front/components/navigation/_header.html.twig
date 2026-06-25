@@ -11,6 +11,7 @@
             <a href="{{ path('app_front_boutique') }}" class="nav-link {{ current_route in ['app_front_boutique'] ? 'active' : '' }}">{{ 'common.shop'|trans }}</a>
             {# <a href="{{ path('app_front_boutique', {filter: 'nouveautes'}) }}" class="nav-link">{{ 'common.new_products'|trans }}</a> #}
             <a href="{{ path('app_front_licences') }}" class="nav-link {{ current_route == 'app_front_licences' ? 'active' : '' }}">{{ 'common.licenses'|trans }}</a>
+            {# <a href="{{ path('app_front_blog') }}" class="nav-link {{ current_route starts with 'app_front_blog' ? 'active' : '' }}">{{ 'common.blog'|trans }}</a> #}
             {# <a href="{{ path('app_front_soldes') }}" class="nav-link text-primary {{ current_route == 'app_front_soldes' ? 'active' : '' }}">{{ 'common.sales'|trans }}</a> #}
         </nav>
 

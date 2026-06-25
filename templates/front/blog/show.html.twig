@@ -1,0 +1,104 @@
+{% extends 'front/base.html.twig' %}
+
+{% set absolute_cover = post.cover_image starts with 'http://' or post.cover_image starts with 'https://' ? post.cover_image : seo_origin ~ post.cover_image %}
+
+{% block title %}{{ post.seo_title }}{% endblock %}
+{% block meta_description %}{{ post.seo_description }}{% endblock %}
+{% block canonical_url %}{{ seo_origin ~ path('app_front_blog_show', {slug: post.slug}) }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_image %}{{ absolute_cover }}{% endblock %}
+{% block storefront_data %}data-page="blog"{% endblock %}
+{% block structured_data %}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: post.title,
+        description: post.seo_description,
+        image: absolute_cover,
+        datePublished: post.published_at|date('c'),
+        dateModified: post.updated_at|date('c'),
+        mainEntityOfPage: seo_origin ~ path('app_front_blog_show', {slug: post.slug}),
+        author: {
+            '@type': 'Organization',
+            name: 'ULTRAPOP'
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: 'ULTRAPOP',
+            logo: {
+                '@type': 'ImageObject',
+                url: seo_origin ~ asset('img/logo/logotype.svg')
+            }
+        }
+    }|json_encode|raw }}</script>
+{% endblock %}
+
+{% block main %}
+    <article class="blog-article">
+        <header class="blog-article__header max-w-5xl mx-auto px-5">
+            <nav class="blog-breadcrumb" aria-label="{{ 'common.breadcrumb'|trans }}">
+                <a href="{{ path('app_front_home') }}">{{ 'common.home'|trans }}</a>
+                <i class="fa-solid fa-chevron-right"></i>
+                <a href="{{ path('app_front_blog') }}">{{ 'common.blog'|trans }}</a>
+            </nav>
+            <span class="blog-article__category">{{ post.category }}</span>
+            <h1>{{ post.title }}</h1>
+            <p>{{ post.excerpt }}</p>
+            <div class="blog-article__meta">
+                <span><i class="fa-regular fa-calendar"></i> {{ post.published_at|date('d/m/Y') }}</span>
+                <span><i class="fa-regular fa-clock"></i> {{ 'blog.reading_time'|trans({'%count%': post.reading_time}) }}</span>
+                <span><i class="fa-solid fa-pen-nib"></i> ULTRAPOP</span>
+            </div>
+        </header>
+
+        <figure class="blog-article__cover max-w-6xl mx-auto px-5">
+            <img src="{{ post.cover_image }}" alt="{{ post.title }}">
+        </figure>
+
+        <div class="blog-article__layout max-w-5xl mx-auto px-5">
+            <aside class="blog-article__aside">
+                <span>{{ 'blog.share'|trans }}</span>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ (seo_origin ~ path('app_front_blog_show', {slug: post.slug}))|url_encode }}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ (seo_origin ~ path('app_front_blog_show', {slug: post.slug}))|url_encode }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                    <i class="fa-brands fa-facebook-f"></i>
+                </a>
+            </aside>
+
+            <div class="blog-article__content">
+                {{ post.content|raw }}
+            </div>
+        </div>
+    </article>
+
+    {% if related_posts %}
+        <section class="blog-related max-w-7xl mx-auto px-5">
+            <div class="blog-related__heading">
+                <div>
+                    <span>{{ 'blog.related_eyebrow'|trans }}</span>
+                    <h2>{{ 'blog.related_title'|trans }}</h2>
+                </div>
+                <a href="{{ path('app_front_blog') }}">{{ 'blog.all_articles'|trans }} <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+            <div class="blog-grid blog-grid--related">
+                {% for related in related_posts %}
+                    <article class="blog-card">
+                        <a class="blog-card__media" href="{{ path('app_front_blog_show', {slug: related.slug}) }}">
+                            <img src="{{ related.cover_image }}" alt="{{ related.title }}" loading="lazy">
+                            <span>{{ related.category }}</span>
+                        </a>
+                        <div class="blog-card__content">
+                            <span class="blog-card__date">{{ related.published_at|date('d/m/Y') }}</span>
+                            <h3><a href="{{ path('app_front_blog_show', {slug: related.slug}) }}">{{ related.title }}</a></h3>
+                            <a class="blog-card__action" href="{{ path('app_front_blog_show', {slug: related.slug}) }}">
+                                {{ 'blog.read_article'|trans }}
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}
