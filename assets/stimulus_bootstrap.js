@@ -8,6 +8,7 @@ import CheckoutAddressController from './controllers/checkout_address_controller
 import FavoritesController from './controllers/favorites_controller.js';
 import LanguageController from './controllers/language_controller.js';
 import LicensesCarouselController from './controllers/licenses_carousel_controller.js';
+import NewsletterController from './controllers/newsletter_controller.js';
 import ProductDetailController from './controllers/product_detail_controller.js';
 import ProfileAuthController from './controllers/profile_auth_controller.js';
 import SearchController from './controllers/search_controller.js';
@@ -23,6 +24,7 @@ app.register('checkout-address', CheckoutAddressController);
 app.register('favorites', FavoritesController);
 app.register('language', LanguageController);
 app.register('licenses-carousel', LicensesCarouselController);
+app.register('newsletter', NewsletterController);
 app.register('product-detail', ProductDetailController);
 app.register('profile-auth', ProfileAuthController);
 app.register('search', SearchController);

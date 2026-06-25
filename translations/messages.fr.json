@@ -715,6 +715,7 @@
     "newsletter.flash.invalid_email": "Saisis une adresse e-mail valide.",
     "newsletter.flash.already_subscribed": "Cette adresse est déjà inscrite à la newsletter.",
     "newsletter.flash.subscribed": "Inscription confirmée. Bienvenue dans la communauté ULTRAPOP !",
+    "newsletter.flash.error": "Impossible de finaliser l’inscription. Réessaie dans un instant.",
     "home.popular.title": "Les produits du moment",
     "home.popular.empty_eyebrow": "Bientôt disponible",
     "home.popular.empty_title": "Notre première sélection arrive",

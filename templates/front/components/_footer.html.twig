@@ -4,10 +4,9 @@
             <img src="{{ asset('img/logo/logotype-white.svg') }}" alt="ULTRAPOP" class="h-10 mb-4" data-logo-fallback="white">
             <p class="text-white/60 text-sm leading-relaxed">{{ 'footer.description'|trans }}</p>
             <div class="flex gap-3 mt-5">
-                <a href="#" class="w-9 h-9 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-colors" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#" class="w-9 h-9 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-colors" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-                <a href="#" class="w-9 h-9 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-colors" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
-                <a href="#" class="w-9 h-9 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-colors" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.instagram.com/ultrapop_/" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-colors" aria-label="Instagram ULTRAPOP"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.tiktok.com/@ultrapop_" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-colors" aria-label="TikTok ULTRAPOP"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="https://www.linkedin.com/company/ultrapopbylnstrade" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-colors" aria-label="LinkedIn ULTRAPOP"><i class="fa-brands fa-linkedin-in"></i></a>
             </div>
         </div>
         <div>
@@ -31,14 +30,29 @@
         <div class="col-span-2 md:col-span-1">
             <h4 class="font-bold mb-4 text-sm">{{ 'footer.newsletter'|trans }}</h4>
             <p class="text-white/60 text-sm mb-3">{{ 'footer.newsletter_text'|trans }}</p>
-            <form action="{{ path('app_newsletter_subscribe') }}" method="post" class="flex bg-white/10 rounded-full overflow-hidden p-1">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('newsletter_subscribe') }}">
-                <input type="hidden" name="source" value="footer">
-                <input type="hidden" name="redirect" value="{{ app.request.requestUri }}">
-                <label for="footer-newsletter-email" class="sr-only">{{ 'common.email'|trans }}</label>
-                <input id="footer-newsletter-email" name="email" type="email" required autocomplete="email" placeholder="{{ 'common.email'|trans }}" class="min-w-0 bg-transparent px-4 text-sm outline-none flex-1 text-white placeholder-white/40">
-                <button type="submit" class="bg-primary hover:bg-primary-d w-9 h-9 rounded-full shrink-0" aria-label="{{ 'footer.subscribe'|trans }}"><i class="fa-solid fa-arrow-right"></i></button>
-            </form>
+            <div
+                data-controller="newsletter"
+                data-newsletter-error-value="{{ 'newsletter.flash.error'|trans }}"
+            >
+                <form
+                    action="{{ path('app_newsletter_subscribe') }}"
+                    method="post"
+                    class="newsletter-form flex bg-white/10 rounded-full overflow-hidden p-1"
+                    data-action="submit->newsletter#submit"
+                    data-newsletter-target="form"
+                >
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('newsletter_subscribe') }}">
+                    <input type="hidden" name="source" value="footer">
+                    <input type="hidden" name="redirect" value="{{ app.request.requestUri }}">
+                    <label for="footer-newsletter-email" class="sr-only">{{ 'common.email'|trans }}</label>
+                    <input id="footer-newsletter-email" name="email" type="email" required autocomplete="email" placeholder="{{ 'common.email'|trans }}" class="min-w-0 bg-transparent px-4 text-sm outline-none flex-1 text-white placeholder-white/40" data-newsletter-target="email">
+                    <button type="submit" class="bg-primary hover:bg-primary-d w-9 h-9 rounded-full shrink-0" aria-label="{{ 'footer.subscribe'|trans }}" data-newsletter-target="button"><i class="fa-solid fa-arrow-right"></i></button>
+                </form>
+                <div class="newsletter-feedback" data-newsletter-target="message" role="status" aria-live="polite" aria-atomic="true" hidden>
+                    <i class="fa-solid fa-circle-check" data-newsletter-target="messageIcon"></i>
+                    <span data-newsletter-target="messageText"></span>
+                </div>
+            </div>
         </div>
     </div>
     <div class="border-t border-white/10">

@@ -8,12 +8,15 @@ use App\Service\Mailer\SimpleMailerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class NewsletterController extends AbstractController
 {
@@ -25,13 +28,19 @@ final class NewsletterController extends AbstractController
         ValidatorInterface $validator,
         SimpleMailerService $mailer,
         LoggerInterface $logger,
-    ): RedirectResponse {
+        TranslatorInterface $translator,
+    ): Response {
         $redirect = $this->safeRedirect($request->request->getString('redirect'));
 
         if (!$this->isCsrfTokenValid('newsletter_subscribe', $request->request->getString('_csrf_token'))) {
-            $this->addFlash('newsletter_error', 'newsletter.flash.invalid');
-
-            return $this->redirect($redirect);
+            return $this->subscriptionResponse(
+                $request,
+                $translator,
+                $redirect,
+                'newsletter.flash.invalid',
+                false,
+                Response::HTTP_FORBIDDEN,
+            );
         }
 
         $email = mb_strtolower(trim($request->request->getString('email')));
@@ -42,17 +51,26 @@ final class NewsletterController extends AbstractController
         ]);
 
         if (count($violations) > 0) {
-            $this->addFlash('newsletter_error', 'newsletter.flash.invalid_email');
-
-            return $this->redirect($redirect);
+            return $this->subscriptionResponse(
+                $request,
+                $translator,
+                $redirect,
+                'newsletter.flash.invalid_email',
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+            );
         }
 
         $subscriber = $subscribers->findOneByEmail($email);
 
         if ($subscriber instanceof NewsletterSubscriber && $subscriber->isActive()) {
-            $this->addFlash('newsletter_success', 'newsletter.flash.already_subscribed');
-
-            return $this->redirect($redirect);
+            return $this->subscriptionResponse(
+                $request,
+                $translator,
+                $redirect,
+                'newsletter.flash.already_subscribed',
+                true,
+            );
         }
 
         $subscriber ??= (new NewsletterSubscriber())->setEmail($email);
@@ -81,9 +99,38 @@ final class NewsletterController extends AbstractController
             ]);
         }
 
-        $this->addFlash('newsletter_success', 'newsletter.flash.subscribed');
+        return $this->subscriptionResponse(
+            $request,
+            $translator,
+            $redirect,
+            'newsletter.flash.subscribed',
+            true,
+        );
+    }
 
-        return $this->redirect($redirect);
+    private function subscriptionResponse(
+        Request $request,
+        TranslatorInterface $translator,
+        string $redirect,
+        string $message,
+        bool $success,
+        int $statusCode = Response::HTTP_OK,
+    ): Response {
+        if ($this->wantsJson($request)) {
+            return new JsonResponse([
+                'success' => $success,
+                'message' => $translator->trans($message),
+            ], $statusCode);
+        }
+
+        $this->addFlash($success ? 'newsletter_success' : 'newsletter_error', $message);
+
+        return new RedirectResponse($redirect);
+    }
+
+    private function wantsJson(Request $request): bool
+    {
+        return str_contains($request->headers->get('Accept', ''), 'application/json');
     }
 
     private function safeRedirect(string $redirect): string
