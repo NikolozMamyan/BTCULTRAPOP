@@ -6819,32 +6819,113 @@ body.is-page-loading {
     line-height: 1.8;
 }
 
-.product-ingredient-tags {
-    display: flex;
+.product-ingredient-grid {
+    display: grid;
     margin-top: 1.5rem;
-    flex-wrap: wrap;
-    gap: .65rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: .75rem;
+    padding: 0;
+    list-style: none;
 }
 
-.product-ingredient-tag {
-    display: inline-flex;
-    max-width: 100%;
-    align-items: flex-start;
-    gap: .45rem;
-    padding: .58rem .9rem;
+.product-ingredient-card {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: 38px minmax(0, 1fr);
+    align-items: center;
+    gap: .75rem;
+    padding: .72rem .8rem;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    background: #f8fafc;
+    border-radius: 14px;
+    background: #fff;
     color: var(--text-dark);
     font-size: .74rem;
-    font-weight: 650;
-    line-height: 1.5;
+    font-weight: 750;
+    line-height: 1.4;
+    box-shadow: 0 8px 22px rgba(32, 50, 99, .045);
 }
 
-.product-ingredient-tag i {
-    margin-top: .2rem;
-    color: var(--success-color);
-    font-size: .62rem;
+.product-ingredient-card__icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 11px;
+    background: var(--ingredient-soft, rgba(16, 185, 129, .1));
+    color: var(--ingredient-color, var(--success-color));
+    font-size: .86rem;
+}
+
+.product-ingredient-card--blue {
+    --ingredient-soft: rgba(14, 165, 233, .11);
+    --ingredient-color: #0284c7;
+}
+
+.product-ingredient-card--amber,
+.product-ingredient-card--gold {
+    --ingredient-soft: rgba(245, 158, 11, .12);
+    --ingredient-color: #d97706;
+}
+
+.product-ingredient-card--orange {
+    --ingredient-soft: rgba(249, 115, 22, .11);
+    --ingredient-color: #ea580c;
+}
+
+.product-ingredient-card--olive {
+    --ingredient-soft: rgba(101, 163, 13, .11);
+    --ingredient-color: #4d7c0f;
+}
+
+.product-ingredient-card--violet,
+.product-ingredient-card--purple {
+    --ingredient-soft: rgba(124, 58, 237, .1);
+    --ingredient-color: #7c3aed;
+}
+
+.product-ingredient-card--sky {
+    --ingredient-soft: rgba(6, 182, 212, .1);
+    --ingredient-color: #0891b2;
+}
+
+.product-ingredient-card--rose {
+    --ingredient-soft: rgba(244, 63, 94, .1);
+    --ingredient-color: #e11d48;
+}
+
+.product-ingredient-information {
+    display: grid;
+    margin-top: 1.25rem;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: .85rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid #dbe4f0;
+    border-radius: 16px;
+    background: #f8fafc;
+}
+
+.product-ingredient-information__icon {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: 11px;
+    background: rgba(32, 50, 99, .08);
+    color: var(--text-dark);
+}
+
+.product-ingredient-information h4 {
+    margin: 0 0 .3rem;
+    color: var(--text-dark);
+    font-size: .8rem;
+    font-weight: 900;
+}
+
+.product-ingredient-information p {
+    margin: 0;
+    color: var(--text-light);
+    font-size: .76rem;
+    line-height: 1.7;
 }
 
 .product-reviews__overview {

@@ -3,6 +3,7 @@
 namespace App\Controller\Front;
 
 use App\Entity\User;
+use App\Service\ProductIngredientPresenter;
 use App\Service\ProductSlugger;
 use App\Service\StorefrontProductCatalog;
 use App\Service\StorefrontProductReviews;
@@ -54,6 +55,7 @@ final class BoutiqueController extends AbstractController
         string $slug,
         StorefrontProductCatalog $catalog,
         StorefrontProductReviews $productReviews,
+        ProductIngredientPresenter $ingredientPresenter,
         ProductSlugger $productSlugger,
     ): Response
     {
@@ -73,6 +75,7 @@ final class BoutiqueController extends AbstractController
 
         $reviews = $productReviews->forProduct($product);
         $presentedProduct = $catalog->presentForUser($product, $this->getAuthenticatedUser());
+        $presentedProduct['ingredient_details'] = $ingredientPresenter->present($product->getIngredients());
         $presentedProduct['rating'] = $reviews['average'];
         $presentedProduct['review_count'] = $reviews['count'];
 

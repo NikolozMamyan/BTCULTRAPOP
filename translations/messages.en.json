@@ -602,6 +602,8 @@
     "product.description_heading": "Where flavour meets manga",
     "product.ingredients_heading": "A detailed and transparent recipe",
     "product.ingredients_intro": "Find the complete product composition provided below.",
+    "product.ingredients_list": "Ingredients list",
+    "product.ingredients_information_heading": "Storage and usage information",
     "product.reviews.rating_label": "Average rating: %rating% out of 5",
     "product.reviews.based_on": "Based on %count% reviews",
     "product.reviews.stars": "%count% stars",

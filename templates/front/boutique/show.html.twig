@@ -208,17 +208,27 @@
                             <p>{{ 'product.ingredients_intro'|trans }}</p>
                         </div>
                     </div>
-                    <div class="product-ingredient-tags">
-                        {% set ingredient_tags = product.ingredients|replace({"\r\n": ' ', "\n": ' ', ';': ','})|split(',') %}
-                        {% for ingredient in ingredient_tags %}
-                            {% if ingredient|trim %}
-                                <span class="product-ingredient-tag">
-                                    <i class="fa-solid fa-check"></i>
-                                    {{ ingredient|trim }}
+                    <ul class="product-ingredient-grid" aria-label="{{ 'product.ingredients_list'|trans }}">
+                        {% for ingredient in product.ingredient_details.items %}
+                            <li class="product-ingredient-card product-ingredient-card--{{ ingredient.tone }}">
+                                <span class="product-ingredient-card__icon" aria-hidden="true">
+                                    <i class="fa-solid {{ ingredient.icon }}"></i>
                                 </span>
-                            {% endif %}
+                                <span>{{ ingredient.name }}</span>
+                            </li>
                         {% endfor %}
-                    </div>
+                    </ul>
+                    {% if product.ingredient_details.information %}
+                        <div class="product-ingredient-information">
+                            <span class="product-ingredient-information__icon" aria-hidden="true">
+                                <i class="fa-solid fa-circle-info"></i>
+                            </span>
+                            <div>
+                                <h4>{{ 'product.ingredients_information_heading'|trans }}</h4>
+                                <p>{{ product.ingredient_details.information }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             {% endif %}
             <div class="product-tabs__panel" data-product-detail-target="panel" data-panel="reviews" hidden>
