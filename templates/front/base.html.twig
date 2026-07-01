@@ -2,6 +2,18 @@
 
 {% block body_class %}font-sans antialiased overflow-x-hidden{% endblock %}
 
+{% block javascripts %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6BF2GZZ6SD"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-6BF2GZZ6SD');
+    </script>
+    {{ parent() }}
+{% endblock %}
+
 {% block body %}
     <div
         id="storefront-app"
