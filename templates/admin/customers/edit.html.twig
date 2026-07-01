@@ -1,0 +1,133 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ customer.fullName ?: customer.email }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-customer-editor">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.customer.edit.eyebrow'|trans }}</span>
+                <h1>{{ customer.fullName ?: customer.email }}</h1>
+                <p>{{ 'admin.customer.edit.subtitle'|trans({'%email%': customer.email}) }}</p>
+            </div>
+            <a href="{{ path('app_admin_customers_index') }}" class="admin-secondary-button">
+                <i class="fa-solid fa-arrow-left"></i>
+                {{ 'admin.customer.back_to_list'|trans }}
+            </a>
+        </div>
+
+        {% include 'admin/customers/_tabs.html.twig' %}
+
+        <div class="admin-customer-editor__layout">
+            {% include 'admin/customers/_form.html.twig' with {
+                form: form,
+                customer: customer,
+                is_current_admin: is_current_admin
+            } only %}
+
+            <aside class="admin-customer-side">
+                <article class="admin-panel admin-customer-profile-card">
+                    <span class="admin-customer-avatar">
+                        {% if customer.avatarPath %}
+                            <img src="{{ asset(customer.avatarPath) }}" alt="">
+                        {% else %}
+                            <i class="fa-solid fa-user"></i>
+                        {% endif %}
+                    </span>
+                    <strong>{{ customer_view.name }}</strong>
+                    <small>{{ customer_view.email }}</small>
+                    <div class="admin-customer-profile-card__badges">
+                        <span class="admin-order-badge {{ customer_view.active ? 'admin-order-badge--paid' : 'admin-order-badge--cancelled' }}">
+                            {{ customer_view.active ? 'admin.customer.status.active'|trans : 'admin.customer.status.inactive'|trans }}
+                        </span>
+                        {% if customer_view.admin %}
+                            <span class="admin-order-badge admin-order-badge--payment-processing">{{ 'admin.customer.status.admin'|trans }}</span>
+                        {% endif %}
+                    </div>
+                </article>
+
+                <article class="admin-panel admin-customer-mini-stats">
+                    <div>
+                        <span>{{ 'admin.customer.table.orders'|trans }}</span>
+                        <strong>{{ customer_view.order_count }}</strong>
+                    </div>
+                    <div>
+                        <span>{{ 'admin.customer.table.total_spent'|trans }}</span>
+                        <strong>{{ customer_view.total_spent }}</strong>
+                    </div>
+                    <div>
+                        <span>{{ 'admin.customer.table.loyalty'|trans }}</span>
+                        <strong>{{ customer_view.loyalty_points }}</strong>
+                    </div>
+                </article>
+            </aside>
+        </div>
+
+        <div class="admin-customer-details-grid">
+            <article class="admin-panel admin-form-card">
+                <div class="admin-form-card__heading">
+                    <span><i class="fa-solid fa-location-dot"></i></span>
+                    <div>
+                        <strong>{{ 'admin.customer.addresses.title'|trans }}</strong>
+                        <small>{{ 'admin.customer.addresses.text'|trans }}</small>
+                    </div>
+                </div>
+
+                {% if customer_view.addresses %}
+                    <div class="admin-customer-addresses">
+                        {% for address in customer_view.addresses %}
+                            <div class="admin-customer-address">
+                                <strong>
+                                    {{ address.name }}
+                                    {% if address.default %}
+                                        <em>{{ 'profile.address.default'|trans }}</em>
+                                    {% endif %}
+                                </strong>
+                                <span>{{ address.street }}</span>
+                                <span>{{ address.postal_code }} {{ address.city }} · {{ address.country_code }}</span>
+                                {% if address.phone %}
+                                    <small>{{ address.phone }}</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="admin-empty-state">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <p>{{ 'admin.customer.addresses.empty'|trans }}</p>
+                    </div>
+                {% endif %}
+            </article>
+
+            <article class="admin-panel admin-form-card">
+                <div class="admin-form-card__heading">
+                    <span><i class="fa-solid fa-receipt"></i></span>
+                    <div>
+                        <strong>{{ 'admin.customer.orders.title'|trans }}</strong>
+                        <small>{{ 'admin.customer.orders.text'|trans }}</small>
+                    </div>
+                </div>
+
+                {% if customer_view.orders %}
+                    <div class="admin-customer-orders">
+                        {% for order in customer_view.orders %}
+                            <a href="{{ path('app_admin_orders_show', {id: order.id}) }}" class="admin-customer-order">
+                                <span>
+                                    <strong>{{ order.number }}</strong>
+                                    <small>{{ order.created_at|date('d/m/Y H:i') }}</small>
+                                </span>
+                                <em class="admin-order-badge admin-order-badge--{{ order.status }}">{{ order.status_key|trans }}</em>
+                                <strong>{{ order.total }}</strong>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="admin-empty-state">
+                        <i class="fa-solid fa-receipt"></i>
+                        <p>{{ 'admin.customer.orders.empty'|trans }}</p>
+                    </div>
+                {% endif %}
+            </article>
+        </div>
+    </section>
+{% endblock %}

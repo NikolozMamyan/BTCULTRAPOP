@@ -1,4 +1,5 @@
 import { startStimulusApp } from '@symfony/stimulus-bundle';
+import AdminEmailingController from './controllers/admin_emailing_controller.js';
 import AdminProductsController from './controllers/admin_products_controller.js';
 import AdminPricesController from './controllers/admin_prices_controller.js';
 import AdminModel3DController from './controllers/admin_model_3d_controller.js';
@@ -17,6 +18,7 @@ import SearchController from './controllers/search_controller.js';
 import ShopFiltersController from './controllers/shop_filters_controller.js';
 
 const app = startStimulusApp();
+app.register('admin-emailing', AdminEmailingController);
 app.register('admin-prices', AdminPricesController);
 app.register('admin-model-3d', AdminModel3DController);
 app.register('admin-products', AdminProductsController);

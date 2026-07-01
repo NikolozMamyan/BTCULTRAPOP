@@ -70,11 +70,10 @@
                     <i class="fa-solid fa-ticket"></i>
                     <span>{{ 'admin.nav.promo_codes'|trans }}</span>
                 </a>
-                <span class="admin-sidebar__link is-disabled">
+                <a href="{{ path('app_admin_customers_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_customers' ? 'is-active' : '' }}">
                     <i class="fa-solid fa-users"></i>
                     <span>{{ 'admin.nav.customers'|trans }}</span>
-                    <em>{{ 'admin.nav.soon'|trans }}</em>
-                </span>
+                </a>
                 <a href="{{ path('app_admin_stock_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_stock' ? 'is-active' : '' }}">
                     <i class="fa-solid fa-warehouse"></i>
                     <span>{{ 'admin.nav.stock'|trans }}</span>

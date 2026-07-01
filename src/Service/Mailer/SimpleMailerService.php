@@ -87,6 +87,38 @@ final readonly class SimpleMailerService
      * @param list<string> $cc
      * @param list<string> $replyTo
      * @param list<string> $bcc
+     *
+     * @throws TransportExceptionInterface
+     */
+    public function sendHtmlMessage(
+        string $subject,
+        string $htmlMessage,
+        string $textMessage = '',
+        array $to = [],
+        array $attachments = [],
+        array $cc = [],
+        array $replyTo = [],
+        array $bcc = [],
+    ): void {
+        $email = (new Email())
+            ->from($this->defaultFrom)
+            ->subject($subject)
+            ->html($htmlMessage);
+
+        if ('' !== trim($textMessage)) {
+            $email->text($textMessage);
+        }
+
+        $this->prepareEmail($email, $to, $attachments, $cc, $replyTo, $bcc);
+        $this->mailer->send($email);
+    }
+
+    /**
+     * @param list<string> $to
+     * @param list<array{path?: string, name?: string, contentType?: string, content?: string}> $attachments
+     * @param list<string> $cc
+     * @param list<string> $replyTo
+     * @param list<string> $bcc
      */
     private function prepareEmail(
         Email $email,

@@ -1,0 +1,81 @@
+{{ form_start(form, {attr: {class: 'admin-category-form admin-customer-form'}}) }}
+    <article class="admin-panel admin-form-card">
+        <div class="admin-form-card__heading">
+            <span><i class="fa-solid fa-user-gear"></i></span>
+            <div>
+                <strong>{{ 'admin.customer.form.identity_title'|trans }}</strong>
+                <small>{{ 'admin.customer.form.identity_text'|trans }}</small>
+            </div>
+        </div>
+
+        {{ form_errors(form) }}
+
+        <div class="admin-form-grid admin-form-grid--two">
+            <div class="admin-field">
+                {{ form_label(form.firstName) }}
+                {{ form_widget(form.firstName) }}
+                {{ form_errors(form.firstName) }}
+            </div>
+            <div class="admin-field">
+                {{ form_label(form.lastName) }}
+                {{ form_widget(form.lastName) }}
+                {{ form_errors(form.lastName) }}
+            </div>
+            <div class="admin-field">
+                {{ form_label(form.email) }}
+                {{ form_widget(form.email) }}
+                {{ form_errors(form.email) }}
+            </div>
+            <div class="admin-field">
+                {{ form_label(form.phone) }}
+                {{ form_widget(form.phone) }}
+                {{ form_errors(form.phone) }}
+            </div>
+            <div class="admin-field">
+                {{ form_label(form.preferredLocale) }}
+                {{ form_widget(form.preferredLocale) }}
+                {{ form_errors(form.preferredLocale) }}
+            </div>
+            <div class="admin-field">
+                {{ form_label(form.loyaltyPoints) }}
+                {{ form_widget(form.loyaltyPoints) }}
+                {{ form_errors(form.loyaltyPoints) }}
+            </div>
+        </div>
+
+        <div class="admin-customer-switches">
+            <div class="admin-field admin-field--switch">
+                {{ form_widget(form.verified) }}
+                {{ form_label(form.verified) }}
+                {{ form_errors(form.verified) }}
+            </div>
+            <div class="admin-field admin-field--switch">
+                {{ form_widget(form.active) }}
+                {{ form_label(form.active) }}
+                {{ form_errors(form.active) }}
+            </div>
+            <div class="admin-field admin-field--switch">
+                {{ form_widget(form.adminRole) }}
+                {{ form_label(form.adminRole) }}
+                {{ form_errors(form.adminRole) }}
+            </div>
+        </div>
+
+        {% if is_current_admin %}
+            <div class="admin-category-warning">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>{{ 'admin.customer.form.current_admin_notice'|trans }}</span>
+            </div>
+        {% endif %}
+
+        <div class="admin-product-form__actions">
+            <button type="submit" class="admin-action-button">
+                <i class="fa-solid fa-floppy-disk"></i>
+                {{ 'admin.customer.form.update_submit'|trans }}
+            </button>
+            <a href="{{ path('app_admin_customers_index') }}" class="admin-secondary-button">
+                {{ 'admin.customer.form.cancel'|trans }}
+            </a>
+        </div>
+    </article>
+{{ form_end(form) }}

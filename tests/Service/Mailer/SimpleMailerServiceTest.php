@@ -68,6 +68,25 @@ final class SimpleMailerServiceTest extends TestCase
         self::assertSame('Bonjour Nina', $sentEmail->getTextBody());
     }
 
+    public function testItSendsARawHtmlMessage(): void
+    {
+        $sentEmail = null;
+        $service = $this->createService($sentEmail);
+
+        $service->sendHtmlMessage(
+            subject: 'Campagne',
+            htmlMessage: '<h1>Promo ULTRAPOP</h1>',
+            textMessage: 'Promo ULTRAPOP',
+            to: ['client@example.com'],
+        );
+
+        self::assertInstanceOf(Email::class, $sentEmail);
+        self::assertSame('client@example.com', $sentEmail->getTo()[0]->getAddress());
+        self::assertSame('Campagne', $sentEmail->getSubject());
+        self::assertSame('<h1>Promo ULTRAPOP</h1>', $sentEmail->getHtmlBody());
+        self::assertSame('Promo ULTRAPOP', $sentEmail->getTextBody());
+    }
+
     public function testItAttachesAReadableFilePath(): void
     {
         $path = tempnam(sys_get_temp_dir(), 'ultrapop-mailer-');

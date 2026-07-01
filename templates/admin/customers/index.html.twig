@@ -1,0 +1,105 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.customer.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-customers">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.customer.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.customer.index.title'|trans }}</h1>
+                <p>{{ 'admin.customer.index.subtitle'|trans }}</p>
+            </div>
+        </div>
+
+        {% include 'admin/customers/_tabs.html.twig' %}
+
+        <div class="admin-stats-grid admin-order-stats">
+            {% for stat in stats %}
+                <article class="admin-stat-card admin-stat-card--{{ stat.tone }}">
+                    <span class="admin-stat-card__icon">
+                        <i class="{{ stat.icon }}"></i>
+                    </span>
+                    <div>
+                        <small>{{ stat.label|trans }}</small>
+                        <strong>{{ stat.value }}</strong>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+
+        <form class="admin-search-bar" method="get" action="{{ path('app_admin_customers_index') }}">
+            <label for="admin-customer-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span>{{ 'admin.customer.index.search_label'|trans }}</span>
+            </label>
+            <input
+                id="admin-customer-search"
+                type="search"
+                name="q"
+                value="{{ search }}"
+                placeholder="{{ 'admin.customer.index.search_placeholder'|trans }}"
+            >
+            <button type="submit">{{ 'admin.customer.index.search_submit'|trans }}</button>
+            {% if search %}
+                <a href="{{ path('app_admin_customers_index') }}">{{ 'admin.customer.index.reset'|trans }}</a>
+            {% endif %}
+        </form>
+
+        <article class="admin-panel admin-customers-panel">
+            <div class="admin-panel__heading">
+                <div>
+                    <span>{{ 'admin.customer.index.list_eyebrow'|trans }}</span>
+                    <h2>{{ 'admin.customer.index.list_title'|trans({'%count%': customers|length}) }}</h2>
+                </div>
+            </div>
+
+            {% if customers %}
+                <div class="admin-customer-table">
+                    <div class="admin-customer-table__row admin-customer-table__row--head">
+                        <span>{{ 'admin.customer.table.customer'|trans }}</span>
+                        <span>{{ 'admin.customer.table.status'|trans }}</span>
+                        <span>{{ 'admin.customer.table.loyalty'|trans }}</span>
+                        <span>{{ 'admin.customer.table.orders'|trans }}</span>
+                        <span>{{ 'admin.customer.table.total_spent'|trans }}</span>
+                        <span>{{ 'admin.customer.table.created_at'|trans }}</span>
+                        <span>{{ 'admin.customer.table.actions'|trans }}</span>
+                    </div>
+
+                    {% for customer in customers %}
+                        <div class="admin-customer-table__row">
+                            <a href="{{ path('app_admin_customers_edit', {id: customer.id}) }}" class="admin-order-customer">
+                                <strong>{{ customer.name }}</strong>
+                                <small>{{ customer.email }}</small>
+                            </a>
+                            <span class="admin-customer-statuses">
+                                <em class="admin-order-badge {{ customer.active ? 'admin-order-badge--paid' : 'admin-order-badge--cancelled' }}">
+                                    {{ customer.active ? 'admin.customer.status.active'|trans : 'admin.customer.status.inactive'|trans }}
+                                </em>
+                                {% if customer.admin %}
+                                    <em class="admin-order-badge admin-order-badge--payment-processing">{{ 'admin.customer.status.admin'|trans }}</em>
+                                {% elseif customer.verified %}
+                                    <em class="admin-order-badge admin-order-badge--delivered">{{ 'admin.customer.status.verified'|trans }}</em>
+                                {% endif %}
+                            </span>
+                            <strong>{{ customer.loyalty_points }}</strong>
+                            <span>{{ customer.order_count }}</span>
+                            <strong>{{ customer.total_spent }}</strong>
+                            <span>{{ customer.created_at|date('d/m/Y') }}</span>
+                            <div class="admin-product-actions">
+                                <a href="{{ path('app_admin_customers_edit', {id: customer.id}) }}" title="{{ 'admin.customer.action.edit'|trans }}">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="admin-empty-state">
+                    <i class="fa-solid fa-users"></i>
+                    <p>{{ search ? 'admin.customer.index.no_search_results'|trans : 'admin.customer.index.empty'|trans }}</p>
+                </div>
+            {% endif %}
+        </article>
+    </section>
+{% endblock %}

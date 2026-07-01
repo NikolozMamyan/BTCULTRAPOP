@@ -1,0 +1,12 @@
+{% set current_route = app.request.attributes.get('_route') %}
+
+<nav class="admin-customer-tabs" aria-label="{{ 'admin.customer.tabs.label'|trans }}">
+    <a href="{{ path('app_admin_customers_index') }}" class="{{ current_route starts with 'app_admin_customers_' and current_route != 'app_admin_customers_emailing' ? 'is-active' : (current_route == 'app_admin_customers_index' ? 'is-active' : '') }}">
+        <i class="fa-solid fa-users"></i>
+        {{ 'admin.customer.tabs.customers'|trans }}
+    </a>
+    <a href="{{ path('app_admin_customers_emailing') }}" class="{{ current_route == 'app_admin_customers_emailing' ? 'is-active' : '' }}">
+        <i class="fa-solid fa-envelope-open-text"></i>
+        {{ 'admin.customer.tabs.emailing'|trans }}
+    </a>
+</nav>

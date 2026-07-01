@@ -1,0 +1,243 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.emailing.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-emailing" data-controller="admin-emailing">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.emailing.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.emailing.index.title'|trans }}</h1>
+                <p>{{ 'admin.emailing.index.subtitle'|trans }}</p>
+            </div>
+        </div>
+
+        {% include 'admin/customers/_tabs.html.twig' %}
+
+        {% if sent_count > 0 %}
+            <div class="admin-emailing-sent-note">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>{{ 'admin.emailing.sent_count'|trans({'%count%': sent_count}) }}</span>
+            </div>
+        {% endif %}
+
+        {% set selected_user_ids = form_data.selected_user_ids|default([]) %}
+        {% set manual_emails = form_data.manual_emails|default([]) %}
+
+        <div class="admin-emailing-layout">
+            <form class="admin-panel admin-emailing-form" method="post" action="{{ path('app_admin_customers_emailing') }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_customer_emailing') }}">
+
+                <div class="admin-form-card__heading">
+                    <span><i class="fa-solid fa-code"></i></span>
+                    <div>
+                        <strong>{{ 'admin.emailing.form.title'|trans }}</strong>
+                        <small>{{ 'admin.emailing.form.text'|trans }}</small>
+                    </div>
+                </div>
+
+                <div class="admin-form-grid admin-form-grid--two">
+                    <label class="admin-field">
+                        <span>{{ 'admin.emailing.form.template_name'|trans }}</span>
+                        <input
+                            type="text"
+                            name="template_name"
+                            value="{{ form_data.template_name }}"
+                            maxlength="120"
+                            required
+                            autocomplete="off"
+                            data-admin-emailing-target="name"
+                            placeholder="{{ 'admin.emailing.form.template_name_placeholder'|trans }}"
+                        >
+                    </label>
+                    <label class="admin-field">
+                        <span>{{ 'admin.emailing.form.subject'|trans }}</span>
+                        <input
+                            type="text"
+                            name="subject"
+                            value="{{ form_data.subject }}"
+                            maxlength="180"
+                            required
+                            autocomplete="off"
+                            data-admin-emailing-target="subject"
+                            placeholder="{{ 'admin.emailing.form.subject_placeholder'|trans }}"
+                        >
+                    </label>
+                </div>
+
+                <div
+                    class="admin-field admin-emailing-recipient-picker"
+                    data-admin-emailing-recipient-empty-value="{{ 'admin.emailing.recipients.empty'|trans }}"
+                    data-admin-emailing-recipient-count-value="{{ 'admin.emailing.recipients.count'|trans({'%count%': '__COUNT__'}) }}"
+                    data-admin-emailing-manual-invalid-value="{{ 'admin.emailing.recipients.invalid_manual'|trans }}"
+                >
+                    <span>{{ 'admin.emailing.form.audience'|trans }}</span>
+                    <button
+                        type="button"
+                        class="admin-emailing-recipient-toggle"
+                        data-admin-emailing-target="recipientToggle"
+                        data-action="admin-emailing#toggleRecipients"
+                    >
+                        <i class="fa-solid fa-users"></i>
+                        <span data-admin-emailing-target="recipientSummary">{{ 'admin.emailing.recipients.empty'|trans }}</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+
+                    <div class="admin-emailing-recipient-panel" data-admin-emailing-target="recipientPanel" hidden>
+                        <label class="admin-emailing-select-all">
+                            <input
+                                type="checkbox"
+                                data-admin-emailing-target="selectAll"
+                                data-action="admin-emailing#toggleAllRecipients"
+                            >
+                            <span>{{ 'admin.emailing.recipients.select_all'|trans }}</span>
+                            <small>{{ 'admin.emailing.audience.count'|trans({'%count%': recipient_choices|length}) }}</small>
+                        </label>
+
+                        <div class="admin-emailing-manual">
+                            <input
+                                type="email"
+                                inputmode="email"
+                                autocomplete="email"
+                                placeholder="{{ 'admin.emailing.recipients.manual_placeholder'|trans }}"
+                                data-admin-emailing-target="manualInput"
+                                data-action="keydown->admin-emailing#manualKeydown"
+                            >
+                            <button type="button" data-action="admin-emailing#addManualEmail">
+                                {{ 'admin.emailing.recipients.add_manual'|trans }}
+                            </button>
+                        </div>
+
+                        <div class="admin-emailing-manual-list" data-admin-emailing-target="manualList">
+                            {% for email in manual_emails %}
+                                <span class="admin-emailing-chip" data-email="{{ email }}">
+                                    <span>{{ email }}</span>
+                                    <button type="button" data-action="admin-emailing#removeManualEmail" data-email-param="{{ email }}" aria-label="{{ 'admin.emailing.recipients.remove_manual'|trans({'%email%': email}) }}">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                    <input type="hidden" name="manual_emails[]" value="{{ email }}">
+                                </span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="admin-emailing-recipient-list">
+                            {% for recipient in recipient_choices %}
+                                {% set is_checked = (recipient.id ~ '') in selected_user_ids %}
+                                <label class="admin-emailing-recipient-option">
+                                    <input
+                                        type="checkbox"
+                                        name="selected_user_ids[]"
+                                        value="{{ recipient.id }}"
+                                        data-admin-emailing-target="recipientCheckbox"
+                                        data-action="admin-emailing#updateRecipientSummary"
+                                        {{ is_checked ? 'checked' : '' }}
+                                    >
+                                    <span>
+                                        <strong>{{ recipient.name }}</strong>
+                                        <small>{{ recipient.email }}</small>
+                                    </span>
+                                    <em>
+                                        {% if recipient.verified %}
+                                            {{ 'admin.customer.status.verified'|trans }}
+                                        {% elseif recipient.active %}
+                                            {{ 'admin.customer.status.active'|trans }}
+                                        {% else %}
+                                            {{ 'admin.customer.status.inactive'|trans }}
+                                        {% endif %}
+                                    </em>
+                                </label>
+                            {% else %}
+                                <div class="admin-empty-state admin-emailing-recipient-empty">
+                                    <i class="fa-solid fa-user-slash"></i>
+                                    <p>{{ 'admin.emailing.recipients.no_users'|trans }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <small>{{ 'admin.emailing.form.audience_help'|trans }}</small>
+                </div>
+
+                <label class="admin-field admin-field--full admin-emailing-html-field">
+                    <span>{{ 'admin.emailing.form.html_content'|trans }}</span>
+                    <textarea
+                        name="html_content"
+                        rows="22"
+                        required
+                        spellcheck="false"
+                        data-admin-emailing-target="html"
+                        data-action="input->admin-emailing#refreshPreview"
+                    >{{ form_data.html_content }}</textarea>
+                </label>
+
+                <div class="admin-emailing-warning">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>{{ 'admin.emailing.form.warning'|trans }}</span>
+                </div>
+
+                <div class="admin-product-form__actions">
+                    <button type="submit" class="admin-action-button" onclick="return confirm('{{ 'admin.emailing.form.confirm_send'|trans|e('js') }}');">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        {{ 'admin.emailing.form.send_submit'|trans }}
+                    </button>
+                </div>
+            </form>
+
+            <aside class="admin-emailing-side">
+                <article class="admin-panel admin-emailing-preview-card">
+                    <div class="admin-form-card__heading">
+                        <span><i class="fa-solid fa-eye"></i></span>
+                        <div>
+                            <strong>{{ 'admin.emailing.preview.title'|trans }}</strong>
+                            <small>{{ 'admin.emailing.preview.text'|trans }}</small>
+                        </div>
+                    </div>
+                    <iframe
+                        class="admin-emailing-preview"
+                        sandbox=""
+                        title="{{ 'admin.emailing.preview.title'|trans }}"
+                        data-admin-emailing-target="preview"
+                    ></iframe>
+                </article>
+
+                <article class="admin-panel admin-emailing-templates">
+                    <div class="admin-form-card__heading">
+                        <span><i class="fa-solid fa-layer-group"></i></span>
+                        <div>
+                            <strong>{{ 'admin.emailing.templates.title'|trans }}</strong>
+                            <small>{{ 'admin.emailing.templates.text'|trans }}</small>
+                        </div>
+                    </div>
+
+                    {% if templates %}
+                        <div class="admin-emailing-template-list">
+                            {% for template in templates %}
+                                <button
+                                    type="button"
+                                    class="admin-emailing-template"
+                                    data-action="admin-emailing#loadTemplate"
+                                    data-template-name-param="{{ template.name }}"
+                                    data-template-subject-param="{{ template.subject }}"
+                                    data-template-html-param="{{ template.htmlContent|e('html_attr') }}"
+                                >
+                                    <strong>{{ template.name }}</strong>
+                                    <span>{{ template.subject }}</span>
+                                    <small>
+                                        {{ ('admin.emailing.audience.' ~ template.audience)|trans }}
+                                        · {{ 'admin.emailing.audience.count'|trans({'%count%': template.recipientCount}) }}
+                                        · {{ template.createdAt|date('d/m/Y H:i') }}
+                                    </small>
+                                </button>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="admin-empty-state">
+                            <i class="fa-solid fa-envelope-open-text"></i>
+                            <p>{{ 'admin.emailing.templates.empty'|trans }}</p>
+                        </div>
+                    {% endif %}
+                </article>
+            </aside>
+        </div>
+    </section>
+{% endblock %}
