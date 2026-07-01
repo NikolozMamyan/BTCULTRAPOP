@@ -8,6 +8,8 @@ final readonly class AdminCartProvider
 {
     private const ABANDONED_AFTER = '-2 hours';
     private const MAX_ROWS = 200;
+    private const STORAGE_TIMEZONE = 'UTC';
+    private const DISPLAY_TIMEZONE = 'Europe/Paris';
 
     public function __construct(private Connection $connection)
     {
@@ -22,7 +24,7 @@ final readonly class AdminCartProvider
      */
     public function index(string $filter = 'all'): array
     {
-        $threshold = new \DateTimeImmutable(self::ABANDONED_AFTER);
+        $threshold = new \DateTimeImmutable(self::ABANDONED_AFTER, $this->storageTimezone());
         $carts = array_map(
             fn (array $row): array => $this->presentCart($row, $threshold),
             $this->cartRows(),
@@ -283,14 +285,14 @@ final readonly class AdminCartProvider
     private function dateFromDatabase(mixed $value): \DateTimeImmutable
     {
         if ($value instanceof \DateTimeImmutable) {
-            return $value;
+            return $value->setTimezone($this->displayTimezone());
         }
 
         if ($value instanceof \DateTimeInterface) {
-            return \DateTimeImmutable::createFromInterface($value);
+            return \DateTimeImmutable::createFromInterface($value)->setTimezone($this->displayTimezone());
         }
 
-        return new \DateTimeImmutable((string) $value);
+        return (new \DateTimeImmutable((string) $value, $this->storageTimezone()))->setTimezone($this->displayTimezone());
     }
 
     private function shortToken(mixed $token): string
@@ -326,5 +328,15 @@ final readonly class AdminCartProvider
     private function formatCents(int $cents): string
     {
         return number_format($cents / 100, 2, ',', ' ') . ' €';
+    }
+
+    private function displayTimezone(): \DateTimeZone
+    {
+        return new \DateTimeZone(self::DISPLAY_TIMEZONE);
+    }
+
+    private function storageTimezone(): \DateTimeZone
+    {
+        return new \DateTimeZone(self::STORAGE_TIMEZONE);
     }
 }

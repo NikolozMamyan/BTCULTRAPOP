@@ -186,7 +186,7 @@ final class CustomerController extends AbstractController
     }
 
     #[Route('/viewer', name: 'app_admin_customers_viewer', methods: ['GET'])]
-    public function viewer(AdminVisitorProvider $visitors): Response
+    public function viewer(Request $request, AdminVisitorProvider $visitors): Response
     {
         $adminUser = $this->resolveAdminUser();
 
@@ -196,7 +196,7 @@ final class CustomerController extends AbstractController
 
         return $this->render('admin/customers/viewer.html.twig', [
             'admin_user' => $adminUser,
-            ...$visitors->online(),
+            ...$visitors->online($request->query->getString('filter', 'humans')),
         ]);
     }
 

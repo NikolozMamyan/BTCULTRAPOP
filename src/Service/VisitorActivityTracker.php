@@ -11,6 +11,37 @@ use Symfony\Component\HttpFoundation\Response;
 final readonly class VisitorActivityTracker
 {
     public const COOKIE_NAME = 'ultrapop_visitor';
+    private const STORAGE_TIMEZONE = 'UTC';
+
+    /**
+     * @var list<string>
+     */
+    private const BOT_USER_AGENT_PATTERNS = [
+        'bot',
+        'crawl',
+        'spider',
+        'slurp',
+        'bingpreview',
+        'facebookexternalhit',
+        'whatsapp',
+        'google-inspectiontool',
+        'ahrefs',
+        'semrush',
+        'mj12',
+        'dotbot',
+        'yandex',
+        'petalbot',
+        'bytespider',
+        'gptbot',
+        'claudebot',
+        'amazonbot',
+        'censys',
+        'python-requests',
+        'curl',
+        'wget',
+        'httpclient',
+        'headless',
+    ];
 
     public function __construct(private Connection $connection)
     {
@@ -22,13 +53,20 @@ final readonly class VisitorActivityTracker
             return;
         }
 
+        if (null !== $this->knownBotReason($request)) {
+            return;
+        }
+
         try {
-            $now = new \DateTimeImmutable();
+            $now = new \DateTimeImmutable('now', new \DateTimeZone(self::STORAGE_TIMEZONE));
             $token = $this->visitorToken($request);
             $cartId = $this->cartId($request, $response);
             $userId = $user?->getId();
             $visitorType = $user instanceof User ? 'customer' : 'guest';
             $expiresAt = $now->modify('+30 days');
+            $humanScore = $this->humanScore($request, $user, $cartId);
+            $suspectedBot = $this->isSuspectedBot($request, $user, $cartId, $humanScore);
+            $botReason = $suspectedBot ? $this->suspectedBotReason($request, $humanScore) : null;
 
             $this->connection->executeStatement(
                 'INSERT INTO site_visitor (
@@ -44,8 +82,12 @@ final readonly class VisitorActivityTracker
                     referer,
                     first_seen_at,
                     last_seen_at,
-                    expires_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    expires_at,
+                    hit_count,
+                    human_score,
+                    suspected_bot,
+                    bot_reason
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
                     user_id = VALUES(user_id),
                     cart_id = COALESCE(VALUES(cart_id), cart_id),
@@ -57,7 +99,11 @@ final readonly class VisitorActivityTracker
                     current_route = VALUES(current_route),
                     referer = VALUES(referer),
                     last_seen_at = VALUES(last_seen_at),
-                    expires_at = VALUES(expires_at)',
+                    expires_at = VALUES(expires_at),
+                    hit_count = hit_count + 1,
+                    human_score = GREATEST(human_score, VALUES(human_score)),
+                    suspected_bot = IF(GREATEST(human_score, VALUES(human_score)) >= 3 OR VALUES(user_id) IS NOT NULL OR COALESCE(VALUES(cart_id), cart_id) IS NOT NULL, 0, VALUES(suspected_bot)),
+                    bot_reason = IF(GREATEST(human_score, VALUES(human_score)) >= 3 OR VALUES(user_id) IS NOT NULL OR COALESCE(VALUES(cart_id), cart_id) IS NOT NULL, NULL, VALUES(bot_reason))',
                 [
                     $token,
                     $userId,
@@ -72,6 +118,10 @@ final readonly class VisitorActivityTracker
                     $now->format('Y-m-d H:i:s'),
                     $now->format('Y-m-d H:i:s'),
                     $expiresAt->format('Y-m-d H:i:s'),
+                    1,
+                    $humanScore,
+                    $suspectedBot ? 1 : 0,
+                    $botReason,
                 ],
             );
 
@@ -97,16 +147,121 @@ final readonly class VisitorActivityTracker
         }
 
         $route = (string) $request->attributes->get('_route', '');
+        $path = $request->getPathInfo();
 
         if ('' === $route || str_starts_with($route, '_') || str_starts_with($route, 'app_admin')) {
             return false;
         }
 
-        if (str_starts_with($request->getPathInfo(), '/assets/')) {
+        if (str_starts_with($path, '/assets/')) {
             return false;
         }
 
-        return !str_starts_with($route, 'app_stripe_webhook');
+        if (str_starts_with($route, 'app_stripe_webhook')) {
+            return false;
+        }
+
+        return !in_array($path, ['/robots.txt', '/sitemap.xml', '/llms.txt', '/favicon.ico', '/manifest.json'], true);
+    }
+
+    private function knownBotReason(Request $request): ?string
+    {
+        $userAgent = mb_strtolower(trim($request->headers->get('User-Agent', '')));
+
+        if ('' === $userAgent) {
+            return 'empty_user_agent';
+        }
+
+        foreach (self::BOT_USER_AGENT_PATTERNS as $pattern) {
+            if (str_contains($userAgent, $pattern)) {
+                return 'user_agent:' . $pattern;
+            }
+        }
+
+        if ('' === trim($request->headers->get('Accept-Language', '')) && '/' === $request->getPathInfo()) {
+            return 'home_without_accept_language';
+        }
+
+        return null;
+    }
+
+    private function humanScore(Request $request, ?User $user, ?int $cartId): int
+    {
+        $score = 0;
+        $route = (string) $request->attributes->get('_route', '');
+        $path = $request->getPathInfo();
+        $accept = mb_strtolower($request->headers->get('Accept', ''));
+
+        if ($user instanceof User) {
+            $score += 6;
+        }
+
+        if (null !== $cartId) {
+            $score += 5;
+        }
+
+        if (str_starts_with($route, 'app_api_cart')) {
+            $score += 5;
+        }
+
+        if ('' !== trim($request->headers->get('Accept-Language', ''))) {
+            ++$score;
+        }
+
+        if (str_contains($accept, 'text/html') || str_contains($accept, 'application/json')) {
+            ++$score;
+        }
+
+        if ('' !== trim($request->headers->get('referer', ''))) {
+            ++$score;
+        }
+
+        if ('/' !== $path) {
+            ++$score;
+        }
+
+        if ($this->isIntentRoute($route, $path)) {
+            $score += 3;
+        }
+
+        return min(99, $score);
+    }
+
+    private function isSuspectedBot(Request $request, ?User $user, ?int $cartId, int $humanScore): bool
+    {
+        if ($user instanceof User || null !== $cartId) {
+            return false;
+        }
+
+        if ($humanScore >= 3) {
+            return false;
+        }
+
+        return '/' === $request->getPathInfo() || '' === trim($request->headers->get('Accept-Language', ''));
+    }
+
+    private function suspectedBotReason(Request $request, int $humanScore): string
+    {
+        if ('' === trim($request->headers->get('Accept-Language', ''))) {
+            return 'missing_accept_language';
+        }
+
+        if ('/' === $request->getPathInfo()) {
+            return 'low_score_homepage_hit';
+        }
+
+        return 'low_human_score_' . $humanScore;
+    }
+
+    private function isIntentRoute(string $route, string $path): bool
+    {
+        foreach (['boutique', 'cart', 'checkout', 'profil', 'favorite', 'search', 'product'] as $needle) {
+            if (str_contains($route, $needle) || str_contains($path, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function visitorToken(Request $request): string
@@ -172,7 +327,7 @@ final readonly class VisitorActivityTracker
             default => 'Navigateur',
         };
 
-        return sprintf('%s · %s', $device, $browser);
+        return sprintf('%s - %s', $device, $browser);
     }
 
     private function truncate(string $value, int $length): string
@@ -183,6 +338,6 @@ final readonly class VisitorActivityTracker
             return $value;
         }
 
-        return mb_substr($value, 0, $length - 1) . '…';
+        return mb_substr($value, 0, $length - 3) . '...';
     }
 }

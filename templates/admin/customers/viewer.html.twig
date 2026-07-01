@@ -10,13 +10,25 @@
                 <h1>{{ 'admin.viewer.index.title'|trans }}</h1>
                 <p>{{ 'admin.viewer.index.subtitle'|trans }}</p>
             </div>
-            <a href="{{ path('app_admin_customers_viewer') }}" class="admin-secondary-button">
+            <a href="{{ path('app_admin_customers_viewer', {filter: filter}) }}" class="admin-secondary-button">
                 <i class="fa-solid fa-rotate"></i>
                 {{ 'admin.viewer.index.refresh'|trans }}
             </a>
         </div>
 
         {% include 'admin/customers/_tabs.html.twig' %}
+
+        <nav class="admin-crm-filters" aria-label="{{ 'admin.viewer.filters.label'|trans }}">
+            {% for value, label in {
+                humans: 'admin.viewer.filters.humans',
+                all: 'admin.viewer.filters.all',
+                bots: 'admin.viewer.filters.bots'
+            } %}
+                <a href="{{ path('app_admin_customers_viewer', {filter: value}) }}" class="{{ filter == value ? 'is-active' : '' }}">
+                    {{ label|trans }}
+                </a>
+            {% endfor %}
+        </nav>
 
         <div class="admin-viewer-refresh-note">
             <i class="fa-solid fa-clock"></i>
@@ -69,6 +81,11 @@
                                         {{ 'admin.viewer.table.guest_session'|trans({'%session%': visitor.session}) }}
                                     {% endif %}
                                 </small>
+                                {% if visitor.suspected_bot %}
+                                    <em class="admin-order-badge admin-order-badge--cancelled">
+                                        {{ 'admin.viewer.table.suspected_bot'|trans }}
+                                    </em>
+                                {% endif %}
                             </div>
                             <div class="admin-crm-path">
                                 <strong>{{ visitor.current_path }}</strong>
@@ -84,7 +101,13 @@
                                     <span class="admin-crm-muted">{{ 'admin.viewer.table.no_cart'|trans }}</span>
                                 {% endif %}
                             </div>
-                            <span>{{ visitor.device }}</span>
+                            <div class="admin-crm-date">
+                                <strong>{{ visitor.device }}</strong>
+                                <small>{{ 'admin.viewer.table.score'|trans({'%score%': visitor.human_score, '%hits%': visitor.hit_count}) }}</small>
+                                {% if visitor.bot_reason %}
+                                    <small>{{ visitor.bot_reason }}</small>
+                                {% endif %}
+                            </div>
                             <div class="admin-crm-date">
                                 <strong>{{ visitor.last_seen_age }}</strong>
                                 <small>{{ visitor.last_seen_at|date('H:i:s') }}</small>
