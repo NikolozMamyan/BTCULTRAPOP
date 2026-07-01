@@ -134,7 +134,7 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('.shop-product-card__quantity input[data-product-quantity][min="1"][value="1"]');
         self::assertSelectorExists('.shop-product-card__quantity button[data-action="cart#decrementProductQuantity"]');
         self::assertSelectorExists('.shop-product-card__quantity button[data-action="cart#incrementProductQuantity"]');
-        self::assertSelectorExists('.shop-product-card button[data-action="product-preview-open"] .fa-magnifying-glass-plus');
+        self::assertSelectorExists('.shop-product-card button[data-action="click->product-preview#open"] .fa-magnifying-glass-plus');
         self::assertSelectorTextContains('.shop-product-card:first-child', '1,31 €');
         self::assertSelectorCount(3, '.shop-filter-card');
         self::assertSelectorExists('[data-controller="shop-filters"]');

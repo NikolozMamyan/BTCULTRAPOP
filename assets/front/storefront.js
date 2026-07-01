@@ -65,45 +65,6 @@ function initializeStorefront() {
         setBodyLocked(false);
     };
 
-    const closeProductPreview = () => {
-        const preview = document.getElementById('product-preview');
-
-        if (!preview) {
-            return;
-        }
-
-        preview.classList.remove('open');
-        preview.setAttribute('aria-hidden', 'true');
-        window.setTimeout(() => preview.classList.add('hidden'), 260);
-        setBodyLocked(false);
-    };
-
-    const openProductPreview = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const button = event.currentTarget;
-        const preview = document.getElementById('product-preview');
-        const image = document.getElementById('product-preview-image');
-        const title = document.getElementById('product-preview-title');
-        const link = document.getElementById('product-preview-link');
-
-        if (!preview || !image || !title || !link) {
-            return;
-        }
-
-        image.src = button.dataset.productPreviewImage || '';
-        image.alt = button.dataset.productPreviewTitle || '';
-        title.textContent = button.dataset.productPreviewTitle || '';
-        link.href = button.dataset.productPreviewUrl || '#';
-        preview.classList.remove('hidden');
-        requestAnimationFrame(() => {
-            preview.classList.add('open');
-            preview.setAttribute('aria-hidden', 'false');
-        });
-        setBodyLocked(true);
-    };
-
     const openSearch = () => {
         const modal = document.getElementById('search-modal');
         if (!modal) {
@@ -280,8 +241,6 @@ function initializeStorefront() {
     document.querySelectorAll('[data-action="search-close"]').forEach((button) => on(button, 'click', closeSearch));
     document.querySelectorAll('[data-action="cart-open"]').forEach((button) => on(button, 'click', openCart));
     document.querySelectorAll('[data-action="cart-close"]').forEach((button) => on(button, 'click', closeCart));
-    document.querySelectorAll('[data-action="product-preview-open"]').forEach((button) => on(button, 'click', openProductPreview));
-    document.querySelectorAll('[data-action="product-preview-close"]').forEach((button) => on(button, 'click', closeProductPreview));
     document.querySelectorAll('.shop-product-card[data-product-url]').forEach((card) => {
         on(card, 'click', (event) => {
             if (!shouldIgnoreCardNavigation(event)) {
@@ -307,7 +266,6 @@ function initializeStorefront() {
         if (event.key === 'Escape') {
             closeSearch();
             closeCart();
-            closeProductPreview();
         }
     });
 

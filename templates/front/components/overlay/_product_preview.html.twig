@@ -1,16 +1,19 @@
-<div id="product-preview" class="product-preview hidden" aria-hidden="true">
-    <button type="button" class="product-preview__backdrop" data-action="product-preview-close" aria-label="{{ 'common.close'|trans }}"></button>
-    <div class="product-preview__dialog" role="dialog" aria-modal="true" aria-labelledby="product-preview-title">
-        <button type="button" class="product-preview__close" data-action="product-preview-close" aria-label="{{ 'common.close'|trans }}">
+<div id="product-preview" class="product-preview hidden" aria-hidden="true" data-product-preview-target="root">
+    <button type="button" class="product-preview__backdrop" data-action="click->product-preview#close" aria-label="{{ 'common.close'|trans }}"></button>
+    <div class="product-preview__dialog is-image-preview" role="dialog" aria-modal="true" aria-label="{{ 'product.preview_scene'|trans }}" data-product-preview-target="dialog">
+        <button type="button" class="product-preview__close" data-action="click->product-preview#close" aria-label="{{ 'common.close'|trans }}">
             <i class="fa-solid fa-xmark"></i>
         </button>
-        <div class="product-preview__media">
-            <img id="product-preview-image" src="" alt="">
+        <div class="product-preview__media is-image-mode" data-product-preview-target="media">
+            <canvas class="product-preview__canvas" data-product-preview-target="canvas" hidden></canvas>
+            <div class="product-preview__loader" data-product-preview-target="loader" hidden aria-hidden="true"></div>
+            <img id="product-preview-image" src="" alt="" data-product-preview-target="image">
+            <p class="product-preview__error" data-product-preview-target="error" role="status" hidden></p>
         </div>
-        <div class="product-preview__content">
+        <div class="product-preview__content" data-product-preview-target="content">
             <span>{{ 'product.preview_eyebrow'|trans }}</span>
-            <h2 id="product-preview-title"></h2>
-            <a id="product-preview-link" href="#" class="product-preview__link">
+            <h2 id="product-preview-title" data-product-preview-target="title"></h2>
+            <a id="product-preview-link" href="#" class="product-preview__link" data-product-preview-target="link">
                 {{ 'product.view_product'|trans }}
                 <i class="fa-solid fa-arrow-right"></i>
             </a>

@@ -9,6 +9,8 @@
     {% set display_name = admin_user is defined ? admin_user.fullName : app.user.userIdentifier|default('Admin') %}
     {% set catalog_menu_active = current_route starts with 'app_admin_products'
         or current_route starts with 'app_admin_categories'
+        or current_route starts with 'app_admin_category_models_3d'
+        or current_route starts with 'app_admin_product_models_3d'
         or current_route starts with 'app_admin_licenses'
         or current_route starts with 'app_admin_prices' %}
 
@@ -49,6 +51,10 @@
                         <a href="{{ path('app_admin_prices_index') }}" class="admin-sidebar__sublink {{ current_route starts with 'app_admin_prices' ? 'is-active' : '' }}">
                             <i class="fa-solid fa-tags"></i>
                             <span>{{ 'admin.nav.prices'|trans }}</span>
+                        </a>
+                        <a href="{{ path('app_admin_category_models_3d_index') }}" class="admin-sidebar__sublink {{ current_route starts with 'app_admin_category_models_3d' or current_route starts with 'app_admin_product_models_3d' ? 'is-active' : '' }}">
+                            <i class="fa-solid fa-cube"></i>
+                            <span>{{ 'admin.nav.models_3d'|trans }}</span>
                         </a>
                     </div>
                 </details>

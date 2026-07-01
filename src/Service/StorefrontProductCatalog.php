@@ -24,6 +24,7 @@ final readonly class StorefrontProductCatalog
         private UserFavoriteRepository $favorites,
         private AssetUrlResolver $assetUrlResolver,
         private ProductSlugger $productSlugger,
+        private ProductModel3DResolver $productModel3DResolver,
     ) {
     }
 
@@ -32,10 +33,7 @@ final readonly class StorefrontProductCatalog
      */
     public function all(?User $user = null): array
     {
-        return $this->withFavoriteState(array_map(
-            fn (Product $product): array => $this->present($product),
-            $this->products->findForStorefront(),
-        ), $user);
+        return $this->withFavoriteState($this->presentProducts($this->products->findForStorefront()), $user);
     }
 
     /**
@@ -59,10 +57,7 @@ final readonly class StorefrontProductCatalog
      */
     public function related(Product $product, int $limit = 3, ?User $user = null): array
     {
-        return $this->withFavoriteState(array_map(
-            fn (Product $relatedProduct): array => $this->present($relatedProduct),
-            $this->products->findRelatedForStorefront($product, $limit),
-        ), $user);
+        return $this->withFavoriteState($this->presentProducts($this->products->findRelatedForStorefront($product, $limit)), $user);
     }
 
     /**
@@ -70,10 +65,7 @@ final readonly class StorefrontProductCatalog
      */
     public function favorites(User $user): array
     {
-        return $this->withFavoriteState(array_map(
-            fn (Product $product): array => $this->present($product),
-            $this->products->findFavoritesForStorefront($user),
-        ), $user);
+        return $this->withFavoriteState($this->presentProducts($this->products->findFavoritesForStorefront($user)), $user);
     }
 
     /**
@@ -81,6 +73,8 @@ final readonly class StorefrontProductCatalog
      */
     public function presentForUser(Product $product, ?User $user = null): array
     {
+        $this->productModel3DResolver->warmup([$product]);
+
         return $this->withFavoriteState([$this->present($product)], $user)[0];
     }
 
@@ -91,10 +85,7 @@ final readonly class StorefrontProductCatalog
      */
     public function presentManyForUser(array $products, ?User $user = null): array
     {
-        return $this->withFavoriteState(array_map(
-            fn (Product $product): array => $this->present($product),
-            $products,
-        ), $user);
+        return $this->withFavoriteState($this->presentProducts($products), $user);
     }
 
     public function maxPrice(): int
@@ -236,6 +227,7 @@ final readonly class StorefrontProductCatalog
             'cat' => $category?->getName() ?? '',
             'category_path' => $category?->getPathNames() ?? [],
             'category_position_path' => $this->categoryPositionPath($category),
+            'model_3d' => $this->productModel3DResolver->present($product),
             'license' => $product->getLicense()?->getName() ?? '',
             'price' => (float) $product->getPriceTaxIncluded(),
             'old' => null,
@@ -248,6 +240,21 @@ final readonly class StorefrontProductCatalog
             'favorite' => false,
             'updated_at' => $product->getUpdatedAt(),
         ];
+    }
+
+    /**
+     * @param list<Product> $products
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function presentProducts(array $products): array
+    {
+        $this->productModel3DResolver->warmup($products);
+
+        return array_map(
+            fn (Product $product): array => $this->present($product),
+            $products,
+        );
     }
 
     private function tagForStatus(ProductStatus $status): ?string

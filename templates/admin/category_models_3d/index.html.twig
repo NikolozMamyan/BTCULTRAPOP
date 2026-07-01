@@ -1,0 +1,252 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.model_3d.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    {% set fields = {
+        widthScale: 'admin.model_3d.field.width_scale',
+        height: 'admin.model_3d.field.height',
+        bodyBulge: 'admin.model_3d.field.body_bulge',
+        shoulder: 'admin.model_3d.field.shoulder',
+        topCut: 'admin.model_3d.field.top_cut',
+        topNeck: 'admin.model_3d.field.top_neck',
+        bottomNeck: 'admin.model_3d.field.bottom_neck',
+        lidScale: 'admin.model_3d.field.lid_scale'
+    } %}
+    {% set type_labels = {
+        can: 'admin.model_3d.type.can',
+        bottle: 'admin.model_3d.type.bottle',
+        chip_bag: 'admin.model_3d.type.chip_bag',
+        noodle_cup: 'admin.model_3d.type.noodle_cup',
+        candy_bag: 'admin.model_3d.type.candy_bag',
+        candy_stick_bag: 'admin.model_3d.type.candy_stick_bag',
+        cereal_box: 'admin.model_3d.type.cereal_box'
+    } %}
+
+    <section
+        class="admin-model-3d"
+        data-controller="admin-model-3d"
+        data-admin-model-3d-defaults-value="{{ defaults|json_encode|e('html_attr') }}"
+        data-admin-model-3d-defaults-by-type-value="{{ defaults_by_type|json_encode|e('html_attr') }}"
+        data-admin-model-3d-default-model-type-value="{{ default_model_type }}"
+        data-admin-model-3d-no-texture-text-value="{{ 'admin.model_3d.preview.no_texture'|trans }}"
+        data-admin-model-3d-card-has-texture-text-value="{{ 'admin.model_3d.card.has_texture'|trans }}"
+        data-admin-model-3d-card-no-texture-text-value="{{ 'admin.model_3d.card.no_texture'|trans }}"
+        data-admin-model-3d-ready-text-value="{{ 'admin.model_3d.status.ready'|trans }}"
+        data-admin-model-3d-to-configure-text-value="{{ 'admin.model_3d.status.to_configure'|trans }}"
+        data-admin-model-3d-error-text-value="{{ 'admin.model_3d.preview.error'|trans }}"
+    >
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.model_3d.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.model_3d.index.title'|trans }}</h1>
+                <p>{{ 'admin.model_3d.index.subtitle'|trans }}</p>
+            </div>
+        </div>
+
+        {% if categories %}
+            <div class="admin-model-3d-grid">
+                {% for category in categories %}
+                    {% set category_products = products_by_category[category.id]|default([]) %}
+                    {% set first_product = category_products|first %}
+                    {% set first_model = first_product ? models[first_product.id]|default(null) : null %}
+                    {% set first_texture_url = first_model and first_model.textureFilename ? path('app_media_3d_product_texture', {filename: first_model.textureFilename}) : '' %}
+                    {% set first_cover = first_product ? first_product.coverImage : null %}
+                    {% set first_image_url = first_texture_url ?: (first_cover ? asset(first_cover.path) : '') %}
+
+                    <article class="admin-panel admin-model-3d-card">
+                        <div class="admin-model-3d-card__heading">
+                            <span class="admin-model-3d-card__icon">
+                                <i class="fa-solid fa-cube"></i>
+                            </span>
+                            <div>
+                                <strong>{{ category.name }}</strong>
+                                <small>{{ category.pathLabel }}</small>
+                                <em>{{ category_products|length }} {{ 'admin.model_3d.card.products'|trans }}</em>
+                            </div>
+                        </div>
+
+                        {% if category_products %}
+                            <label class="admin-model-3d-card__select">
+                                <span>{{ 'admin.model_3d.field.product'|trans }}</span>
+                                <select
+                                    class="admin-model-3d-product-select"
+                                    data-model-product-select
+                                    data-action="change->admin-model-3d#selectProduct"
+                                >
+                                    {% for product in category_products %}
+                                        {% set product_model = models[product.id]|default(null) %}
+                                        {% set model_type = product_model ? product_model.modelType : product_type_guesses[product.id]|default(default_model_type) %}
+                                        {% set values = product_model ? product_model.toShapeArray() : defaults_by_type[model_type]|default(defaults) %}
+                                        {% set texture_url = product_model and product_model.textureFilename ? path('app_media_3d_product_texture', {filename: product_model.textureFilename}) : '' %}
+                                        {% set cover = product.coverImage %}
+                                        {% set image_url = texture_url ?: (cover ? asset(cover.path) : '') %}
+                                        <option
+                                            value="{{ product.id }}"
+                                            data-model-product-name="{{ product.name|e('html_attr') }}"
+                                            data-model-product-reference="{{ product.reference|e('html_attr') }}"
+                                            data-model-category-path="{{ category.pathLabel|e('html_attr') }}"
+                                            data-model-action-url="{{ path('app_admin_product_models_3d_save', {id: product.id}) }}"
+                                            data-model-token="{{ csrf_token('admin_product_model_3d_' ~ product.id) }}"
+                                            data-model-active="{{ product_model and product_model.active ? '1' : '0' }}"
+                                            data-model-type="{{ model_type }}"
+                                            data-model-shape="{{ values|json_encode|e('html_attr') }}"
+                                            data-model-texture-url="{{ texture_url }}"
+                                            data-model-product-image="{{ image_url|e('html_attr') }}"
+                                            data-model-product-image-alt="{{ (cover ? (cover.alt ?: product.name) : product.name)|e('html_attr') }}"
+                                        >
+                                            {{ product.name }} — {{ product.reference }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <small>{{ 'admin.model_3d.field.product_help'|trans }}</small>
+                            </label>
+                        {% else %}
+                            <div class="admin-model-3d-card__select admin-model-3d-card__select--empty">
+                                <span>{{ 'admin.model_3d.card.no_product'|trans }}</span>
+                            </div>
+                        {% endif %}
+
+                        <div class="admin-model-3d-card__body">
+                            <span class="admin-model-3d-card__thumb {{ first_image_url ? '' : 'is-empty' }}" data-model-card-thumb>
+                                {% if first_image_url %}
+                                    <img src="{{ first_image_url }}" alt="{{ first_cover ? (first_cover.alt ?: first_product.name) : first_product.name }}">
+                                {% else %}
+                                    <i class="fa-solid fa-image"></i>
+                                {% endif %}
+                            </span>
+                            <div>
+                                <span class="admin-model-3d-status {{ first_model and first_model.active and first_texture_url ? 'is-ready' : '' }}" data-model-card-status>
+                                    <i class="fa-solid {{ first_model and first_model.active and first_texture_url ? 'fa-circle-check' : 'fa-circle-info' }}"></i>
+                                    <span>{{ first_model and first_model.active and first_texture_url ? 'admin.model_3d.status.ready'|trans : 'admin.model_3d.status.to_configure'|trans }}</span>
+                                </span>
+                                <p data-model-card-description>{{ first_texture_url ? 'admin.model_3d.card.has_texture'|trans : 'admin.model_3d.card.no_texture'|trans }}</p>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="admin-action-button admin-model-3d-configure"
+                            data-action="admin-model-3d#open"
+                            data-model-category-path="{{ category.pathLabel|e('html_attr') }}"
+                            {{ category_products ? '' : 'disabled' }}
+                        >
+                            <i class="fa-solid fa-sliders"></i>
+                            {{ 'admin.model_3d.action.configure'|trans }}
+                        </button>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <article class="admin-panel admin-empty-state">
+                <i class="fa-solid fa-cube"></i>
+                <p>{{ 'admin.model_3d.index.empty'|trans }}</p>
+                <a href="{{ path('app_admin_categories_index') }}" class="admin-action-button">
+                    <i class="fa-solid fa-layer-group"></i>
+                    {{ 'admin.model_3d.action.manage_categories'|trans }}
+                </a>
+            </article>
+        {% endif %}
+
+        <div class="admin-model-3d-modal is-hidden" data-admin-model-3d-target="modal" aria-hidden="true">
+            <button type="button" class="admin-model-3d-modal__backdrop" data-action="admin-model-3d#close" aria-label="{{ 'common.close'|trans }}"></button>
+            <form
+                class="admin-model-3d-modal__dialog"
+                method="post"
+                enctype="multipart/form-data"
+                data-admin-model-3d-target="form"
+            >
+                <input type="hidden" name="_csrf_token" data-admin-model-3d-target="token">
+
+                <div class="admin-model-3d-preview">
+                    <canvas class="admin-model-3d-preview__canvas" data-admin-model-3d-target="canvas"></canvas>
+                    <div class="admin-model-3d-preview__loader" data-admin-model-3d-target="loader" hidden aria-hidden="true"></div>
+                    <div class="admin-model-3d-preview__empty" data-admin-model-3d-target="empty">
+                        <i class="fa-solid fa-image"></i>
+                        <span>{{ 'admin.model_3d.preview.no_texture'|trans }}</span>
+                    </div>
+                </div>
+
+                <aside class="admin-model-3d-editor">
+                    <div class="admin-model-3d-editor__top">
+                        <div>
+                            <span>{{ 'admin.model_3d.editor.eyebrow'|trans }}</span>
+                            <h2 data-admin-model-3d-target="title">{{ 'admin.model_3d.index.title'|trans }}</h2>
+                            <p data-admin-model-3d-target="subtitle"></p>
+                        </div>
+                        <button type="button" class="admin-model-3d-editor__close" data-action="admin-model-3d#close" aria-label="{{ 'common.close'|trans }}">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <label class="admin-model-3d-upload">
+                        <input
+                            type="file"
+                            name="texture_image"
+                            accept="image/jpeg,image/png,image/webp"
+                            data-admin-model-3d-target="file"
+                            data-action="change->admin-model-3d#previewUpload"
+                        >
+                        <span>
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <strong>{{ 'admin.model_3d.field.texture'|trans }}</strong>
+                            <small data-admin-model-3d-target="textureName">{{ 'admin.model_3d.field.texture_help'|trans }}</small>
+                        </span>
+                    </label>
+
+                    <label class="admin-model-3d-toggle">
+                        <input type="checkbox" name="model_3d[active]" data-admin-model-3d-target="active">
+                        <span>{{ 'admin.model_3d.field.active'|trans }}</span>
+                    </label>
+
+                    <label class="admin-model-3d-type">
+                        <span>{{ 'admin.model_3d.field.model_type'|trans }}</span>
+                        <select
+                            name="model_3d[modelType]"
+                            data-admin-model-3d-target="modelType"
+                            data-action="change->admin-model-3d#changeModelType"
+                        >
+                            {% for model_type in model_types %}
+                                <option value="{{ model_type }}">{{ type_labels[model_type]|default(model_type)|trans }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+
+                    <div class="admin-model-3d-controls admin-model-3d-controls--modal">
+                        {% for field, label in fields %}
+                            {% set field_limits = limits[field] %}
+                            <label class="admin-model-3d-field">
+                                <span>
+                                    {{ label|trans }}
+                                    <output data-admin-model-3d-target="output" data-model-field="{{ field }}"></output>
+                                </span>
+                                <input
+                                    type="range"
+                                    name="model_3d[{{ field }}]"
+                                    min="{{ field_limits[0] }}"
+                                    max="{{ field_limits[1] }}"
+                                    step="{{ field == 'height' or field == 'widthScale' or field == 'topCut' ? '0.01' : '0.005' }}"
+                                    value="{{ defaults[field] }}"
+                                    data-admin-model-3d-target="input"
+                                    data-model-field="{{ field }}"
+                                    data-action="input->admin-model-3d#sync"
+                                >
+                            </label>
+                        {% endfor %}
+                    </div>
+
+                    <div class="admin-model-3d-card__actions">
+                        <button type="button" class="admin-secondary-button" data-action="admin-model-3d#reset">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            {{ 'admin.model_3d.action.reset'|trans }}
+                        </button>
+                        <button type="submit" class="admin-action-button">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            {{ 'admin.model_3d.action.save'|trans }}
+                        </button>
+                    </div>
+                </aside>
+            </form>
+        </div>
+    </section>
+{% endblock %}

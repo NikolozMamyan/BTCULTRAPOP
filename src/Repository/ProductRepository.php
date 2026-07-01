@@ -118,6 +118,37 @@ final class ProductRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param list<Category> $categories
+     *
+     * @return list<Product>
+     */
+    public function findForModel3DAdmin(array $categories): array
+    {
+        $categoryIds = array_values(array_filter(
+            array_map(static fn (Category $category): ?int => $category->getId(), $categories),
+        ));
+
+        if ([] === $categoryIds) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('product')
+            ->addSelect('category', 'categoryParent', 'categoryGrandparent', 'images')
+            ->innerJoin('product.category', 'category')
+            ->leftJoin('category.parent', 'categoryParent')
+            ->leftJoin('categoryParent.parent', 'categoryGrandparent')
+            ->leftJoin('product.images', 'images')
+            ->andWhere('category.id IN (:categoryIds)')
+            ->setParameter('categoryIds', $categoryIds)
+            ->orderBy('categoryGrandparent.position', 'ASC')
+            ->addOrderBy('categoryParent.position', 'ASC')
+            ->addOrderBy('category.position', 'ASC')
+            ->addOrderBy('product.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * @return list<Product>
      */
     public function findForStorefront(): array

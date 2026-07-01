@@ -39,10 +39,11 @@
             </button>
             <button
                 type="button"
-                data-action="product-preview-open"
+                data-action="click->product-preview#open"
                 data-product-preview-image="{{ product.img }}"
                 data-product-preview-title="{{ product.name }}"
                 data-product-preview-url="{{ path('app_front_product', {id: product.id, slug: product.slug}) }}"
+                data-product-preview-model="{{ product.model_3d|default(null) ? product.model_3d|json_encode|e('html_attr') : '' }}"
                 aria-label="{{ 'product.preview'|trans({'%name%': product.name}) }}"
             >
                 <i class="fa-solid fa-magnifying-glass-plus"></i>
