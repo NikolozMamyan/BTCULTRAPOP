@@ -1,0 +1,140 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.cart.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-customers admin-carts">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.cart.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.cart.index.title'|trans }}</h1>
+                <p>{{ 'admin.cart.index.subtitle'|trans }}</p>
+            </div>
+        </div>
+
+        {% include 'admin/customers/_tabs.html.twig' %}
+
+        <div class="admin-stats-grid admin-order-stats">
+            {% for stat in stats %}
+                <article class="admin-stat-card admin-stat-card--{{ stat.tone }}">
+                    <span class="admin-stat-card__icon">
+                        <i class="{{ stat.icon }}"></i>
+                    </span>
+                    <div>
+                        <small>{{ stat.label|trans }}</small>
+                        <strong>{{ stat.value }}</strong>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+
+        <nav class="admin-crm-filters" aria-label="{{ 'admin.cart.filters.label'|trans }}">
+            {% for value, label in {
+                all: 'admin.cart.filters.all',
+                active: 'admin.cart.filters.active',
+                abandoned: 'admin.cart.filters.abandoned',
+                converted: 'admin.cart.filters.converted',
+                customers: 'admin.cart.filters.customers',
+                guests: 'admin.cart.filters.guests'
+            } %}
+                <a href="{{ path('app_admin_customers_carts', {filter: value}) }}" class="{{ filter == value ? 'is-active' : '' }}">
+                    {{ label|trans }}
+                </a>
+            {% endfor %}
+        </nav>
+
+        <article class="admin-panel admin-customers-panel">
+            <div class="admin-panel__heading">
+                <div>
+                    <span>{{ 'admin.cart.index.list_eyebrow'|trans }}</span>
+                    <h2>{{ 'admin.cart.index.list_title'|trans({'%count%': carts|length}) }}</h2>
+                </div>
+            </div>
+
+            {% if carts %}
+                <div class="admin-crm-table admin-cart-table">
+                    <div class="admin-crm-table__row admin-crm-table__row--head">
+                        <span>{{ 'admin.cart.table.owner'|trans }}</span>
+                        <span>{{ 'admin.cart.table.status'|trans }}</span>
+                        <span>{{ 'admin.cart.table.content'|trans }}</span>
+                        <span>{{ 'admin.cart.table.total'|trans }}</span>
+                        <span>{{ 'admin.cart.table.updated_at'|trans }}</span>
+                        <span>{{ 'admin.cart.table.actions'|trans }}</span>
+                    </div>
+
+                    {% for cart in carts %}
+                        <div class="admin-crm-table__row">
+                            <div class="admin-order-customer">
+                                <strong>{{ cart.owner_label }}</strong>
+                                <small>
+                                    {% if cart.email %}
+                                        {{ cart.email }}
+                                    {% else %}
+                                        {{ 'admin.cart.owner.guest_session'|trans({'%session%': cart.session}) }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <span class="admin-customer-statuses">
+                                <em class="admin-order-badge {{ cart.is_abandoned ? 'admin-order-badge--cancelled' : (cart.status == 'converted' ? 'admin-order-badge--paid' : 'admin-order-badge--payment-processing') }}">
+                                    {{ cart.status_key|trans }}
+                                </em>
+                                {% if cart.promo_code %}
+                                    <em class="admin-order-badge admin-order-badge--delivered">{{ cart.promo_code }}</em>
+                                {% endif %}
+                            </span>
+                            <div class="admin-crm-products">
+                                <strong>{{ 'admin.cart.table.quantity'|trans({'%count%': cart.total_quantity}) }}</strong>
+                                {% if cart.products %}
+                                    {% for product in cart.products %}
+                                        <small>{{ product }}</small>
+                                    {% endfor %}
+                                {% else %}
+                                    <small>{{ 'admin.cart.table.empty_products'|trans }}</small>
+                                {% endif %}
+                            </div>
+                            <strong>{{ cart.total }}</strong>
+                            <div class="admin-crm-date">
+                                <strong>{{ cart.updated_at|date('d/m/Y H:i') }}</strong>
+                                <small>{{ 'admin.cart.table.age'|trans({'%age%': cart.age}) }}</small>
+                            </div>
+                            <div class="admin-crm-actions">
+                                <div class="admin-crm-action-row">
+                                    {% if cart.can_recover %}
+                                        <form method="post" action="{{ path('app_admin_customers_carts_recover', {id: cart.id}) }}">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_cart_recovery_' ~ cart.id) }}">
+                                            <input type="hidden" name="filter" value="{{ filter }}">
+                                            <button type="submit" class="admin-action-button admin-action-button--small" onclick="return confirm('{{ 'admin.cart.recovery.confirm'|trans|e('js') }}');">
+                                                <i class="fa-solid fa-paper-plane"></i>
+                                                {{ 'admin.cart.recovery.send'|trans }}
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span class="admin-crm-muted">{{ cart.recovery_block_key|trans }}</span>
+                                    {% endif %}
+
+                                    <form method="post" action="{{ path('app_admin_customers_carts_delete', {id: cart.id}) }}">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_cart_delete_' ~ cart.id) }}">
+                                        <input type="hidden" name="filter" value="{{ filter }}">
+                                        <button type="submit" class="admin-secondary-button admin-secondary-button--small admin-secondary-button--danger" onclick="return confirm('{{ 'admin.cart.delete.confirm'|trans|e('js') }}');">
+                                            <i class="fa-solid fa-trash"></i>
+                                            {{ 'admin.cart.delete.submit'|trans }}
+                                        </button>
+                                    </form>
+                                </div>
+
+                                {% if cart.last_recovery_sent_at %}
+                                    <small>{{ 'admin.cart.recovery.last_sent'|trans({'%date%': cart.last_recovery_sent_at|date('d/m/Y H:i')}) }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="admin-empty-state">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <p>{{ 'admin.cart.index.empty'|trans }}</p>
+                </div>
+            {% endif %}
+        </article>
+    </section>
+{% endblock %}

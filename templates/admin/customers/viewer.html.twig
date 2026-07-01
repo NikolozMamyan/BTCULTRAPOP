@@ -1,0 +1,103 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.viewer.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-customers admin-viewer">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.viewer.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.viewer.index.title'|trans }}</h1>
+                <p>{{ 'admin.viewer.index.subtitle'|trans }}</p>
+            </div>
+            <a href="{{ path('app_admin_customers_viewer') }}" class="admin-secondary-button">
+                <i class="fa-solid fa-rotate"></i>
+                {{ 'admin.viewer.index.refresh'|trans }}
+            </a>
+        </div>
+
+        {% include 'admin/customers/_tabs.html.twig' %}
+
+        <div class="admin-viewer-refresh-note">
+            <i class="fa-solid fa-clock"></i>
+            <span>{{ 'admin.viewer.index.refreshed_at'|trans({'%date%': refreshed_at|date('H:i:s')}) }}</span>
+        </div>
+
+        <div class="admin-stats-grid admin-order-stats">
+            {% for stat in stats %}
+                <article class="admin-stat-card admin-stat-card--{{ stat.tone }}">
+                    <span class="admin-stat-card__icon">
+                        <i class="{{ stat.icon }}"></i>
+                    </span>
+                    <div>
+                        <small>{{ stat.label|trans }}</small>
+                        <strong>{{ stat.value }}</strong>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+
+        <article class="admin-panel admin-customers-panel">
+            <div class="admin-panel__heading">
+                <div>
+                    <span>{{ 'admin.viewer.index.list_eyebrow'|trans }}</span>
+                    <h2>{{ 'admin.viewer.index.list_title'|trans({'%count%': visitors|length}) }}</h2>
+                </div>
+            </div>
+
+            {% if visitors %}
+                <div class="admin-crm-table admin-viewer-table">
+                    <div class="admin-crm-table__row admin-crm-table__row--head">
+                        <span>{{ 'admin.viewer.table.visitor'|trans }}</span>
+                        <span>{{ 'admin.viewer.table.page'|trans }}</span>
+                        <span>{{ 'admin.viewer.table.cart'|trans }}</span>
+                        <span>{{ 'admin.viewer.table.device'|trans }}</span>
+                        <span>{{ 'admin.viewer.table.last_seen'|trans }}</span>
+                    </div>
+
+                    {% for visitor in visitors %}
+                        <div class="admin-crm-table__row">
+                            <div class="admin-order-customer">
+                                <strong>
+                                    <span class="admin-viewer-live-dot"></span>
+                                    {{ visitor.label }}
+                                </strong>
+                                <small>
+                                    {% if visitor.email %}
+                                        {{ visitor.email }}
+                                    {% else %}
+                                        {{ 'admin.viewer.table.guest_session'|trans({'%session%': visitor.session}) }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div class="admin-crm-path">
+                                <strong>{{ visitor.current_path }}</strong>
+                                {% if visitor.referer %}
+                                    <small>{{ 'admin.viewer.table.referer'|trans({'%referer%': visitor.referer}) }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="admin-crm-date">
+                                {% if visitor.cart_quantity > 0 %}
+                                    <strong>{{ 'admin.viewer.table.cart_quantity'|trans({'%count%': visitor.cart_quantity}) }}</strong>
+                                    <small>{{ visitor.cart_total }} · {{ visitor.cart_status }}</small>
+                                {% else %}
+                                    <span class="admin-crm-muted">{{ 'admin.viewer.table.no_cart'|trans }}</span>
+                                {% endif %}
+                            </div>
+                            <span>{{ visitor.device }}</span>
+                            <div class="admin-crm-date">
+                                <strong>{{ visitor.last_seen_age }}</strong>
+                                <small>{{ visitor.last_seen_at|date('H:i:s') }}</small>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="admin-empty-state">
+                    <i class="fa-solid fa-signal"></i>
+                    <p>{{ 'admin.viewer.index.empty'|trans }}</p>
+                </div>
+            {% endif %}
+        </article>
+    </section>
+{% endblock %}

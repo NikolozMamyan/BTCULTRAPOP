@@ -5,9 +5,13 @@ namespace App\Controller\Admin;
 use App\Entity\User;
 use App\Form\Admin\CustomerType;
 use App\Repository\EmailTemplateRepository;
+use App\Service\AdminCartManager;
+use App\Service\AdminCartProvider;
+use App\Service\AdminCartRecoveryManager;
 use App\Service\AdminCustomerManager;
 use App\Service\AdminCustomerProvider;
 use App\Service\AdminEmailingManager;
+use App\Service\AdminVisitorProvider;
 use App\Service\AssetUrlResolver;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -94,6 +98,105 @@ final class CustomerController extends AbstractController
             'recipient_choices' => $emailingManager->recipientChoices(),
             'form_data' => $formData,
             'sent_count' => max(0, $request->query->getInt('sent')),
+        ]);
+    }
+
+    #[Route('/paniers', name: 'app_admin_customers_carts', methods: ['GET'])]
+    public function carts(Request $request, AdminCartProvider $carts): Response
+    {
+        $adminUser = $this->resolveAdminUser();
+
+        if (!$adminUser instanceof User) {
+            return $this->redirectToRoute('app_front_profil');
+        }
+
+        return $this->render('admin/customers/carts.html.twig', [
+            'admin_user' => $adminUser,
+            ...$carts->index($request->query->getString('filter', 'all')),
+        ]);
+    }
+
+    #[Route('/paniers/{id}/relance', name: 'app_admin_customers_carts_recover', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function recoverCart(
+        int $id,
+        Request $request,
+        AdminCartRecoveryManager $cartRecoveryManager,
+    ): Response {
+        $adminUser = $this->resolveAdminUser();
+
+        if (!$adminUser instanceof User) {
+            return $this->redirectToRoute('app_front_profil');
+        }
+
+        if (!$this->isCsrfTokenValid('admin_cart_recovery_' . $id, $request->request->getString('_csrf_token'))) {
+            $this->addFlash('error', 'admin.cart.recovery.flash.invalid_csrf');
+
+            return $this->redirectToRoute('app_admin_customers_carts', [
+                'filter' => $request->query->getString('filter', 'abandoned'),
+            ]);
+        }
+
+        try {
+            $result = $cartRecoveryManager->sendReminder($id);
+            $this->addFlash('success', 'admin.cart.recovery.flash.sent');
+
+            return $this->redirectToRoute('app_admin_customers_carts', [
+                'filter' => $request->request->getString('filter', 'abandoned'),
+                'sent_to' => $result['email'],
+            ]);
+        } catch (\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        } catch (TransportExceptionInterface) {
+            $this->addFlash('error', 'admin.cart.recovery.flash.transport_error');
+        }
+
+        return $this->redirectToRoute('app_admin_customers_carts', [
+            'filter' => $request->request->getString('filter', 'abandoned'),
+        ]);
+    }
+
+    #[Route('/paniers/{id}/supprimer', name: 'app_admin_customers_carts_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function deleteCart(
+        int $id,
+        Request $request,
+        AdminCartManager $cartManager,
+    ): Response {
+        $adminUser = $this->resolveAdminUser();
+
+        if (!$adminUser instanceof User) {
+            return $this->redirectToRoute('app_front_profil');
+        }
+
+        $filter = $request->request->getString('filter', 'all');
+
+        if (!$this->isCsrfTokenValid('admin_cart_delete_' . $id, $request->request->getString('_csrf_token'))) {
+            $this->addFlash('error', 'admin.cart.delete.flash.invalid_csrf');
+
+            return $this->redirectToRoute('app_admin_customers_carts', ['filter' => $filter]);
+        }
+
+        try {
+            $cartManager->delete($id);
+            $this->addFlash('success', 'admin.cart.delete.flash.deleted');
+        } catch (\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('app_admin_customers_carts', ['filter' => $filter]);
+    }
+
+    #[Route('/viewer', name: 'app_admin_customers_viewer', methods: ['GET'])]
+    public function viewer(AdminVisitorProvider $visitors): Response
+    {
+        $adminUser = $this->resolveAdminUser();
+
+        if (!$adminUser instanceof User) {
+            return $this->redirectToRoute('app_front_profil');
+        }
+
+        return $this->render('admin/customers/viewer.html.twig', [
+            'admin_user' => $adminUser,
+            ...$visitors->online(),
         ]);
     }
 

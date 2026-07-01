@@ -1701,6 +1701,164 @@ body {
     color: var(--primary-color);
 }
 
+.admin-crm-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    margin-bottom: 1rem;
+}
+
+.admin-crm-filters a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
+    padding: .58rem .9rem;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--text-light);
+    font-size: .76rem;
+    font-weight: 950;
+    transition: var(--transition);
+}
+
+.admin-crm-filters a:hover,
+.admin-crm-filters a.is-active {
+    border-color: rgba(232, 33, 24, .22);
+    background: rgba(232, 33, 24, .08);
+    color: var(--primary-color);
+}
+
+.admin-crm-table {
+    display: grid;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+}
+
+.admin-crm-table__row {
+    display: grid;
+    gap: .85rem;
+    align-items: center;
+    padding: .9rem 1rem;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-light);
+    font-size: .82rem;
+}
+
+.admin-crm-table__row:first-child {
+    border-top: 0;
+}
+
+.admin-crm-table__row--head {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    font-size: .66rem;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.admin-cart-table .admin-crm-table__row {
+    grid-template-columns: minmax(190px, 1.1fr) minmax(140px, .7fr) minmax(220px, 1.4fr) 110px minmax(135px, .75fr) minmax(170px, .9fr);
+}
+
+.admin-viewer-table .admin-crm-table__row {
+    grid-template-columns: minmax(210px, 1.1fr) minmax(260px, 1.5fr) minmax(140px, .75fr) minmax(130px, .7fr) minmax(100px, .55fr);
+}
+
+.admin-crm-products,
+.admin-crm-date,
+.admin-crm-actions,
+.admin-crm-path {
+    display: grid;
+    gap: .2rem;
+    min-width: 0;
+}
+
+.admin-crm-products strong,
+.admin-crm-date strong,
+.admin-crm-path strong {
+    color: var(--text-dark);
+    font-weight: 950;
+}
+
+.admin-crm-products small,
+.admin-crm-date small,
+.admin-crm-actions small,
+.admin-crm-path small {
+    overflow: hidden;
+    color: var(--text-light);
+    font-size: .72rem;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.admin-crm-path strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.admin-crm-muted {
+    color: var(--text-light);
+    font-size: .74rem;
+    font-weight: 850;
+}
+
+.admin-crm-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+}
+
+.admin-action-button--small,
+.admin-secondary-button--small {
+    width: auto;
+    min-height: 36px;
+    padding: .55rem .8rem;
+    border-radius: 999px;
+    font-size: .72rem;
+}
+
+.admin-secondary-button--danger {
+    border-color: rgba(232, 33, 24, .22);
+    background: rgba(232, 33, 24, .08);
+    color: var(--primary-color);
+}
+
+.admin-secondary-button--danger:hover {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+.admin-viewer-refresh-note {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    width: fit-content;
+    margin-bottom: 1rem;
+    padding: .65rem .85rem;
+    border: 1px solid rgba(16, 185, 129, .16);
+    border-radius: 999px;
+    background: rgba(16, 185, 129, .08);
+    color: var(--success-color);
+    font-size: .78rem;
+    font-weight: 900;
+}
+
+.admin-viewer-live-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: .35rem;
+    border-radius: 50%;
+    background: var(--success-color);
+    box-shadow: 0 0 0 5px rgba(16, 185, 129, .12);
+    vertical-align: middle;
+}
+
 .admin-emailing-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(360px, .78fr);
@@ -13082,6 +13240,11 @@ body.is-page-loading {
         grid-template-columns: minmax(210px, 1.2fr) minmax(160px, 1fr) .55fr .45fr .62fr .62fr 70px;
     }
 
+    .admin-cart-table .admin-crm-table__row,
+    .admin-viewer-table .admin-crm-table__row {
+        grid-template-columns: 1fr;
+    }
+
     .admin-customer-editor__layout,
     .admin-customer-details-grid,
     .admin-emailing-layout {
@@ -13216,6 +13379,27 @@ body.is-page-loading {
 
     .admin-customer-switches {
         grid-template-columns: 1fr;
+    }
+
+    .admin-crm-table {
+        border: 0;
+        gap: .75rem;
+        overflow: visible;
+        background: transparent;
+    }
+
+    .admin-crm-table__row--head {
+        display: none;
+    }
+
+    .admin-crm-table__row {
+        grid-template-columns: 1fr;
+        gap: .65rem;
+        padding: .9rem;
+        border: 1px solid var(--border-color);
+        border-radius: 22px;
+        background: #fff;
+        box-shadow: 0 16px 34px rgba(32, 50, 99, .08);
     }
 
     .admin-order-show__grid {

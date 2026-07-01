@@ -13,6 +13,7 @@
         or current_route starts with 'app_admin_product_models_3d'
         or current_route starts with 'app_admin_licenses'
         or current_route starts with 'app_admin_prices' %}
+    {% set customer_menu_active = current_route starts with 'app_admin_customers' %}
 
     <div class="admin-shell">
         <aside class="admin-sidebar">
@@ -70,10 +71,31 @@
                     <i class="fa-solid fa-ticket"></i>
                     <span>{{ 'admin.nav.promo_codes'|trans }}</span>
                 </a>
-                <a href="{{ path('app_admin_customers_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_customers' ? 'is-active' : '' }}">
-                    <i class="fa-solid fa-users"></i>
-                    <span>{{ 'admin.nav.customers'|trans }}</span>
-                </a>
+                <details class="admin-sidebar__group" {{ customer_menu_active ? 'open' : '' }}>
+                    <summary class="admin-sidebar__link admin-sidebar__group-toggle {{ customer_menu_active ? 'is-active' : '' }}">
+                        <i class="fa-solid fa-users"></i>
+                        <span>{{ 'admin.nav.customers'|trans }}</span>
+                        <i class="admin-sidebar__group-chevron fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </summary>
+                    <div class="admin-sidebar__submenu">
+                        <a href="{{ path('app_admin_customers_index') }}" class="admin-sidebar__sublink {{ current_route == 'app_admin_customers_index' or current_route == 'app_admin_customers_edit' ? 'is-active' : '' }}">
+                            <i class="fa-solid fa-address-book"></i>
+                            <span>{{ 'admin.customer.tabs.customers'|trans }}</span>
+                        </a>
+                        <a href="{{ path('app_admin_customers_emailing') }}" class="admin-sidebar__sublink {{ current_route == 'app_admin_customers_emailing' ? 'is-active' : '' }}">
+                            <i class="fa-solid fa-envelope-open-text"></i>
+                            <span>{{ 'admin.customer.tabs.emailing'|trans }}</span>
+                        </a>
+                        <a href="{{ path('app_admin_customers_carts') }}" class="admin-sidebar__sublink {{ current_route starts with 'app_admin_customers_carts' ? 'is-active' : '' }}">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <span>{{ 'admin.customer.tabs.carts'|trans }}</span>
+                        </a>
+                        <a href="{{ path('app_admin_customers_viewer') }}" class="admin-sidebar__sublink {{ current_route == 'app_admin_customers_viewer' ? 'is-active' : '' }}">
+                            <i class="fa-solid fa-signal"></i>
+                            <span>{{ 'admin.customer.tabs.viewer'|trans }}</span>
+                        </a>
+                    </div>
+                </details>
                 <a href="{{ path('app_admin_stock_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_stock' ? 'is-active' : '' }}">
                     <i class="fa-solid fa-warehouse"></i>
                     <span>{{ 'admin.nav.stock'|trans }}</span>
