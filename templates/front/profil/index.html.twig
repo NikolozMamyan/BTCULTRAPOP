@@ -383,6 +383,9 @@
                                         <input type="password" name="password" autocomplete="current-password" required placeholder="••••••••">
                                     </span>
                                 </label>
+                                <a class="profile-auth__forgot" href="{{ path('app_auth_forgot_password') }}">
+                                    {{ 'auth.login.forgot_password'|trans }}
+                                </a>
                                 <button type="submit" class="profile-auth__submit">
                                     <span>{{ 'auth.login.submit'|trans }}</span>
                                     <i class="fa-solid fa-arrow-right-to-bracket"></i>

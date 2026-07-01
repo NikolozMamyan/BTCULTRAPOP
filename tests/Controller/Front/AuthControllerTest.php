@@ -28,6 +28,7 @@ final class AuthControllerTest extends WebTestCase
         self::assertSelectorExists('form[action="/auth/register"] input[name="first_name"]');
         self::assertSelectorExists('form[action="/auth/register"] input[name="address_name"]');
         self::assertSelectorExists('form[action="/auth/register"] input[name="accept_terms"][required]');
+        self::assertSelectorExists('.profile-auth__forgot[href="/auth/mot-de-passe-oublie"]');
         self::assertSelectorExists('.profile-auth__terms a[href="/conditions-generales-de-vente"]');
         self::assertSelectorExists('.profile-auth__terms a[href="/politique-de-confidentialite"]');
         self::assertSelectorExists('[data-action="profile-auth#showRegister"]');
@@ -133,6 +134,75 @@ final class AuthControllerTest extends WebTestCase
         }
     }
 
+    public function testPasswordResetRequestSendsTokenAndUpdatesPassword(): void
+    {
+        $client = static::createClient();
+        $this->skipIfPasswordResetTableIsUnavailable();
+
+        $email = sprintf('reset-%s@example.com', bin2hex(random_bytes(4)));
+        $oldPassword = 'old-password-secure';
+        $newPassword = 'new-password-secure';
+        $entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+        \assert($entityManager instanceof EntityManagerInterface);
+        \assert($passwordHasher instanceof UserPasswordHasherInterface);
+
+        $user = (new User())
+            ->setEmail($email)
+            ->setFirstName('Reset')
+            ->setLastName('Client');
+        $user->setPassword($passwordHasher->hashPassword($user, $oldPassword));
+
+        try {
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            $crawler = $client->request('GET', '/auth/mot-de-passe-oublie');
+            self::assertResponseIsSuccessful();
+            $requestToken = $crawler->filter('form[action="/auth/mot-de-passe-oublie"] input[name="_csrf_token"]')->attr('value');
+
+            $client->request('POST', '/auth/mot-de-passe-oublie', [
+                '_csrf_token' => $requestToken,
+                'email' => $email,
+            ]);
+
+            self::assertResponseRedirects('/auth/mot-de-passe-oublie');
+            self::assertEmailCount(1);
+
+            $message = self::getMailerMessage();
+            self::assertNotNull($message);
+            self::assertEmailHeaderSame($message, 'To', $email);
+            self::assertEmailHeaderSame($message, 'Subject', 'Réinitialisation de ton mot de passe ULTRAPOP');
+
+            $htmlBody = html_entity_decode($message->getHtmlBody() ?? '', ENT_QUOTES | ENT_HTML5);
+            self::assertMatchesRegularExpression('#/auth/reinitialiser-mot-de-passe/([a-f0-9]{32}\.[a-f0-9]{64})#', $htmlBody);
+            preg_match('#/auth/reinitialiser-mot-de-passe/([a-f0-9]{32}\.[a-f0-9]{64})#', $htmlBody, $matches);
+            $resetToken = $matches[1];
+
+            $crawler = $client->request('GET', sprintf('/auth/reinitialiser-mot-de-passe/%s', $resetToken));
+            self::assertResponseIsSuccessful();
+            $updateToken = $crawler->filter('form[action="/auth/reinitialiser-mot-de-passe/'.$resetToken.'"] input[name="_csrf_token"]')->attr('value');
+
+            $client->request('POST', sprintf('/auth/reinitialiser-mot-de-passe/%s', $resetToken), [
+                '_csrf_token' => $updateToken,
+                'password' => $newPassword,
+                'password_confirmation' => $newPassword,
+            ]);
+
+            self::assertResponseRedirects('/profil');
+
+            $entityManager->clear();
+            $updatedUser = static::getContainer()->get(\App\Repository\UserRepository::class)->loadUserByIdentifier($email);
+            self::assertInstanceOf(User::class, $updatedUser);
+            self::assertFalse($passwordHasher->isPasswordValid($updatedUser, $oldPassword));
+            self::assertTrue($passwordHasher->isPasswordValid($updatedUser, $newPassword));
+        } finally {
+            $connection = static::getContainer()->get(Connection::class);
+            \assert($connection instanceof Connection);
+            $connection->delete('app_user', ['email' => $email]);
+        }
+    }
+
     public function testSavedAddressIsCollapsedIntoCardOnCartPage(): void
     {
         $client = static::createClient();
@@ -226,6 +296,19 @@ final class AuthControllerTest extends WebTestCase
             $connection->executeQuery('SELECT 1');
         } catch (\Throwable $exception) {
             self::markTestSkipped(sprintf('Database connection is unavailable in test env: %s', $exception->getMessage()));
+        }
+    }
+
+    private function skipIfPasswordResetTableIsUnavailable(): void
+    {
+        $this->skipIfDatabaseIsUnavailable();
+
+        try {
+            $connection = static::getContainer()->get(Connection::class);
+            \assert($connection instanceof Connection);
+            $connection->executeQuery('SELECT COUNT(*) FROM password_reset_token');
+        } catch (\Throwable $exception) {
+            self::markTestSkipped(sprintf('Password reset table is unavailable in test env: %s', $exception->getMessage()));
         }
     }
 }

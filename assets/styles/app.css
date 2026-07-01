@@ -10914,6 +10914,24 @@ body.is-page-loading {
     font-weight: 400;
 }
 
+.profile-auth__forgot {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: -.25rem;
+    color: var(--primary-color);
+    font-size: .74rem;
+    font-weight: 900;
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 4px;
+}
+
+.profile-auth__forgot:hover {
+    color: var(--text-dark);
+}
+
 .profile-auth__address {
     display: flex;
     flex-direction: column;
@@ -11030,6 +11048,110 @@ body.is-page-loading {
 
 .profile-auth__switch button:hover {
     text-decoration: underline;
+}
+
+.auth-reset-page {
+    min-height: calc(100vh - 90px);
+    padding: clamp(2rem, 6vw, 5rem) 0;
+    background:
+        radial-gradient(circle at 15% 15%, rgba(232, 33, 24, .09), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(255, 204, 7, .16), transparent 26%),
+        linear-gradient(180deg, #fff 0%, #f7f9fc 100%);
+}
+
+.auth-reset-shell {
+    display: flex;
+    justify-content: center;
+}
+
+.auth-reset-card {
+    position: relative;
+    display: grid;
+    width: min(100%, 560px);
+    gap: 1rem;
+    overflow: hidden;
+    padding: clamp(1.35rem, 4vw, 2rem);
+    border: 1px solid rgba(32, 50, 99, .1);
+    border-radius: 28px;
+    background: rgba(255, 255, 255, .9);
+    box-shadow: 0 24px 70px rgba(32, 50, 99, .12);
+}
+
+.auth-reset-card::before {
+    position: absolute;
+    top: -120px;
+    right: -100px;
+    width: 240px;
+    height: 240px;
+    border-radius: 999px;
+    background: rgba(232, 33, 24, .08);
+    content: "";
+}
+
+.auth-reset-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.auth-reset-card__back {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: .45rem;
+    color: var(--text-light);
+    font-size: .74rem;
+    font-weight: 900;
+}
+
+.auth-reset-card__back:hover {
+    color: var(--primary-color);
+}
+
+.auth-reset-card__icon {
+    display: grid;
+    width: 58px;
+    height: 58px;
+    place-items: center;
+    border-radius: 20px;
+    background: rgba(232, 33, 24, .1);
+    color: var(--primary-color);
+    font-size: 1.15rem;
+}
+
+.auth-reset-card__icon--success {
+    background: rgba(35, 190, 112, .12);
+    color: var(--success-color);
+}
+
+.auth-reset-card__eyebrow {
+    margin: .4rem 0 -.55rem;
+    color: var(--primary-color);
+    font-size: .68rem;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.auth-reset-card h1 {
+    color: var(--text-dark);
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 900;
+    letter-spacing: -.04em;
+    line-height: .98;
+}
+
+.auth-reset-card p {
+    max-width: 46rem;
+    color: var(--text-light);
+    font-size: .94rem;
+    line-height: 1.7;
+}
+
+.auth-reset-form {
+    display: grid;
+    gap: 1rem;
+    margin-top: .5rem;
 }
 
 @media (min-width: 768px) {
