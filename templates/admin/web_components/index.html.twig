@@ -241,6 +241,62 @@
                             </article>
                         {% endfor %}
                     </div>
+
+                    <div class="admin-web-components-mobile">
+                        <div class="admin-web-components-mobile__heading">
+                            <div>
+                                <strong>{{ 'admin.web_components.boutique.hero.mobile_title'|trans }}</strong>
+                                <small>{{ 'admin.web_components.boutique.hero.mobile_help'|trans }}</small>
+                            </div>
+                            <form
+                                class="admin-web-components-breakpoint"
+                                method="post"
+                                action="{{ path('app_admin_web_components_boutique_hero_mobile_breakpoint') }}"
+                            >
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_web_components_boutique_mobile_breakpoint') }}">
+                                <label for="boutique-hero-mobile-breakpoint">{{ 'admin.web_components.hero.breakpoint'|trans }}</label>
+                                <input
+                                    id="boutique-hero-mobile-breakpoint"
+                                    type="text"
+                                    name="mobile_breakpoint"
+                                    value="{{ components.boutique.mobile_breakpoint|default('995px') }}"
+                                    inputmode="numeric"
+                                    placeholder="995px"
+                                >
+                                <button type="submit">{{ 'admin.web_components.action.save'|trans }}</button>
+                            </form>
+                        </div>
+
+                        <div class="admin-web-components-grid">
+                            {% for hero_key, hero in components.boutique.heroes %}
+                                {% set mobile_path = hero.mobile_image|default('') %}
+                                <article class="admin-web-component-card admin-web-component-card--wide {{ mobile_path ? '' : 'admin-web-component-card--muted' }}">
+                                    <img src="{{ asset(mobile_path ?: hero.image) }}" alt="{{ hero.label|trans }}">
+                                    <span>{{ 'admin.web_components.boutique.hero.mobile_for'|trans({'%label%': hero.label|trans}) }}</span>
+                                    {% if not mobile_path %}
+                                        <small>{{ 'admin.web_components.hero.mobile_fallback'|trans }}</small>
+                                    {% endif %}
+                                    <form
+                                        class="admin-web-component-replace"
+                                        method="post"
+                                        action="{{ path('app_admin_web_components_boutique_hero_mobile_image', {heroKey: hero_key}) }}"
+                                        enctype="multipart/form-data"
+                                    >
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_web_components_boutique_mobile_' ~ hero_key) }}">
+                                        <label title="{{ 'admin.web_components.boutique.hero.mobile_change'|trans }}">
+                                            <input
+                                                type="file"
+                                                name="image"
+                                                accept="image/jpeg,image/png,image/webp"
+                                                data-action="change->admin-web-components#submitOnFileSelect"
+                                            >
+                                            <i class="fa-solid fa-plus"></i>
+                                        </label>
+                                    </form>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </details>
             </div>
         </details>

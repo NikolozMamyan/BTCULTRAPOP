@@ -3121,6 +3121,33 @@ body {
     font-weight: 760;
 }
 
+.admin-web-component-upload.is-submitting,
+.admin-web-component-replace.is-submitting {
+    pointer-events: none;
+}
+
+.admin-web-component-upload.is-submitting {
+    border-color: rgba(232, 33, 24, .35);
+    background: rgba(232, 33, 24, .06);
+}
+
+.admin-web-component-upload.is-submitting i,
+.admin-web-component-replace.is-submitting label {
+    animation: admin-web-components-upload-pulse .75s ease-in-out infinite alternate;
+}
+
+@keyframes admin-web-components-upload-pulse {
+    from {
+        opacity: .62;
+        transform: scale(.94);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1.04);
+    }
+}
+
 .admin-web-components-mobile {
     display: grid;
     gap: .95rem;
@@ -7091,6 +7118,12 @@ body.is-page-loading {
     overflow: hidden;
     height:350px;
     background: inherit;
+}
+
+.shop-category-hero__media picture {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .shop-category-hero__media::after {

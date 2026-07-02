@@ -74,6 +74,34 @@ final class WebComponentManager
     }
 
     /**
+     * @return array<string, string>
+     */
+    public function boutiqueHeroMobileImages(): array
+    {
+        $heroes = $this->home()['boutique']['heroes'] ?? [];
+        $images = [];
+
+        foreach ($heroes as $key => $hero) {
+            if (!is_array($hero)) {
+                continue;
+            }
+
+            $image = trim((string) ($hero['mobile_image'] ?? ''));
+
+            if ('' !== $image) {
+                $images[(string) $key] = $image;
+            }
+        }
+
+        return $images;
+    }
+
+    public function boutiqueHeroMobileBreakpoint(): string
+    {
+        return (string) ($this->home()['boutique']['mobile_breakpoint'] ?? '995px');
+    }
+
+    /**
      * @param list<UploadedFile> $files
      */
     public function addImages(string $section, array $files): int
@@ -205,6 +233,38 @@ final class WebComponentManager
         $this->write($home);
     }
 
+    public function updateBoutiqueHeroMobileImage(string $key, UploadedFile $file): void
+    {
+        $defaults = self::defaultHome()['boutique']['heroes'];
+
+        if (!isset($defaults[$key])) {
+            throw new \InvalidArgumentException('admin.web_components.flash.invalid_boutique_hero');
+        }
+
+        if ('' === $file->getClientOriginalName()) {
+            throw new \InvalidArgumentException('admin.web_components.flash.no_file');
+        }
+
+        $home = $this->home();
+        $oldPath = (string) ($home['boutique']['heroes'][$key]['mobile_image'] ?? '');
+        $home['boutique']['heroes'][$key] = array_merge(
+            $defaults[$key],
+            is_array($home['boutique']['heroes'][$key] ?? null) ? $home['boutique']['heroes'][$key] : [],
+            ['mobile_image' => $this->upload('boutique-mobile-'.$key, $file)],
+        );
+
+        $this->removeUploadedFile($oldPath);
+        $this->write($home);
+    }
+
+    public function updateBoutiqueHeroMobileBreakpoint(string $breakpoint): void
+    {
+        $home = $this->home();
+        $home['boutique']['mobile_breakpoint'] = $this->normalizeBreakpoint($breakpoint);
+
+        $this->write($home);
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -251,6 +311,7 @@ final class WebComponentManager
                 'image' => 'img/home/newsletter.jpg',
             ],
             'boutique' => [
+                'mobile_breakpoint' => '995px',
                 'heroes' => [
                     'all' => [
                         'label' => 'admin.web_components.boutique.hero.all',
@@ -367,7 +428,7 @@ final class WebComponentManager
     /**
      * @param mixed $boutique
      *
-     * @return array{heroes: array<string, array<string, string>>}
+     * @return array{mobile_breakpoint: string, heroes: array<string, array<string, string>>}
      */
     private function normalizeBoutique(mixed $boutique): array
     {
@@ -379,19 +440,33 @@ final class WebComponentManager
 
         $heroes = [];
         $storedHeroes = is_array($boutique['heroes'] ?? null) ? $boutique['heroes'] : [];
+        $mobileBreakpoint = $default['mobile_breakpoint'];
+
+        try {
+            $mobileBreakpoint = $this->normalizeBreakpoint((string) ($boutique['mobile_breakpoint'] ?? ''));
+        } catch (\InvalidArgumentException) {
+        }
 
         foreach ($default['heroes'] as $key => $defaultHero) {
             $storedHero = is_array($storedHeroes[$key] ?? null) ? $storedHeroes[$key] : [];
             $image = trim((string) ($storedHero['image'] ?? ''));
+            $mobileImage = trim((string) ($storedHero['mobile_image'] ?? ''));
             $label = trim((string) ($storedHero['label'] ?? ''));
 
             $heroes[$key] = [
                 'label' => '' !== $label ? $label : $defaultHero['label'],
                 'image' => '' !== $image ? $image : $defaultHero['image'],
             ];
+
+            if ('' !== $mobileImage) {
+                $heroes[$key]['mobile_image'] = $mobileImage;
+            }
         }
 
-        return ['heroes' => $heroes];
+        return [
+            'mobile_breakpoint' => $mobileBreakpoint,
+            'heroes' => $heroes,
+        ];
     }
 
     /**

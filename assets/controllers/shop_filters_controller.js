@@ -5,6 +5,8 @@ export default class extends Controller {
         filterField: String,
         heroAllLabel: String,
         heroImages: Object,
+        heroMobileBreakpoint: String,
+        heroMobileImages: Object,
         pageSize: { type: Number, default: 6 },
     };
 
@@ -21,6 +23,7 @@ export default class extends Controller {
         'grid',
         'hero',
         'heroImage',
+        'heroMobileSource',
         'loader',
         'mobileCount',
         'modal',
@@ -42,6 +45,7 @@ export default class extends Controller {
         this.handleWindowScroll = () => this.loadOnScroll();
         document.addEventListener('keydown', this.handleKeydown);
         window.addEventListener('scroll', this.handleWindowScroll, { passive: true });
+        this.setupHeroMediaQuery();
 
         if (searchParams.get('filter') === 'nouveautes') {
             this.newTarget.checked = true;
@@ -56,7 +60,37 @@ export default class extends Controller {
     disconnect() {
         document.removeEventListener('keydown', this.handleKeydown);
         window.removeEventListener('scroll', this.handleWindowScroll);
+        this.teardownHeroMediaQuery();
         document.body.classList.remove('shop-filters-open');
+    }
+
+    setupHeroMediaQuery() {
+        if (!this.hasHeroMobileBreakpointValue) {
+            return;
+        }
+
+        this.heroMediaQuery = window.matchMedia(`(max-width: ${this.heroMobileBreakpointValue})`);
+        this.handleHeroMediaChange = () => this.syncHero();
+
+        if (this.heroMediaQuery.addEventListener) {
+            this.heroMediaQuery.addEventListener('change', this.handleHeroMediaChange);
+
+            return;
+        }
+
+        this.heroMediaQuery.addListener(this.handleHeroMediaChange);
+    }
+
+    teardownHeroMediaQuery() {
+        if (!this.heroMediaQuery || !this.handleHeroMediaChange) {
+            return;
+        }
+
+        if (this.heroMediaQuery.removeEventListener) {
+            this.heroMediaQuery.removeEventListener('change', this.handleHeroMediaChange);
+        } else {
+            this.heroMediaQuery.removeListener(this.handleHeroMediaChange);
+        }
     }
 
     openModal() {
@@ -83,6 +117,31 @@ export default class extends Controller {
 
     selectCategory(event) {
         this.selectedCategory = event.params.category;
+
+        this.syncCategoryButtons();
+        this.syncCategoryGroups();
+        this.syncHero();
+        this.filter();
+    }
+
+    selectCategoryGroup(event) {
+        const group = event.currentTarget.closest('[data-shop-filters-target~="categoryGroup"]');
+        const parentCategoryButton = group?.querySelector('.shop-category-button--parent[data-shop-filters-target~="category"]');
+
+        if (!group || !parentCategoryButton) {
+            return;
+        }
+
+        event.preventDefault();
+
+        this.selectedCategory = parentCategoryButton.dataset.shopFiltersCategoryParam || 'all';
+        group.open = true;
+
+        this.categoryGroupTargets.forEach((categoryGroup) => {
+            if (categoryGroup !== group) {
+                categoryGroup.open = false;
+            }
+        });
 
         this.syncCategoryButtons();
         this.syncCategoryGroups();
@@ -349,8 +408,7 @@ export default class extends Controller {
             (button) => button.dataset.shopFiltersCategoryParam === this.selectedCategory,
         );
         const heroKey = activeCategory?.dataset.shopFiltersHeroKeyParam || 'all';
-        const heroImages = this.heroImagesValue;
-        const source = heroImages[heroKey] || heroImages.all;
+        const { desktopSource, mobileSource, source } = this.heroSourcesFor(heroKey);
         const label = this.selectedCategory === 'all'
             ? this.heroAllLabelValue
             : this.selectedCategory;
@@ -363,7 +421,9 @@ export default class extends Controller {
             this.activeCategoryTitleTarget.textContent = label;
         }
 
-        if (!source || new URL(source, window.location.href).href === this.heroImageTarget.src) {
+        if (!source || new URL(source, window.location.href).href === (this.heroImageTarget.currentSrc || this.heroImageTarget.src)) {
+            this.applyHeroSources(desktopSource, mobileSource);
+
             if (source && this.hasActiveCategoryImageTarget) {
                 this.activeCategoryImageTarget.src = source;
             }
@@ -382,7 +442,7 @@ export default class extends Controller {
             this.heroTarget.classList.add('is-changing');
 
             requestAnimationFrame(() => {
-                this.heroImageTarget.src = source;
+                this.applyHeroSources(desktopSource, mobileSource);
 
                 if (this.hasActiveCategoryImageTarget) {
                     this.activeCategoryImageTarget.src = source;
@@ -395,5 +455,37 @@ export default class extends Controller {
         }, { once: true });
 
         candidate.src = source;
+    }
+
+    heroSourcesFor(heroKey) {
+        const heroImages = this.heroImagesValue;
+        const desktopSource = heroImages[heroKey] || heroImages.all;
+        const mobileImages = this.hasHeroMobileImagesValue ? this.heroMobileImagesValue : {};
+        const mobileSource = mobileImages[heroKey] || '';
+        const source = this.usesMobileHero() && mobileSource ? mobileSource : desktopSource;
+
+        return {
+            desktopSource,
+            mobileSource,
+            source,
+        };
+    }
+
+    usesMobileHero() {
+        return Boolean(this.heroMediaQuery?.matches);
+    }
+
+    applyHeroSources(desktopSource, mobileSource) {
+        if (this.hasHeroMobileSourceTarget) {
+            this.heroMobileSourceTarget.srcset = mobileSource || desktopSource || '';
+
+            if (this.hasHeroMobileBreakpointValue) {
+                this.heroMobileSourceTarget.media = `(max-width: ${this.heroMobileBreakpointValue})`;
+            }
+        }
+
+        if (desktopSource) {
+            this.heroImageTarget.src = desktopSource;
+        }
     }
 }

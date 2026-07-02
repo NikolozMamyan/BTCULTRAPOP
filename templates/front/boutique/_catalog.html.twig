@@ -9,11 +9,19 @@
 {% set catalog_title = title|default('shop.title') %}
 {% set catalog_show_hero = show_hero|default(false) %}
 {% set catalog_hero_image_paths = hero_images|default({}) %}
+{% set catalog_hero_mobile_image_paths = hero_mobile_images|default({}) %}
+{% set catalog_hero_mobile_breakpoint = hero_mobile_breakpoint|default('995px') %}
 {% set catalog_hero_images = {
     all: asset(catalog_hero_image_paths.all|default('img/boutique/boutique_tout.jpg', true)),
     drinks: asset(catalog_hero_image_paths.drinks|default('img/boutique/boutique_boissons.jpg', true)),
     savory: asset(catalog_hero_image_paths.savory|default('img/boutique/boutique_salée.jpg', true)),
     sweet: asset(catalog_hero_image_paths.sweet|default('img/boutique/boutique_sucrée.jpg', true))
+} %}
+{% set catalog_hero_mobile_images = {
+    all: catalog_hero_mobile_image_paths.all|default('') ? asset(catalog_hero_mobile_image_paths.all) : '',
+    drinks: catalog_hero_mobile_image_paths.drinks|default('') ? asset(catalog_hero_mobile_image_paths.drinks) : '',
+    savory: catalog_hero_mobile_image_paths.savory|default('') ? asset(catalog_hero_mobile_image_paths.savory) : '',
+    sweet: catalog_hero_mobile_image_paths.sweet|default('') ? asset(catalog_hero_mobile_image_paths.sweet) : ''
 } %}
 
 {% if catalog_products %}
@@ -28,6 +36,8 @@
             {% if catalog_show_hero %}
                 data-shop-filters-hero-all-label-value="{{ catalog_title|trans }}"
                 data-shop-filters-hero-images-value="{{ catalog_hero_images|json_encode|e('html_attr') }}"
+                data-shop-filters-hero-mobile-images-value="{{ catalog_hero_mobile_images|json_encode|e('html_attr') }}"
+                data-shop-filters-hero-mobile-breakpoint-value="{{ catalog_hero_mobile_breakpoint|e('html_attr') }}"
             {% endif %}
         >
             <button
@@ -46,14 +56,21 @@
                     aria-label="{{ catalog_title|trans }}"
                 >
                     <div class="shop-category-hero__media">
-                        <img
-                            src="{{ catalog_hero_images.all }}"
-                            alt="{{ catalog_title|trans }}"
-                            data-shop-filters-target="heroImage"
-                            width="1800"
-                            height="1200"
-                            fetchpriority="high"
-                        >
+                        <picture>
+                            <source
+                                media="(max-width: {{ catalog_hero_mobile_breakpoint }})"
+                                srcset="{{ catalog_hero_mobile_images.all ? catalog_hero_mobile_images.all : catalog_hero_images.all }}"
+                                data-shop-filters-target="heroMobileSource"
+                            >
+                            <img
+                                src="{{ catalog_hero_images.all }}"
+                                alt="{{ catalog_title|trans }}"
+                                data-shop-filters-target="heroImage"
+                                width="1800"
+                                height="1200"
+                                fetchpriority="high"
+                            >
+                        </picture>
                     </div>
                 </section>
             {% endif %}
@@ -153,7 +170,9 @@
                                     data-action="toggle->shop-filters#toggleCategoryGroup"
                                     {{ loop.first ? 'open' : '' }}
                                 >
-                                    <summary>
+                                    <summary
+                                        data-action="click->shop-filters#selectCategoryGroup"
+                                    >
                                         <span class="shop-category-img-container">
                                             <img
                                                 src="{{ filter_group.image ?: root_thumbnail }}"

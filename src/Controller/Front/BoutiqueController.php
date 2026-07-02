@@ -24,6 +24,8 @@ final class BoutiqueController extends AbstractController
             'categories' => $catalog->categoriesFor($products),
             'max_price' => $catalog->maxPriceFor($products),
             'boutique_hero_images' => $webComponents->boutiqueHeroImages(),
+            'boutique_hero_mobile_images' => $webComponents->boutiqueHeroMobileImages(),
+            'boutique_hero_mobile_breakpoint' => $webComponents->boutiqueHeroMobileBreakpoint(),
         ]);
     }
 

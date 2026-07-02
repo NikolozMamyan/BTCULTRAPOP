@@ -170,6 +170,54 @@ final class WebComponentController extends AbstractController
         return $this->redirectToRoute('app_admin_web_components_index');
     }
 
+    #[Route('/boutique/{heroKey}/mobile-image', name: 'app_admin_web_components_boutique_hero_mobile_image', requirements: ['heroKey' => 'all|drinks|savory|sweet'], methods: ['POST'])]
+    public function boutiqueHeroMobileImage(string $heroKey, Request $request, WebComponentManager $webComponents): RedirectResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        if (!$this->isCsrfTokenValid('admin_web_components_boutique_mobile_'.$heroKey, $request->request->getString('_csrf_token'))) {
+            $this->addFlash('error', 'admin.web_components.flash.invalid_csrf');
+
+            return $this->redirectToRoute('app_admin_web_components_index');
+        }
+
+        $file = $request->files->get('image');
+
+        try {
+            if (!$file instanceof UploadedFile) {
+                throw new \InvalidArgumentException('admin.web_components.flash.no_file');
+            }
+
+            $webComponents->updateBoutiqueHeroMobileImage($heroKey, $file);
+            $this->addFlash('success', 'admin.web_components.flash.boutique_mobile_updated');
+        } catch (\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('app_admin_web_components_index');
+    }
+
+    #[Route('/boutique/mobile-breakpoint', name: 'app_admin_web_components_boutique_hero_mobile_breakpoint', methods: ['POST'])]
+    public function boutiqueHeroMobileBreakpoint(Request $request, WebComponentManager $webComponents): RedirectResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        if (!$this->isCsrfTokenValid('admin_web_components_boutique_mobile_breakpoint', $request->request->getString('_csrf_token'))) {
+            $this->addFlash('error', 'admin.web_components.flash.invalid_csrf');
+
+            return $this->redirectToRoute('app_admin_web_components_index');
+        }
+
+        try {
+            $webComponents->updateBoutiqueHeroMobileBreakpoint($request->request->getString('mobile_breakpoint'));
+            $this->addFlash('success', 'admin.web_components.flash.boutique_breakpoint_updated');
+        } catch (\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('app_admin_web_components_index');
+    }
+
     /**
      * @return list<UploadedFile>
      */
