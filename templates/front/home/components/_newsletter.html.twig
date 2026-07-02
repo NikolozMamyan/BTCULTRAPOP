@@ -1,7 +1,7 @@
 <section id="newsletter" class="max-w-7xl mx-auto px-5 mt-20 reveal">
     <div
         class="home-newsletter-card relative rounded-lg-c overflow-hidden text-white p-6 md:p-14 text-center"
-        style="--newsletter-background: url('{{ asset('img/home/newsletter.jpg') }}')"
+        style="--newsletter-background: url('{{ asset(web_components.newsletter.image|default('img/home/newsletter.jpg')) }}')"
     >
         <div class="home-newsletter-card__content relative z-10 max-w-xl mx-auto">
             <h2 class="font-display text-2xl md:text-4xl font-extrabold mb-3">{{ 'home.newsletter.title'|trans }}</h2>

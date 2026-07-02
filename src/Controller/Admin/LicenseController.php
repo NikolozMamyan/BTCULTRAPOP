@@ -7,7 +7,9 @@ use App\Entity\User;
 use App\Form\Admin\LicenseType;
 use App\Repository\LicenseRepository;
 use App\Service\AdminLicenseManager;
+use App\Service\CatalogIconUploader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -108,6 +110,40 @@ final class LicenseController extends AbstractController
             'label' => $license->isActive() ? 'admin.license.active.enabled' : 'admin.license.active.disabled',
             'message' => $license->isActive() ? 'admin.license.flash.enabled' : 'admin.license.flash.disabled',
         ]);
+    }
+
+    #[Route('/{id}/icon', name: 'app_admin_licenses_icon', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function icon(
+        License $license,
+        Request $request,
+        AdminLicenseManager $licenseManager,
+        CatalogIconUploader $iconUploader,
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        if (!$this->isCsrfTokenValid(sprintf('admin_license_icon_%d', $license->getId()), $request->request->getString('_csrf_token'))) {
+            $this->addFlash('error', 'admin.catalog_icon.flash.invalid_csrf');
+
+            return $this->redirectToRoute('app_admin_licenses_index');
+        }
+
+        $file = $request->files->get('icon');
+
+        try {
+            if (!$file instanceof UploadedFile) {
+                throw new \InvalidArgumentException('admin.catalog_icon.flash.no_file');
+            }
+
+            $previousPath = $license->getIconPath();
+            $license->setIconPath($iconUploader->upload('license', $license->getName(), $file));
+            $licenseManager->save($license);
+            $iconUploader->remove($previousPath);
+            $this->addFlash('success', 'admin.catalog_icon.flash.updated');
+        } catch (\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('app_admin_licenses_index');
     }
 
     private function resolveAdminUser(): ?User

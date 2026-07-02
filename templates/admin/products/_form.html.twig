@@ -156,6 +156,49 @@
                 {{ form_errors(form.coverImageUrl) }}
             </div>
 
+            {% set gallery_images = product.images|filter(image => not image.cover) %}
+            <div
+                class="admin-product-gallery-field"
+                data-controller="admin-product-gallery"
+                data-admin-product-gallery-pending-label="{{ 'admin.product.gallery.pending'|trans }}"
+            >
+                <div class="admin-product-gallery-field__heading">
+                    <strong>{{ 'admin.product.gallery.title'|trans }}</strong>
+                    <small>{{ 'admin.product.gallery.help'|trans }}</small>
+                </div>
+                <div class="admin-product-gallery-grid">
+                    {% for image in gallery_images %}
+                        <label class="admin-product-gallery-tile admin-product-gallery-tile--existing">
+                            <img src="{{ asset(image.path) }}" alt="{{ image.alt ?: product.name }}">
+                            <span>
+                                <input type="checkbox" name="gallery_images_to_delete[]" value="{{ image.id }}">
+                                {{ 'admin.product.gallery.delete'|trans }}
+                            </span>
+                        </label>
+                    {% endfor %}
+                    <div
+                        class="admin-product-gallery-pending"
+                        data-admin-product-gallery-target="previewList"
+                        hidden
+                    ></div>
+                    <label class="admin-product-gallery-tile admin-product-gallery-tile--upload">
+                        <span class="admin-product-gallery-tile__plus">
+                            <i class="fa-solid fa-plus"></i>
+                        </span>
+                        <strong>{{ 'admin.product.gallery.add'|trans }}</strong>
+                        <small>{{ 'admin.product.gallery.accepted'|trans }}</small>
+                        {{ form_widget(form.galleryImages, {
+                            attr: {
+                                accept: 'image/jpeg,image/png,image/webp',
+                                'data-admin-product-gallery-target': 'input',
+                                'data-action': 'change->admin-product-gallery#preview'
+                            }
+                        }) }}
+                    </label>
+                </div>
+                {{ form_errors(form.galleryImages) }}
+            </div>
+
             <div class="admin-product-preview__meta">
                 <span>{{ product.reference ?: 'admin.product.form.reference_empty'|trans }}</span>
                 <strong>{{ product.name ?: 'admin.product.form.name_empty'|trans }}</strong>

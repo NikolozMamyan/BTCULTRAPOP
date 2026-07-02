@@ -7,7 +7,9 @@ use App\Entity\User;
 use App\Form\Admin\CategoryType;
 use App\Repository\CategoryRepository;
 use App\Service\AdminCategoryManager;
+use App\Service\CatalogIconUploader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -121,6 +123,40 @@ final class CategoryController extends AbstractController
             'label' => $category->isActive() ? 'admin.category.active.enabled' : 'admin.category.active.disabled',
             'message' => $category->isActive() ? 'admin.category.flash.enabled' : 'admin.category.flash.disabled',
         ]);
+    }
+
+    #[Route('/{id}/icon', name: 'app_admin_categories_icon', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function icon(
+        Category $category,
+        Request $request,
+        AdminCategoryManager $categoryManager,
+        CatalogIconUploader $iconUploader,
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        if (!$this->isCsrfTokenValid(sprintf('admin_category_icon_%d', $category->getId()), $request->request->getString('_csrf_token'))) {
+            $this->addFlash('error', 'admin.catalog_icon.flash.invalid_csrf');
+
+            return $this->redirectToRoute('app_admin_categories_index');
+        }
+
+        $file = $request->files->get('icon');
+
+        try {
+            if (!$file instanceof UploadedFile) {
+                throw new \InvalidArgumentException('admin.catalog_icon.flash.no_file');
+            }
+
+            $previousPath = $category->getIconPath();
+            $category->setIconPath($iconUploader->upload('category', $category->getName(), $file));
+            $categoryManager->save($category);
+            $iconUploader->remove($previousPath);
+            $this->addFlash('success', 'admin.catalog_icon.flash.updated');
+        } catch (\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('app_admin_categories_index');
     }
 
     private function resolveAdminUser(): ?User

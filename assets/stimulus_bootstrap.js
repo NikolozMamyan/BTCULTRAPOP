@@ -1,9 +1,11 @@
 import { startStimulusApp } from '@symfony/stimulus-bundle';
 import AdminEmailingController from './controllers/admin_emailing_controller.js';
+import AdminProductGalleryController from './controllers/admin_product_gallery_controller.js';
 import AdminProductsController from './controllers/admin_products_controller.js';
 import AdminPricesController from './controllers/admin_prices_controller.js';
 import AdminModel3DController from './controllers/admin_model_3d_controller.js';
 import AdminStockController from './controllers/admin_stock_controller.js';
+import AdminWebComponentsController from './controllers/admin_web_components_controller.js';
 import AvatarUploadController from './controllers/avatar_upload_controller.js';
 import CartController from './controllers/cart_controller.js';
 import CheckoutAddressController from './controllers/checkout_address_controller.js';
@@ -19,10 +21,12 @@ import ShopFiltersController from './controllers/shop_filters_controller.js';
 
 const app = startStimulusApp();
 app.register('admin-emailing', AdminEmailingController);
+app.register('admin-product-gallery', AdminProductGalleryController);
 app.register('admin-prices', AdminPricesController);
 app.register('admin-model-3d', AdminModel3DController);
 app.register('admin-products', AdminProductsController);
 app.register('admin-stock', AdminStockController);
+app.register('admin-web-components', AdminWebComponentsController);
 app.register('avatar-upload', AvatarUploadController);
 app.register('cart', CartController);
 app.register('checkout-address', CheckoutAddressController);

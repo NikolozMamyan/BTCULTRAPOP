@@ -29,6 +29,9 @@ class Category
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $iconPath = null;
+
     #[ORM\Column(options: ['default' => true])]
     private bool $active = true;
 
@@ -92,6 +95,19 @@ class Category
     public function setDescription(?string $description): self
     {
         $this->description = null === $description ? null : trim($description);
+
+        return $this;
+    }
+
+    public function getIconPath(): ?string
+    {
+        return $this->iconPath;
+    }
+
+    public function setIconPath(?string $iconPath): self
+    {
+        $iconPath = null === $iconPath ? null : trim($iconPath);
+        $this->iconPath = '' === $iconPath ? null : $iconPath;
 
         return $this;
     }

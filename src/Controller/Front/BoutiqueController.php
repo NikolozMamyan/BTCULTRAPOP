@@ -7,6 +7,7 @@ use App\Service\ProductIngredientPresenter;
 use App\Service\ProductSlugger;
 use App\Service\StorefrontProductCatalog;
 use App\Service\StorefrontProductReviews;
+use App\Service\WebComponentManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -14,7 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class BoutiqueController extends AbstractController
 {
     #[Route('/boutique', name: 'app_front_boutique', methods: ['GET'])]
-    public function index(StorefrontProductCatalog $catalog): Response
+    public function index(StorefrontProductCatalog $catalog, WebComponentManager $webComponents): Response
     {
         $products = $catalog->all($this->getAuthenticatedUser());
 
@@ -22,6 +23,7 @@ final class BoutiqueController extends AbstractController
             'products' => $products,
             'categories' => $catalog->categoriesFor($products),
             'max_price' => $catalog->maxPriceFor($products),
+            'boutique_hero_images' => $webComponents->boutiqueHeroImages(),
         ]);
     }
 

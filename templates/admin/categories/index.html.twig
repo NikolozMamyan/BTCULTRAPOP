@@ -5,7 +5,7 @@
 {% block admin_content %}
     <section
         class="admin-categories"
-        data-controller="admin-products"
+        data-controller="admin-products admin-web-components"
         data-admin-products-enabled-text-value="{{ 'admin.category.active.enabled'|trans }}"
         data-admin-products-disabled-text-value="{{ 'admin.category.active.disabled'|trans }}"
     >
@@ -55,8 +55,12 @@
 
                         <article class="admin-category-card admin-category-card--depth-{{ category.depth }}">
                             <a href="{{ path('app_admin_categories_edit', {id: category.id}) }}" class="admin-category-card__main">
-                                <span class="admin-category-card__icon">
-                                    <i class="fa-solid fa-layer-group"></i>
+                                <span class="admin-category-card__icon {{ category.iconPath ? 'admin-category-card__icon--image' : '' }}">
+                                    {% if category.iconPath %}
+                                        <img src="{{ asset(category.iconPath) }}" alt="">
+                                    {% else %}
+                                        <i class="fa-solid fa-layer-group"></i>
+                                    {% endif %}
                                 </span>
                                 <span>
                                     <em class="admin-category-card__level">
@@ -67,6 +71,23 @@
                                     <small>{{ category.description ?: 'admin.category.table.no_description'|trans }}</small>
                                 </span>
                             </a>
+                            <form
+                                class="admin-catalog-icon-upload"
+                                method="post"
+                                action="{{ path('app_admin_categories_icon', {id: category.id}) }}"
+                                enctype="multipart/form-data"
+                            >
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_category_icon_' ~ category.id) }}">
+                                <label title="{{ 'admin.catalog_icon.action.upload_category'|trans }}">
+                                    <input
+                                        type="file"
+                                        name="icon"
+                                        accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                                        data-action="change->admin-web-components#submitOnFileSelect"
+                                    >
+                                    <i class="fa-solid fa-plus"></i>
+                                </label>
+                            </form>
 
                             <div class="admin-category-card__stats">
                                 <span>

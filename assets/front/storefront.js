@@ -161,7 +161,7 @@ function initializeStorefront() {
             return;
         }
 
-        container.replaceChildren(...[0, 1].map((index) => {
+        container.replaceChildren(...Array.from({ length: carouselSlideCount() }, (_, index) => {
             const button = document.createElement('button');
             button.type = 'button';
             button.className = `h-2.5 rounded-full transition-all ${index === slideIndex ? 'bg-white w-7' : 'bg-white/50 w-2.5'}`;
@@ -185,11 +185,14 @@ function initializeStorefront() {
             return;
         }
 
-        slideIndex = (index + 2) % 2;
+        const count = carouselSlideCount();
+        slideIndex = ((index % count) + count) % count;
         track.style.transform = `translateX(-${slideIndex * 100}%)`;
         renderCarouselDots();
         resetCarouselTimer();
     };
+
+    const carouselSlideCount = () => Math.max(document.querySelectorAll('#carousel-track .carousel-slide').length, 1);
 
     const triggerReveals = () => {
         document.querySelectorAll('.reveal').forEach((element) => {

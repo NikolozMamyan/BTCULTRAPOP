@@ -8,11 +8,12 @@
 {% set catalog_breadcrumb = breadcrumb|default('shop.breadcrumb') %}
 {% set catalog_title = title|default('shop.title') %}
 {% set catalog_show_hero = show_hero|default(false) %}
+{% set catalog_hero_image_paths = hero_images|default({}) %}
 {% set catalog_hero_images = {
-    all: asset('img/boutique/boutique_tout.jpg'),
-    drinks: asset('img/boutique/boutique_boissons.jpg'),
-    savory: asset('img/boutique/boutique_salée.jpg'),
-    sweet: asset('img/boutique/boutique_sucrée.jpg')
+    all: asset(catalog_hero_image_paths.all|default('img/boutique/boutique_tout.jpg', true)),
+    drinks: asset(catalog_hero_image_paths.drinks|default('img/boutique/boutique_boissons.jpg', true)),
+    savory: asset(catalog_hero_image_paths.savory|default('img/boutique/boutique_salée.jpg', true)),
+    sweet: asset(catalog_hero_image_paths.sweet|default('img/boutique/boutique_sucrée.jpg', true))
 } %}
 
 {% if catalog_products %}
@@ -95,9 +96,11 @@
 
                     {% set first_filter_group = catalog_filter_items|first %}
                     {% set root_thumbnail = catalog_filter_field == 'category'
-                        ? asset('img/categories/all-products.png')
+                        ? first_filter_group.rootImage|default(catalog_products|first.img|default(''), true)
                         : first_filter_group.image|default(catalog_products|first.img|default('')) %}
-                    {% set root_thumbnail_fallback = first_filter_group.fallbackImage|default(catalog_products|first.img|default('')) %}
+                    {% set root_thumbnail_fallback = catalog_filter_field == 'category'
+                        ? first_filter_group.rootFallbackImage|default(catalog_products|first.img|default(''), true)
+                        : first_filter_group.fallbackImage|default(catalog_products|first.img|default('')) %}
 
                     <div class="shop-category-list">
                         <button
@@ -206,14 +209,36 @@
                             {% endfor %}
                         {% else %}
                             {% for filter_item in catalog_filter_items %}
+                                {% set filter_item_name = filter_item.name|default(filter_item) %}
+                                {% set filter_item_image = filter_item.image|default('') %}
                                 <button
                                     type="button"
                                     class="shop-category-button"
                                     data-shop-filters-target="category"
-                                    data-shop-filters-category-param="{{ filter_item }}"
+                                    data-shop-filters-category-param="{{ filter_item_name }}"
                                     data-action="shop-filters#selectCategory"
                                 >
-                                    <span>{{ filter_item }}</span>
+                                    <span class="shop-category-button__label">
+                                        {% if filter_item_image %}
+                                            <span class="shop-category-img-container shop-category-img-container--license">
+                                                <img
+                                                    src="{{ filter_item_image }}"
+                                                    alt=""
+                                                    width="44"
+                                                    height="44"
+                                                    loading="lazy"
+                                                >
+                                            </span>
+                                        {% else %}
+                                            <span class="shop-category-button__icon">
+                                                <i class="{{ catalog_filter_icon }}"></i>
+                                            </span>
+                                        {% endif %}
+                                        <strong>{{ filter_item_name }}</strong>
+                                    </span>
+                                    {% if filter_item.count|default(null) is not null %}
+                                        <span class="shop-category-button__count">{{ filter_item.count }}</span>
+                                    {% endif %}
                                 </button>
                             {% endfor %}
                         {% endif %}

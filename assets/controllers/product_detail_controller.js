@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['panel', 'quantity', 'tab'];
+    static targets = ['panel', 'quantity', 'tab', 'thumbnail', 'visualImage'];
     static values = {
         productId: Number,
     };
@@ -26,6 +26,23 @@ export default class extends Controller {
 
             panel.hidden = !active;
             panel.classList.toggle('is-active', active);
+        });
+    }
+
+    selectImage(event) {
+        const button = event.currentTarget;
+        const image = event.params.image || '';
+        const alt = event.params.alt || '';
+
+        if (!image || !this.hasVisualImageTarget) {
+            return;
+        }
+
+        this.visualImageTarget.src = image;
+        this.visualImageTarget.alt = alt;
+
+        this.thumbnailTargets.forEach((thumbnail) => {
+            thumbnail.classList.toggle('is-active', thumbnail === button);
         });
     }
 

@@ -1,0 +1,248 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.web_components.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-web-components" data-controller="admin-web-components">
+        <div class="admin-page-heading">
+            <div>
+                <span>{{ 'admin.web_components.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.web_components.title'|trans }}</h1>
+                <p>{{ 'admin.web_components.subtitle'|trans }}</p>
+            </div>
+        </div>
+
+        <details class="admin-web-components-page" open>
+            <summary>
+                <span>
+                    <i class="fa-solid fa-house"></i>
+                    {{ 'admin.web_components.home.title'|trans }}
+                </span>
+                <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+            </summary>
+
+            <div class="admin-web-components-page__content">
+                <details class="admin-web-components-block" open>
+                    <summary>
+                        <span>{{ 'admin.web_components.hero.title'|trans }}</span>
+                        <small>{{ 'admin.web_components.hero.help'|trans }}</small>
+                    </summary>
+
+                    <div class="admin-web-components-grid">
+                        {% for slide in components.hero %}
+                            {% set image_path = slide.image %}
+                            {% set image_label = slide.alt|default(slide.alt_key is defined ? slide.alt_key|trans : ('admin.web_components.hero.image'|trans({'%number%': loop.index}))) %}
+                            <article class="admin-web-component-card">
+                                <img src="{{ asset(image_path) }}" alt="{{ image_label }}">
+                                <form method="post" action="{{ path('app_admin_web_components_delete', {section: 'hero'}) }}">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_web_components_delete_hero_' ~ image_path) }}">
+                                    <input type="hidden" name="path" value="{{ image_path }}">
+                                    <button type="submit" aria-label="{{ 'admin.web_components.action.delete'|trans }}">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </form>
+                                <span>{{ image_label }}</span>
+                            </article>
+                        {% endfor %}
+
+                        <form
+                            class="admin-web-component-upload"
+                            method="post"
+                            action="{{ path('app_admin_web_components_upload', {section: 'hero'}) }}"
+                            enctype="multipart/form-data"
+                        >
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_web_components_upload_hero') }}">
+                            <input
+                                type="file"
+                                name="images[]"
+                                accept="image/jpeg,image/png,image/webp"
+                                multiple
+                                data-action="change->admin-web-components#submitOnFileSelect"
+                            >
+                            <i class="fa-solid fa-plus"></i>
+                            <strong>{{ 'admin.web_components.action.add_images'|trans }}</strong>
+                            <small>{{ 'admin.web_components.accepted'|trans }}</small>
+                        </form>
+                    </div>
+
+                    <div class="admin-web-components-mobile">
+                        <div class="admin-web-components-mobile__heading">
+                            <div>
+                                <strong>{{ 'admin.web_components.hero.mobile_title'|trans }}</strong>
+                                <small>{{ 'admin.web_components.hero.mobile_help'|trans }}</small>
+                            </div>
+                            <form
+                                class="admin-web-components-breakpoint"
+                                method="post"
+                                action="{{ path('app_admin_web_components_hero_mobile_breakpoint') }}"
+                            >
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_web_components_hero_mobile_breakpoint') }}">
+                                <label for="hero-mobile-breakpoint">{{ 'admin.web_components.hero.breakpoint'|trans }}</label>
+                                <input
+                                    id="hero-mobile-breakpoint"
+                                    type="text"
+                                    name="mobile_breakpoint"
+                                    value="{{ components.hero_settings.mobile_breakpoint|default('995px') }}"
+                                    inputmode="numeric"
+                                    placeholder="995px"
+                                >
+                                <button type="submit">{{ 'admin.web_components.action.save'|trans }}</button>
+                            </form>
+                        </div>
+
+                        <div class="admin-web-components-grid">
+                            {% for slide in components.hero %}
+                                {% set mobile_path = slide.mobile_image|default('') %}
+                                {% set image_label = slide.alt|default(slide.alt_key is defined ? slide.alt_key|trans : ('admin.web_components.hero.image'|trans({'%number%': loop.index}))) %}
+                                <article class="admin-web-component-card admin-web-component-card--wide {{ mobile_path ? '' : 'admin-web-component-card--muted' }}">
+                                    <img src="{{ asset(mobile_path ?: slide.image) }}" alt="{{ image_label }}">
+                                    <span>{{ 'admin.web_components.hero.mobile_for'|trans({'%label%': image_label}) }}</span>
+                                    {% if not mobile_path %}
+                                        <small>{{ 'admin.web_components.hero.mobile_fallback'|trans }}</small>
+                                    {% endif %}
+                                    <form
+                                        class="admin-web-component-replace"
+                                        method="post"
+                                        action="{{ path('app_admin_web_components_hero_mobile_image', {index: loop.index0}) }}"
+                                        enctype="multipart/form-data"
+                                    >
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_web_components_hero_mobile_' ~ loop.index0) }}">
+                                        <label title="{{ 'admin.web_components.hero.mobile_change'|trans }}">
+                                            <input
+                                                type="file"
+                                                name="image"
+                                                accept="image/jpeg,image/png,image/webp"
+                                                data-action="change->admin-web-components#submitOnFileSelect"
+                                            >
+                                            <i class="fa-solid fa-plus"></i>
+                                        </label>
+                                    </form>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </details>
+
+                <details class="admin-web-components-block">
+                    <summary>
+                        <span>{{ 'admin.web_components.licenses.title'|trans }}</span>
+                        <small>{{ 'admin.web_components.licenses.help'|trans }}</small>
+                    </summary>
+
+                    <div class="admin-web-components-grid admin-web-components-grid--licenses">
+                        {% for license in components.licenses %}
+                            {% set image_path = license.image %}
+                            <article class="admin-web-component-card">
+                                <img src="{{ asset(image_path) }}" alt="{{ license.name }}">
+                                <form method="post" action="{{ path('app_admin_web_components_delete', {section: 'licenses'}) }}">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_web_components_delete_licenses_' ~ image_path) }}">
+                                    <input type="hidden" name="path" value="{{ image_path }}">
+                                    <button type="submit" aria-label="{{ 'admin.web_components.action.delete'|trans }}">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </form>
+                                <span>{{ license.name }}</span>
+                            </article>
+                        {% endfor %}
+
+                        <form
+                            class="admin-web-component-upload"
+                            method="post"
+                            action="{{ path('app_admin_web_components_upload', {section: 'licenses'}) }}"
+                            enctype="multipart/form-data"
+                        >
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_web_components_upload_licenses') }}">
+                            <input
+                                type="file"
+                                name="images[]"
+                                accept="image/jpeg,image/png,image/webp"
+                                multiple
+                                data-action="change->admin-web-components#submitOnFileSelect"
+                            >
+                            <i class="fa-solid fa-plus"></i>
+                            <strong>{{ 'admin.web_components.action.add_images'|trans }}</strong>
+                            <small>{{ 'admin.web_components.accepted'|trans }}</small>
+                        </form>
+                    </div>
+                </details>
+
+                <details class="admin-web-components-block">
+                    <summary>
+                        <span>{{ 'admin.web_components.newsletter.title'|trans }}</span>
+                        <small>{{ 'admin.web_components.newsletter.help'|trans }}</small>
+                    </summary>
+
+                    <div class="admin-web-components-newsletter">
+                        <article class="admin-web-component-card admin-web-component-card--wide">
+                            <img src="{{ asset(components.newsletter.image) }}" alt="{{ 'admin.web_components.newsletter.current'|trans }}">
+                            <span>{{ 'admin.web_components.newsletter.current'|trans }}</span>
+                        </article>
+
+                        <form
+                            class="admin-web-component-upload admin-web-component-upload--wide"
+                            method="post"
+                            action="{{ path('app_admin_web_components_newsletter_image') }}"
+                            enctype="multipart/form-data"
+                        >
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_web_components_newsletter') }}">
+                            <input
+                                type="file"
+                                name="image"
+                                accept="image/jpeg,image/png,image/webp"
+                                data-action="change->admin-web-components#submitOnFileSelect"
+                            >
+                            <i class="fa-solid fa-image"></i>
+                            <strong>{{ 'admin.web_components.newsletter.change'|trans }}</strong>
+                            <small>{{ 'admin.web_components.accepted'|trans }}</small>
+                        </form>
+                    </div>
+                </details>
+            </div>
+        </details>
+
+        <details class="admin-web-components-page">
+            <summary>
+                <span>
+                    <i class="fa-solid fa-store"></i>
+                    {{ 'admin.web_components.boutique.title'|trans }}
+                </span>
+                <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+            </summary>
+
+            <div class="admin-web-components-page__content">
+                <details class="admin-web-components-block" open>
+                    <summary>
+                        <span>{{ 'admin.web_components.boutique.hero.title'|trans }}</span>
+                        <small>{{ 'admin.web_components.boutique.hero.help'|trans }}</small>
+                    </summary>
+
+                    <div class="admin-web-components-grid">
+                        {% for hero_key, hero in components.boutique.heroes %}
+                            <article class="admin-web-component-card admin-web-component-card--wide">
+                                <img src="{{ asset(hero.image) }}" alt="{{ hero.label|trans }}">
+                                <span>{{ hero.label|trans }}</span>
+                                <form
+                                    class="admin-web-component-replace"
+                                    method="post"
+                                    action="{{ path('app_admin_web_components_boutique_hero_image', {heroKey: hero_key}) }}"
+                                    enctype="multipart/form-data"
+                                >
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_web_components_boutique_' ~ hero_key) }}">
+                                    <label title="{{ 'admin.web_components.boutique.hero.change'|trans }}">
+                                        <input
+                                            type="file"
+                                            name="image"
+                                            accept="image/jpeg,image/png,image/webp"
+                                            data-action="change->admin-web-components#submitOnFileSelect"
+                                        >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </label>
+                                </form>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </details>
+            </div>
+        </details>
+    </section>
+{% endblock %}

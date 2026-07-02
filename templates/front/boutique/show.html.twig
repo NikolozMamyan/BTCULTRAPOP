@@ -11,7 +11,7 @@
         '@type': 'Product',
         name: product.name,
         description: product.seo_description ?: product.description,
-        image: [product.img starts with 'http://' or product.img starts with 'https://' ? product.img : seo_origin ~ product.img],
+        image: product.image_absolute_urls,
         sku: product.reference,
         category: product.cat,
         brand: {
@@ -94,11 +94,27 @@
                             {{ tag_label|trans }}
                         </span>
                     {% endif %}
-                    <img src="{{ product.img }}" alt="{{ product.name }}">
+                    <img
+                        src="{{ product.img }}"
+                        alt="{{ product.name }}"
+                        data-product-detail-target="visualImage"
+                    >
                 </div>
-                <button type="button" class="product-detail__thumbnail is-active" aria-label="{{ 'product.main_image'|trans }}">
-                    <img src="{{ product.img }}" alt="">
-                </button>
+                <div class="product-detail__thumbnails" aria-label="{{ 'product.gallery.label'|trans }}">
+                    {% for image in product.images %}
+                        <button
+                            type="button"
+                            class="product-detail__thumbnail {{ loop.first ? 'is-active' : '' }}"
+                            aria-label="{{ loop.first ? 'product.main_image'|trans : 'product.gallery.thumbnail'|trans({'%position%': loop.index}) }}"
+                            data-product-detail-target="thumbnail"
+                            data-product-detail-image-param="{{ image.src }}"
+                            data-product-detail-alt-param="{{ image.alt }}"
+                            data-action="product-detail#selectImage"
+                        >
+                            <img src="{{ image.src }}" alt="">
+                        </button>
+                    {% endfor %}
+                </div>
             </div>
 
             <div class="product-detail__content">

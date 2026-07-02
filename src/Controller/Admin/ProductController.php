@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/admin/products')]
@@ -56,7 +57,11 @@ final class ProductController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $productManager->save($product, $form->get('coverImageUrl')->getData());
+            $productManager->save(
+                $product,
+                $form->get('coverImageUrl')->getData(),
+                $this->galleryUploads($form->get('galleryImages')->getData()),
+            );
             $this->addFlash('success', 'admin.product.flash.created');
 
             return $this->redirectToRoute('app_admin_products_edit', ['id' => $product->getId()]);
@@ -84,7 +89,12 @@ final class ProductController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $productManager->save($product, $form->get('coverImageUrl')->getData());
+            $productManager->save(
+                $product,
+                $form->get('coverImageUrl')->getData(),
+                $this->galleryUploads($form->get('galleryImages')->getData()),
+                $this->galleryImagesToDelete($request),
+            );
             $this->addFlash('success', 'admin.product.flash.updated');
 
             return $this->redirectToRoute('app_admin_products_edit', ['id' => $product->getId()]);
@@ -196,5 +206,41 @@ final class ProductController extends AbstractController
         }
 
         return $user;
+    }
+
+    /**
+     * @return list<UploadedFile>
+     */
+    private function galleryUploads(mixed $files): array
+    {
+        if ($files instanceof UploadedFile) {
+            return [$files];
+        }
+
+        if (!is_array($files)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            $files,
+            static fn (mixed $file): bool => $file instanceof UploadedFile,
+        ));
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function galleryImagesToDelete(Request $request): array
+    {
+        $ids = $request->request->all('gallery_images_to_delete');
+
+        if (!is_array($ids)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            array_map(static fn (mixed $id): int => (int) $id, $ids),
+            static fn (int $id): bool => $id > 0,
+        ));
     }
 }

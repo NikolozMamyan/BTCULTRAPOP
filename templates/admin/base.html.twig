@@ -72,6 +72,10 @@
                     <i class="fa-solid fa-ticket"></i>
                     <span>{{ 'admin.nav.promo_codes'|trans }}</span>
                 </a>
+                <a href="{{ path('app_admin_web_components_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_web_components' ? 'is-active' : '' }}">
+                    <i class="fa-solid fa-puzzle-piece"></i>
+                    <span>{{ 'admin.nav.web_components'|trans }}</span>
+                </a>
                 <details class="admin-sidebar__group" {{ customer_menu_active ? 'open' : '' }}>
                     <summary class="admin-sidebar__link admin-sidebar__group-toggle {{ customer_menu_active ? 'is-active' : '' }}">
                         <i class="fa-solid fa-users"></i>

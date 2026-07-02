@@ -120,6 +120,8 @@ final readonly class StorefrontProductCatalog
     public function categoriesFor(array $products): array
     {
         $tree = [];
+        $rootImage = '';
+        $rootFallbackImage = '';
 
         foreach ($products as $product) {
             $path = array_values(array_filter(
@@ -127,10 +129,25 @@ final readonly class StorefrontProductCatalog
                 static fn (mixed $name): bool => is_string($name) && '' !== trim($name),
             ));
             $positions = array_map('intval', (array) ($product['category_position_path'] ?? []));
+            $icons = array_values(array_filter(
+                (array) ($product['category_icon_path'] ?? []),
+                static fn (mixed $path): bool => is_string($path),
+            ));
 
             if ('Tout' === ($path[0] ?? null)) {
+                $rootCandidate = trim((string) ($icons[0] ?? ''));
+
+                if ('' === $rootImage && '' !== $rootCandidate) {
+                    $rootImage = $rootCandidate;
+                }
+
+                if ('' === $rootFallbackImage && is_string($product['img'] ?? null)) {
+                    $rootFallbackImage = $product['img'];
+                }
+
                 array_shift($path);
                 array_shift($positions);
+                array_shift($icons);
             }
 
             $parent = $path[0] ?? null;
@@ -144,9 +161,16 @@ final readonly class StorefrontProductCatalog
                 'count' => 0,
                 'image' => '',
                 'fallbackImage' => '',
+                'iconImage' => '',
                 'children' => [],
             ];
             ++$tree[$parent]['count'];
+
+            $parentIcon = trim((string) ($icons[0] ?? ''));
+
+            if ('' === $tree[$parent]['iconImage'] && '' !== $parentIcon) {
+                $tree[$parent]['iconImage'] = $parentIcon;
+            }
 
             if ('' === $tree[$parent]['image'] && is_string($product['img'] ?? null)) {
                 $tree[$parent]['image'] = $product['img'];
@@ -169,7 +193,7 @@ final readonly class StorefrontProductCatalog
         });
 
         return array_map(
-            function (string $name, array $group): array {
+            function (string $name, array $group) use ($rootImage, $rootFallbackImage): array {
                 uasort($group['children'], static function (array $first, array $second): int {
                     return $first['position'] <=> $second['position'];
                 });
@@ -177,9 +201,10 @@ final readonly class StorefrontProductCatalog
                 return [
                     'name' => $name,
                     'count' => $group['count'],
-                    'image' => $this->assetUrlResolver->resolve(self::CATEGORY_THUMBNAILS[$name] ?? '')
-                        ?? $group['image'],
+                    'image' => $group['iconImage'] ?: $group['image'],
                     'fallbackImage' => $group['fallbackImage'],
+                    'rootImage' => $rootImage,
+                    'rootFallbackImage' => $rootFallbackImage,
                     'children' => array_map(
                         static fn (string $childName, array $child): array => [
                             'name' => $childName,
@@ -198,11 +223,36 @@ final readonly class StorefrontProductCatalog
     /**
      * @param list<array<string, mixed>> $products
      *
-     * @return list<string>
+     * @return list<array{name: string, count: int, image: string}>
      */
     public function licensesFor(array $products): array
     {
-        return $this->uniqueSortedValuesFor($products, 'license');
+        $licenses = [];
+
+        foreach ($products as $product) {
+            $name = trim((string) ($product['license'] ?? ''));
+
+            if ('' === $name) {
+                continue;
+            }
+
+            $licenses[$name] ??= [
+                'name' => $name,
+                'count' => 0,
+                'image' => '',
+            ];
+            ++$licenses[$name]['count'];
+
+            $image = trim((string) ($product['license_icon'] ?? ''));
+
+            if ('' !== $image && '' === $licenses[$name]['image']) {
+                $licenses[$name]['image'] = $image;
+            }
+        }
+
+        uasort($licenses, static fn (array $first, array $second): int => strnatcasecmp($first['name'], $second['name']));
+
+        return array_values($licenses);
     }
 
     /**
@@ -213,6 +263,8 @@ final readonly class StorefrontProductCatalog
         $cover = $product->getCoverImage();
         $quantity = max(0, $product->getQuantity());
         $category = $product->getCategory();
+        $license = $product->getLicense();
+        $images = $this->productImages($product);
 
         return [
             'id' => $product->getId(),
@@ -227,11 +279,16 @@ final readonly class StorefrontProductCatalog
             'cat' => $category?->getName() ?? '',
             'category_path' => $category?->getPathNames() ?? [],
             'category_position_path' => $this->categoryPositionPath($category),
+            'category_icon_path' => $this->categoryIconPath($category),
             'model_3d' => $this->productModel3DResolver->present($product),
-            'license' => $product->getLicense()?->getName() ?? '',
+            'license' => $license?->getName() ?? '',
+            'license_icon' => $license?->getIconPath() ? $this->assetUrlResolver->resolve($license->getIconPath()) : '',
             'price' => (float) $product->getPriceTaxIncluded(),
             'old' => null,
             'img' => $this->assetUrlResolver->resolve($cover?->getPath() ?: self::FALLBACK_IMAGE),
+            'images' => $images,
+            'image_urls' => array_column($images, 'src'),
+            'image_absolute_urls' => array_column($images, 'absolute_src'),
             'quantity' => $quantity,
             'in_stock' => $quantity > 0,
             'rating' => null,
@@ -240,6 +297,45 @@ final readonly class StorefrontProductCatalog
             'favorite' => false,
             'updated_at' => $product->getUpdatedAt(),
         ];
+    }
+
+    /**
+     * @return list<array{src: string, absolute_src: string, alt: string, main: bool}>
+     */
+    private function productImages(Product $product): array
+    {
+        $cover = $product->getCoverImage();
+        $images = [];
+        $seen = [];
+
+        foreach ($product->getImages() as $image) {
+            $path = $image->getPath();
+
+            if ('' === $path || isset($seen[$path])) {
+                continue;
+            }
+
+            $seen[$path] = true;
+            $images[] = [
+                'src' => $this->assetUrlResolver->resolve($path) ?? $path,
+                'absolute_src' => $this->assetUrlResolver->resolveAbsolute($path) ?? $path,
+                'alt' => $image->getAlt() ?: $product->getName(),
+                'main' => $image === $cover,
+            ];
+        }
+
+        if ([] === $images) {
+            $images[] = [
+                'src' => $this->assetUrlResolver->resolve(self::FALLBACK_IMAGE) ?? self::FALLBACK_IMAGE,
+                'absolute_src' => $this->assetUrlResolver->resolveAbsolute(self::FALLBACK_IMAGE) ?? self::FALLBACK_IMAGE,
+                'alt' => $product->getName(),
+                'main' => true,
+            ];
+        }
+
+        usort($images, static fn (array $left, array $right): int => ($right['main'] <=> $left['main']));
+
+        return $images;
     }
 
     /**
@@ -308,6 +404,30 @@ final readonly class StorefrontProductCatalog
         }
 
         return $positions;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function categoryIconPath(?Category $category): array
+    {
+        $icons = [];
+        $visited = [];
+
+        while ($category instanceof Category) {
+            $objectId = spl_object_id($category);
+
+            if (isset($visited[$objectId])) {
+                break;
+            }
+
+            $visited[$objectId] = true;
+            $iconPath = $category->getIconPath();
+            array_unshift($icons, $iconPath ? ($this->assetUrlResolver->resolve($iconPath) ?? '') : '');
+            $category = $category->getParent();
+        }
+
+        return $icons;
     }
 
     /**
