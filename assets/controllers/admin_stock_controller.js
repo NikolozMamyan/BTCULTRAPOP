@@ -5,6 +5,7 @@ export default class extends Controller {
         errorText: String,
         savedText: String,
         savingText: String,
+        source: String,
         token: String,
     };
 
@@ -38,7 +39,10 @@ export default class extends Controller {
                     'Content-Type': 'application/json',
                     'X-CSRF-Token': this.tokenValue,
                 },
-                body: JSON.stringify({ quantity: input.value }),
+                body: JSON.stringify({
+                    quantity: input.value,
+                    source: this.sourceValue,
+                }),
             });
             const payload = await response.json();
 
@@ -46,7 +50,7 @@ export default class extends Controller {
                 throw new Error(payload.message || this.errorTextValue);
             }
 
-            input.value = String(payload.product.quantity);
+            input.value = this.normalizeQuantity(payload.product.quantity);
             input.dataset.savedValue = input.value;
             this.setStatus(status, payload.message || this.savedTextValue, 'saved');
         } catch (error) {
@@ -64,5 +68,13 @@ export default class extends Controller {
 
         element.textContent = message;
         element.dataset.tone = tone;
+    }
+
+    normalizeQuantity(quantity) {
+        if (quantity === null || quantity === undefined) {
+            return '';
+        }
+
+        return String(quantity);
     }
 }

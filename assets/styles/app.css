@@ -838,6 +838,92 @@ body {
     transform: rotate(90deg);
 }
 
+.admin-stock-source-form {
+    display: inline-flex;
+    align-items: center;
+    gap: .65rem;
+    min-height: 46px;
+    padding: .42rem .5rem .42rem .85rem;
+    border: 1px solid rgba(32, 50, 99, .12);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .9);
+    box-shadow: 0 12px 30px rgba(32, 50, 99, .06);
+}
+
+.admin-stock-source-form label {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    color: var(--text-dark);
+    font-size: .76rem;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.admin-stock-source-form label i {
+    color: var(--primary-color);
+}
+
+.admin-stock-source-form select {
+    min-height: 36px;
+    padding: .45rem 2rem .45rem .75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    outline: none;
+    background: #fff;
+    color: var(--text-dark);
+    font-size: .78rem;
+    font-weight: 900;
+}
+
+.admin-stock-source-form select:focus {
+    border-color: rgba(232, 33, 24, .48);
+    box-shadow: 0 0 0 4px rgba(232, 33, 24, .08);
+}
+
+.admin-stock-source-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid rgba(229, 231, 235, .9);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, .9);
+    box-shadow: 0 18px 42px rgba(32, 50, 99, .08);
+}
+
+.admin-stock-source-card__icon {
+    display: inline-flex;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    background: rgba(22, 163, 74, .1);
+    color: var(--success-color);
+}
+
+.admin-stock-source-card.needs-validation .admin-stock-source-card__icon {
+    background: rgba(245, 158, 11, .13);
+    color: #b07800;
+}
+
+.admin-stock-source-card strong {
+    display: block;
+    color: var(--text-dark);
+    font-size: .9rem;
+    font-weight: 950;
+}
+
+.admin-stock-source-card p {
+    margin: .22rem 0 0;
+    color: var(--text-light);
+    font-size: .78rem;
+    line-height: 1.5;
+}
+
 .admin-stock-table-panel {
     padding: 0;
     overflow: hidden;

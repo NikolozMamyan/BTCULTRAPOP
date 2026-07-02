@@ -11,6 +11,8 @@ final class AdminProductManager
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ProductPriceCalculator $priceCalculator,
+        private readonly ProductStockSourceWriter $stockSourceWriter,
+        private readonly StockSettingsManager $stockSettingsManager,
     ) {
     }
 
@@ -27,6 +29,7 @@ final class AdminProductManager
 
         $this->entityManager->persist($product);
         $this->entityManager->flush();
+        $this->stockSourceWriter->write($product, $this->stockSettingsManager->activeSource(), $product->getQuantity());
     }
 
     public function delete(Product $product): void

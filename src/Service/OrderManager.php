@@ -10,6 +10,7 @@ use App\Entity\OrderItem;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Enum\PaymentStatus;
+use App\Enum\StockSource;
 use App\Model\CheckoutAddress;
 
 final class OrderManager
@@ -17,6 +18,8 @@ final class OrderManager
     public function __construct(
         private readonly ?OrderNumberGenerator $orderNumberGenerator = null,
         private readonly ?PromoCodeManager $promoCodeManager = null,
+        private readonly ?StockSettingsManager $stockSettingsManager = null,
+        private readonly ?ProductStockSourceWriter $stockSourceWriter = null,
     ) {
     }
 
@@ -114,13 +117,20 @@ final class OrderManager
         $this->promoCodeManager?->redeemForOrder($order);
         $order->markPaid($paidAt);
         $order->getUser()?->addLoyaltyPoints($order->getLoyaltyPointsEarned());
+        $activeStockSource = $this->stockSettingsManager?->activeSource() ?? StockSource::default();
+        $updatedProducts = [];
 
         foreach ($order->getItems() as $item) {
             $product = $item->getProduct();
 
             if ($product instanceof Product) {
                 $product->setQuantity(max(0, $product->getQuantity() - $item->getQuantity()));
+                $updatedProducts[] = $product;
             }
+        }
+
+        foreach ($updatedProducts as $product) {
+            $this->stockSourceWriter?->write($product, $activeStockSource, $product->getQuantity());
         }
     }
 

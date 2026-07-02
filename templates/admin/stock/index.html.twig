@@ -10,7 +10,11 @@
         data-admin-stock-saving-text-value="{{ 'admin.stock.status.saving'|trans }}"
         data-admin-stock-saved-text-value="{{ 'admin.stock.status.saved'|trans }}"
         data-admin-stock-error-text-value="{{ 'admin.stock.status.error'|trans }}"
+        data-admin-stock-source-value="{{ selected_stock_source }}"
     >
+        {% set selected_source_label = selected_stock_source_label|trans %}
+        {% set active_source_label = active_stock_source_label|trans %}
+
         <div class="admin-page-heading admin-page-heading--actions">
             <div>
                 <span>{{ 'admin.stock.index.eyebrow'|trans }}</span>
@@ -18,6 +22,24 @@
                 <p>{{ 'admin.stock.index.subtitle'|trans }}</p>
             </div>
             <div class="admin-heading-actions">
+                <form class="admin-stock-source-form" method="get" action="{{ path('app_admin_stock_index') }}">
+                    <label for="admin-stock-source">
+                        <i class="fa-solid fa-database" aria-hidden="true"></i>
+                        {{ 'admin.stock.source.label'|trans }}
+                    </label>
+                    <select
+                        id="admin-stock-source"
+                        name="source"
+                        aria-label="{{ 'admin.stock.source.label'|trans }}"
+                        onchange="this.form.submit()"
+                    >
+                        {% for source in stock_sources %}
+                            <option value="{{ source.value }}" {{ selected_stock_source == source.value ? 'selected' : '' }}>
+                                {{ source.label|trans }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
                 <button
                     type="button"
                     class="admin-action-button admin-stock-sync"
@@ -28,6 +50,35 @@
                 </button>
             </div>
         </div>
+
+        <article class="admin-stock-source-card {{ selected_stock_source == active_stock_source ? 'is-active' : 'needs-validation' }}">
+            <span class="admin-stock-source-card__icon">
+                <i class="fa-solid {{ selected_stock_source == active_stock_source ? 'fa-circle-check' : 'fa-triangle-exclamation' }}" aria-hidden="true"></i>
+            </span>
+            <div>
+                {% if selected_stock_source == active_stock_source %}
+                    <strong>{{ 'admin.stock.source.active_title'|trans({'%source%': active_source_label}) }}</strong>
+                    <p>{{ 'admin.stock.source.active_text'|trans }}</p>
+                {% else %}
+                    <strong>{{ 'admin.stock.source.pending_title'|trans({'%selected%': selected_source_label, '%active%': active_source_label}) }}</strong>
+                    <p>{{ 'admin.stock.source.pending_text'|trans }}</p>
+                {% endif %}
+            </div>
+            {% if selected_stock_source != active_stock_source %}
+                <form
+                    method="post"
+                    action="{{ path('app_admin_stock_source_update') }}"
+                    onsubmit="return confirm('{{ 'admin.stock.source.confirm'|trans({'%source%': selected_source_label})|e('js') }}');"
+                >
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_stock_source') }}">
+                    <input type="hidden" name="source" value="{{ selected_stock_source }}">
+                    <button type="submit" class="admin-action-button">
+                        <i class="fa-solid fa-check" aria-hidden="true"></i>
+                        {{ 'admin.stock.source.use_submit'|trans({'%source%': selected_source_label}) }}
+                    </button>
+                </form>
+            {% endif %}
+        </article>
 
         {% if products %}
             <div class="admin-panel admin-stock-table-panel">
@@ -42,6 +93,7 @@
                         </thead>
                         <tbody>
                             {% for product in products %}
+                                {% set quantity_value = product.quantity is same as(null) ? '' : product.quantity %}
                                 <tr
                                     data-stock-product-id="{{ product.id }}"
                                     data-stock-update-url="{{ path('app_admin_stock_product_update', {id: product.id}) }}"
@@ -55,8 +107,9 @@
                                                 min="0"
                                                 step="1"
                                                 inputmode="numeric"
-                                                value="{{ product.quantity }}"
-                                                data-saved-value="{{ product.quantity }}"
+                                                value="{{ quantity_value }}"
+                                                placeholder="{{ selected_stock_source == 'clic' ? 'admin.stock.field.empty'|trans : '0' }}"
+                                                data-saved-value="{{ quantity_value }}"
                                                 data-action="blur->admin-stock#save keydown->admin-stock#submitOnEnter"
                                                 aria-label="{{ 'admin.stock.field.quantity_for'|trans({'%product%': product.name}) }}"
                                             >
