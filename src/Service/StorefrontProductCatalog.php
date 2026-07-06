@@ -265,6 +265,8 @@ final readonly class StorefrontProductCatalog
         $category = $product->getCategory();
         $license = $product->getLicense();
         $images = $this->productImages($product);
+        $price = (float) $product->getEffectivePriceTaxIncluded();
+        $regularPrice = (float) $product->getPriceTaxIncluded();
 
         return [
             'id' => $product->getId(),
@@ -283,8 +285,8 @@ final readonly class StorefrontProductCatalog
             'model_3d' => $this->productModel3DResolver->present($product),
             'license' => $license?->getName() ?? '',
             'license_icon' => $license?->getIconPath() ? $this->assetUrlResolver->resolve($license->getIconPath()) : '',
-            'price' => (float) $product->getPriceTaxIncluded(),
-            'old' => null,
+            'price' => $price,
+            'old' => $product->hasPromoPrice() ? $regularPrice : null,
             'img' => $this->assetUrlResolver->resolve($cover?->getPath() ?: self::FALLBACK_IMAGE),
             'images' => $images,
             'image_urls' => array_column($images, 'src'),
@@ -293,7 +295,7 @@ final readonly class StorefrontProductCatalog
             'in_stock' => $quantity > 0,
             'rating' => null,
             'pop' => min(100, $quantity),
-            'tag' => $this->tagForStatus($product->getStatus()),
+            'tag' => $product->hasPromoPrice() ? 'Promo' : $this->tagForStatus($product->getStatus()),
             'favorite' => false,
             'updated_at' => $product->getUpdatedAt(),
         ];

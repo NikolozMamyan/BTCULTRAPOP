@@ -94,7 +94,14 @@
                             </a>
                             <span>{{ product.category.name }}</span>
                             <span>{{ product.license.name }}</span>
-                            <strong>{{ product.priceTaxIncluded|number_format(2, ',', ' ') }} €</strong>
+                            <strong class="admin-product-price {{ product.hasPromoPrice ? 'is-promo' : '' }}">
+                                {% if product.hasPromoPrice %}
+                                    <del>{{ product.priceTaxIncluded|number_format(2, ',', ' ') }} €</del>
+                                    <span>{{ product.effectivePriceTaxIncluded|number_format(2, ',', ' ') }} €</span>
+                                {% else %}
+                                    <span>{{ product.priceTaxIncluded|number_format(2, ',', ' ') }} €</span>
+                                {% endif %}
+                            </strong>
                             <span class="{{ product.quantity <= 5 ? 'admin-stock admin-stock--low' : 'admin-stock' }}">
                                 {{ product.quantity }}
                             </span>

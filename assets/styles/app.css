@@ -1353,6 +1353,23 @@ body {
     font-weight: 800;
 }
 
+.admin-product-price {
+    display: grid;
+    gap: .12rem;
+    color: var(--text-dark);
+    font-weight: 950;
+}
+
+.admin-product-price del {
+    color: var(--text-light);
+    font-size: .72rem;
+    font-weight: 800;
+}
+
+.admin-product-price.is-promo span {
+    color: var(--primary-color);
+}
+
 .admin-product-thumb {
     display: grid;
     width: 58px;

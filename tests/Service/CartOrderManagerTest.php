@@ -41,6 +41,46 @@ final class CartOrderManagerTest extends TestCase
         self::assertSame(17970, $cart->getTotalTaxIncludedCents());
     }
 
+    public function testCartManagerUsesProductPromoPriceWhenAvailable(): void
+    {
+        $cartManager = new CartManager();
+        $cart = $cartManager->createCart(token: 'promo-cart');
+        $product = $this->createProduct()
+            ->setPriceTaxExcluded('10.000000')
+            ->setPriceTaxIncluded('12.000000')
+            ->setTaxRate('20')
+            ->setPromoPriceTaxIncluded('9.990000');
+
+        $item = $cartManager->addProduct($cart, $product, 2);
+
+        self::assertSame(833, $item->getUnitPriceTaxExcludedCents());
+        self::assertSame(999, $item->getUnitPriceTaxIncludedCents());
+        self::assertSame(1666, $cart->getTotalTaxExcludedCents());
+        self::assertSame(1998, $cart->getTotalTaxIncludedCents());
+    }
+
+    public function testCartManagerRefreshesActiveCartPricesFromCurrentProductPrice(): void
+    {
+        $cartManager = new CartManager();
+        $cart = $cartManager->createCart(token: 'refresh-cart');
+        $product = $this->createProduct()
+            ->setPriceTaxExcluded('10.000000')
+            ->setPriceTaxIncluded('12.000000')
+            ->setTaxRate('20');
+
+        $item = $cartManager->addProduct($cart, $product, 1);
+
+        self::assertSame(1200, $item->getUnitPriceTaxIncludedCents());
+
+        $product->setPromoPriceTaxIncluded('9.990000');
+
+        $cartManager->refreshPrices($cart);
+
+        self::assertSame(833, $item->getUnitPriceTaxExcludedCents());
+        self::assertSame(999, $item->getUnitPriceTaxIncludedCents());
+        self::assertSame(999, $cart->getTotalTaxIncludedCents());
+    }
+
     public function testCartManagerRejectsConvertedCart(): void
     {
         $cartManager = new CartManager();

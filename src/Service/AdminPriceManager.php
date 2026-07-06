@@ -60,6 +60,10 @@ final readonly class AdminPriceManager
             ->setPriceTaxExcluded($priceTaxExcluded)
             ->setTaxRate($taxRate)
             ->setPriceTaxIncluded($this->calculator->taxIncluded($priceTaxExcluded, $taxRate));
+
+        if (!$product->isPromoPriceValid()) {
+            $product->setPromoPriceTaxIncluded(null);
+        }
     }
 
     /**

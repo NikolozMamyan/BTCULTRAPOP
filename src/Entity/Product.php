@@ -14,6 +14,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['reference'])]
+#[Assert\Expression(
+    expression: 'this.isPromoPriceValid()',
+    message: 'product.promo_price.lower_than_regular',
+)]
 class Product
 {
     #[ORM\Id]
@@ -69,6 +73,10 @@ class Product
     #[Assert\NotBlank]
     #[Assert\PositiveOrZero]
     private string $priceTaxIncluded = '0.000000';
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 6, nullable: true)]
+    #[Assert\Positive]
+    private ?string $promoPriceTaxIncluded = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2, options: ['default' => '0.00'])]
     #[Assert\PositiveOrZero]
@@ -277,6 +285,53 @@ class Product
         return $this;
     }
 
+    public function getPromoPriceTaxIncluded(): ?string
+    {
+        return $this->promoPriceTaxIncluded;
+    }
+
+    public function setPromoPriceTaxIncluded(?string $promoPriceTaxIncluded): self
+    {
+        $promoPriceTaxIncluded = null === $promoPriceTaxIncluded ? null : trim($promoPriceTaxIncluded);
+        $this->promoPriceTaxIncluded = '' === $promoPriceTaxIncluded ? null : $promoPriceTaxIncluded;
+
+        return $this;
+    }
+
+    public function hasPromoPrice(): bool
+    {
+        return null !== $this->promoPriceTaxIncluded
+            && (float) $this->promoPriceTaxIncluded > 0
+            && (float) $this->promoPriceTaxIncluded < (float) $this->priceTaxIncluded;
+    }
+
+    public function isPromoPriceValid(): bool
+    {
+        return null === $this->promoPriceTaxIncluded
+            || ((float) $this->promoPriceTaxIncluded > 0
+                && (float) $this->promoPriceTaxIncluded < (float) $this->priceTaxIncluded);
+    }
+
+    public function getEffectivePriceTaxIncluded(): string
+    {
+        return $this->hasPromoPrice() ? (string) $this->promoPriceTaxIncluded : $this->priceTaxIncluded;
+    }
+
+    public function getEffectivePriceTaxExcluded(): string
+    {
+        if (!$this->hasPromoPrice()) {
+            return $this->priceTaxExcluded;
+        }
+
+        $taxMultiplier = 1 + (((float) $this->taxRate) / 100);
+
+        if ($taxMultiplier <= 0) {
+            return (string) $this->promoPriceTaxIncluded;
+        }
+
+        return number_format(((float) $this->promoPriceTaxIncluded) / $taxMultiplier, 6, '.', '');
+    }
+
     public function getTaxRate(): string
     {
         return $this->taxRate;
@@ -327,7 +382,7 @@ class Product
 
     public function isOnSale(): bool
     {
-        return ProductStatus::PROMO === $this->status;
+        return $this->hasPromoPrice() || ProductStatus::PROMO === $this->status;
     }
 
     public function isNew(): bool

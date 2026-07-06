@@ -25,12 +25,14 @@ final class CartController extends AbstractController
     public function show(
         Request $request,
         CartResolver $cartResolver,
+        CartManager $cartManager,
         CartViewBuilder $cartViewBuilder,
         EntityManagerInterface $entityManager,
     ): JsonResponse {
         $cart = $cartResolver->resolve($request, $this->getAuthenticatedUser());
 
         if ($cart instanceof Cart) {
+            $cartManager->refreshPrices($cart);
             $entityManager->flush();
         }
 
@@ -116,6 +118,7 @@ final class CartController extends AbstractController
             $message = 'cart.flash.removed';
         } else {
             $cartManager->updateQuantity($item, min(99, $quantity));
+            $cartManager->refreshPrices($cart);
             $message = 'cart.flash.updated';
         }
 

@@ -9,6 +9,11 @@ final class ProductPriceCalculator
         return $this->normalizeDecimal($amount, 6, 14);
     }
 
+    public function normalizeTaxIncluded(string $amount): string
+    {
+        return $this->normalizeDecimal($amount, 6, 14);
+    }
+
     public function normalizeTaxRate(string $taxRate): string
     {
         $rawTaxRate = str_replace([' ', ','], ['', '.'], trim($taxRate));

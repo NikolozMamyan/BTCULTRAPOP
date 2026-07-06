@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Form\CheckoutAddressType;
 use App\Model\CheckoutAddress;
 use App\Repository\PromoCodeRepository;
+use App\Service\CartManager;
 use App\Service\CartResolver;
 use App\Service\CartViewBuilder;
 use App\Service\PromoCodeManager;
@@ -24,6 +25,7 @@ final class CartController extends AbstractController
     public function index(
         Request $request,
         CartResolver $cartResolver,
+        CartManager $cartManager,
         CartViewBuilder $cartViewBuilder,
         EntityManagerInterface $entityManager,
     ): Response
@@ -34,6 +36,7 @@ final class CartController extends AbstractController
         $hasSavedAddress = null !== $user?->getDefaultAddress();
 
         if ($cart instanceof Cart) {
+            $cartManager->refreshPrices($cart);
             $entityManager->flush();
         }
 
@@ -57,6 +60,7 @@ final class CartController extends AbstractController
     public function applyPromoCode(
         Request $request,
         CartResolver $cartResolver,
+        CartManager $cartManager,
         PromoCodeRepository $promoCodes,
         PromoCodeManager $promoCodeManager,
         CartViewBuilder $cartViewBuilder,
@@ -78,6 +82,11 @@ final class CartController extends AbstractController
 
         $user = $this->getAuthenticatedUser();
         $cart = $cartResolver->resolve($request, $user);
+
+        if ($cart instanceof Cart) {
+            $cartManager->refreshPrices($cart);
+            $entityManager->flush();
+        }
 
         if (!$cart instanceof Cart || 0 === $cart->getItems()->count()) {
             return $this->promoResponse(
@@ -138,6 +147,7 @@ final class CartController extends AbstractController
     public function removePromoCode(
         Request $request,
         CartResolver $cartResolver,
+        CartManager $cartManager,
         PromoCodeManager $promoCodeManager,
         CartViewBuilder $cartViewBuilder,
         EntityManagerInterface $entityManager,
@@ -159,6 +169,7 @@ final class CartController extends AbstractController
         $cart = $cartResolver->resolve($request, $this->getAuthenticatedUser());
 
         if ($cart instanceof Cart) {
+            $cartManager->refreshPrices($cart);
             $promoCodeManager->remove($cart);
             $entityManager->flush();
         }

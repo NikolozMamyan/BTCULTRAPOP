@@ -30,7 +30,8 @@ final class AdminProductManager
             ->setPriceTaxIncluded($this->priceCalculator->taxIncluded(
                 $product->getPriceTaxExcluded(),
                 $product->getTaxRate(),
-            ));
+            ))
+            ->setPromoPriceTaxIncluded($this->normalizePromoPrice($product->getPromoPriceTaxIncluded()));
         $this->syncCoverImage($product, $coverImageUrl);
         $this->deleteGalleryImages($product, $galleryImagesToDelete);
         $this->addGalleryImages($product, $galleryImages);
@@ -129,5 +130,14 @@ final class AdminProductManager
         }
 
         return $position;
+    }
+
+    private function normalizePromoPrice(?string $promoPrice): ?string
+    {
+        if (null === $promoPrice || '' === trim($promoPrice)) {
+            return null;
+        }
+
+        return $this->priceCalculator->normalizeTaxIncluded($promoPrice);
     }
 }

@@ -35,7 +35,7 @@ final readonly class StorefrontSearchProvider
     private function present(Product $product): array
     {
         $quantity = max(0, $product->getQuantity());
-        $price = (float) $product->getPriceTaxIncluded();
+        $price = (float) $product->getEffectivePriceTaxIncluded();
 
         return [
             'id' => $product->getId(),

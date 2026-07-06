@@ -125,4 +125,32 @@ final class ProductTest extends TestCase
         self::assertSame('8.250', $product->getDepth());
         self::assertSame('0.750', $product->getWeight());
     }
+
+    public function testProductUsesPromoPriceAsEffectivePriceOnlyWhenLowerThanRegularPrice(): void
+    {
+        $product = (new Product())
+            ->setPriceTaxExcluded('10.000000')
+            ->setPriceTaxIncluded('12.000000')
+            ->setTaxRate('20')
+            ->setPromoPriceTaxIncluded('9.990000');
+
+        self::assertTrue($product->hasPromoPrice());
+        self::assertTrue($product->isPromoPriceValid());
+        self::assertTrue($product->isOnSale());
+        self::assertSame('9.990000', $product->getEffectivePriceTaxIncluded());
+        self::assertSame('8.325000', $product->getEffectivePriceTaxExcluded());
+
+        $product->setPromoPriceTaxIncluded('12.000000');
+
+        self::assertFalse($product->hasPromoPrice());
+        self::assertFalse($product->isPromoPriceValid());
+        self::assertSame('12.000000', $product->getEffectivePriceTaxIncluded());
+        self::assertSame('10.000000', $product->getEffectivePriceTaxExcluded());
+
+        $product->setPromoPriceTaxIncluded(null);
+
+        self::assertNull($product->getPromoPriceTaxIncluded());
+        self::assertFalse($product->hasPromoPrice());
+        self::assertTrue($product->isPromoPriceValid());
+    }
 }

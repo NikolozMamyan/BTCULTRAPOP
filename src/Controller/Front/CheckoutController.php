@@ -11,6 +11,7 @@ use App\Exception\StripeConfigurationException;
 use App\Form\CheckoutAddressType;
 use App\Model\CheckoutAddress;
 use App\Repository\OrderRepository;
+use App\Service\CartManager;
 use App\Service\CartResolver;
 use App\Service\CartViewBuilder;
 use App\Service\OrderManager;
@@ -32,6 +33,7 @@ final class CheckoutController extends AbstractController
     public function createStripeSession(
         Request $request,
         CartResolver $cartResolver,
+        CartManager $cartManager,
         CartViewBuilder $cartViewBuilder,
         OrderManager $orderManager,
         ShippingRateCalculator $shippingRateCalculator,
@@ -47,6 +49,9 @@ final class CheckoutController extends AbstractController
 
             return $this->redirectToRoute('app_front_cart');
         }
+
+        $cartManager->refreshPrices($cart);
+        $entityManager->flush();
 
         $address = CheckoutAddress::fromUser($user);
         $form = $this->createForm(CheckoutAddressType::class, $address, [

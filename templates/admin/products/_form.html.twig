@@ -111,6 +111,12 @@
                     {{ form_errors(form.priceTaxIncluded) }}
                 </div>
                 <div class="admin-field">
+                    {{ form_label(form.promoPriceTaxIncluded) }}
+                    {{ form_widget(form.promoPriceTaxIncluded) }}
+                    {{ form_help(form.promoPriceTaxIncluded) }}
+                    {{ form_errors(form.promoPriceTaxIncluded) }}
+                </div>
+                <div class="admin-field">
                     {{ form_label(form.quantity) }}
                     {{ form_widget(form.quantity) }}
                     {{ form_errors(form.quantity) }}

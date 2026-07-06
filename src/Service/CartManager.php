@@ -26,18 +26,35 @@ final class CartManager
         $item = $cart->getItemForProduct($product);
 
         if ($item instanceof CartItem) {
+            $this->applyProductPrice($item, $product);
+
             return $item->incrementQuantity($quantity);
         }
 
         $item = (new CartItem())
             ->setProduct($product)
-            ->setQuantity($quantity)
-            ->setUnitPriceTaxExcludedCents($this->decimalToCents($product->getPriceTaxExcluded()))
-            ->setUnitPriceTaxIncludedCents($this->decimalToCents($product->getPriceTaxIncluded()));
+            ->setQuantity($quantity);
+
+        $this->applyProductPrice($item, $product);
 
         $cart->addItem($item);
 
         return $item;
+    }
+
+    public function refreshPrices(Cart $cart): void
+    {
+        if (!$cart->isActive()) {
+            return;
+        }
+
+        foreach ($cart->getItems() as $item) {
+            $product = $item->getProduct();
+
+            if ($product instanceof Product) {
+                $this->applyProductPrice($item, $product);
+            }
+        }
     }
 
     public function updateQuantity(CartItem $item, int $quantity): void
@@ -99,6 +116,13 @@ final class CartManager
     private function generateToken(): string
     {
         return bin2hex(random_bytes(32));
+    }
+
+    private function applyProductPrice(CartItem $item, Product $product): void
+    {
+        $item
+            ->setUnitPriceTaxExcludedCents($this->decimalToCents($product->getEffectivePriceTaxExcluded()))
+            ->setUnitPriceTaxIncludedCents($this->decimalToCents($product->getEffectivePriceTaxIncluded()));
     }
 
     private function decimalToCents(string $amount): int

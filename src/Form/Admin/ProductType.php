@@ -7,6 +7,7 @@ use App\Entity\License;
 use App\Entity\Product;
 use App\Enum\ProductStatus;
 use App\Repository\CategoryRepository;
+use App\Service\ProductPriceCalculator;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -22,8 +23,10 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 final class ProductType extends AbstractType
 {
-    public function __construct(private readonly CategoryRepository $categories)
-    {
+    public function __construct(
+        private readonly CategoryRepository $categories,
+        private readonly ProductPriceCalculator $priceCalculator,
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -126,6 +129,15 @@ final class ProductType extends AbstractType
                     'placeholder' => '0.00',
                 ],
             ])
+            ->add('promoPriceTaxIncluded', TextType::class, [
+                'label' => 'admin.product.form.promo_price_ttc',
+                'required' => false,
+                'help' => 'admin.product.form.promo_price_help',
+                'attr' => [
+                    'inputmode' => 'decimal',
+                    'placeholder' => '0.00',
+                ],
+            ])
             ->add('taxRate', TextType::class, [
                 'label' => 'admin.product.form.tax_rate',
                 'attr' => [
@@ -191,7 +203,7 @@ final class ProductType extends AbstractType
                 $data[$field] = '' === $value ? '0' : self::normalizeDecimal($value);
             }
 
-            foreach (['width', 'height', 'depth', 'weight'] as $field) {
+            foreach (['promoPriceTaxIncluded', 'width', 'height', 'depth', 'weight'] as $field) {
                 $value = trim((string) ($data[$field] ?? ''));
                 $data[$field] = '' === $value ? null : self::normalizeDecimal($value);
             }
@@ -203,6 +215,31 @@ final class ProductType extends AbstractType
             }
 
             $event->setData($data);
+        });
+
+        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event): void {
+            $product = $event->getData();
+
+            if (!$product instanceof Product) {
+                return;
+            }
+
+            try {
+                $product
+                    ->setPriceTaxExcluded($this->priceCalculator->normalizeTaxExcluded($product->getPriceTaxExcluded()))
+                    ->setTaxRate($this->priceCalculator->normalizeTaxRate($product->getTaxRate()))
+                    ->setPriceTaxIncluded($this->priceCalculator->taxIncluded(
+                        $product->getPriceTaxExcluded(),
+                        $product->getTaxRate(),
+                    ))
+                    ->setPromoPriceTaxIncluded(
+                        null === $product->getPromoPriceTaxIncluded()
+                            ? null
+                            : $this->priceCalculator->normalizeTaxIncluded($product->getPromoPriceTaxIncluded()),
+                    );
+            } catch (\InvalidArgumentException) {
+                // Field-level validation keeps the form invalid without turning a bad decimal into a 500.
+            }
         });
     }
 
