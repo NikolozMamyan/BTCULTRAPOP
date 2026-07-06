@@ -4,6 +4,15 @@
 {% block storefront_data %}data-page="checkout-success"{% endblock %}
 
 {% block main %}
+    {% if purchase_analytics %}
+        <div
+            hidden
+            data-controller="ecommerce"
+            data-ecommerce-event-value="purchase"
+            data-ecommerce-ecommerce-value="{{ purchase_analytics|json_encode|e('html_attr') }}"
+        ></div>
+    {% endif %}
+
     <section class="checkout-result">
         <article class="checkout-result__card checkout-result__card--success">
             <span class="checkout-result__icon">

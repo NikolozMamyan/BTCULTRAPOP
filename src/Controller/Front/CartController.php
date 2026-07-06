@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Form\CheckoutAddressType;
 use App\Model\CheckoutAddress;
 use App\Repository\PromoCodeRepository;
+use App\Service\Analytics\EcommercePayloadBuilder;
 use App\Service\CartManager;
 use App\Service\CartResolver;
 use App\Service\CartViewBuilder;
@@ -27,6 +28,7 @@ final class CartController extends AbstractController
         CartResolver $cartResolver,
         CartManager $cartManager,
         CartViewBuilder $cartViewBuilder,
+        EcommercePayloadBuilder $analytics,
         EntityManagerInterface $entityManager,
     ): Response
     {
@@ -40,8 +42,11 @@ final class CartController extends AbstractController
             $entityManager->flush();
         }
 
+        $cartView = $cartViewBuilder->build($cart);
+
         $response = $this->render('front/cart/index.html.twig', [
-            'cart' => $cartViewBuilder->build($cart),
+            'cart' => $cartView,
+            'cart_analytics' => $cart instanceof Cart ? $analytics->cart($cart) : null,
             'checkout_form' => $this->createForm(CheckoutAddressType::class, $checkoutAddress, [
                 'action' => $this->generateUrl('app_checkout_stripe_create'),
             ])->createView(),

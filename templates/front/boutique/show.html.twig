@@ -81,8 +81,10 @@
 
     <main
         class="product-page max-w-7xl mx-auto px-5"
-        data-controller="product-detail"
+        data-controller="product-detail ecommerce"
         data-product-detail-product-id-value="{{ product.id }}"
+        data-ecommerce-event-value="view_item"
+        data-ecommerce-ecommerce-value="{{ view_item_analytics|json_encode|e('html_attr') }}"
     >
         <article class="product-detail">
             <div class="product-detail__gallery">

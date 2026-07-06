@@ -2,6 +2,7 @@ twig:
     file_name_pattern: '*.twig'
     globals:
         seo_origin: '%env(SEO_ORIGIN)%'
+        gtm_container_id: '%env(GTM_CONTAINER_ID)%'
 
 when@test:
     twig:

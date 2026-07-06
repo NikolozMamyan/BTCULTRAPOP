@@ -7,6 +7,7 @@ use App\Entity\CartItem;
 use App\Entity\User;
 use App\Repository\CartItemRepository;
 use App\Repository\ProductRepository;
+use App\Service\Analytics\EcommercePayloadBuilder;
 use App\Service\CartManager;
 use App\Service\CartResolver;
 use App\Service\CartViewBuilder;
@@ -52,6 +53,7 @@ final class CartController extends AbstractController
         CartManager $cartManager,
         CartViewBuilder $cartViewBuilder,
         ProductRepository $products,
+        EcommercePayloadBuilder $analytics,
         EntityManagerInterface $entityManager,
         TranslatorInterface $translator,
     ): JsonResponse {
@@ -76,7 +78,7 @@ final class CartController extends AbstractController
         $cart = $cartResolver->resolve($request, $this->getAuthenticatedUser(), true);
         \assert($cart instanceof Cart);
 
-        $cartManager->addProduct($cart, $product, $quantity);
+        $cartItem = $cartManager->addProduct($cart, $product, $quantity);
         $entityManager->flush();
 
         return $this->cartResponse(
@@ -85,6 +87,10 @@ final class CartController extends AbstractController
             $cartResolver,
             $cartViewBuilder,
             $translator->trans('cart.flash.added', ['%quantity%' => $quantity]),
+            [
+                'event' => 'add_to_cart',
+                'ecommerce' => $analytics->addToCart($product, $quantity, $cartItem->getUnitPriceTaxIncludedCents()),
+            ],
         );
     }
 
@@ -176,11 +182,18 @@ final class CartController extends AbstractController
         CartResolver $cartResolver,
         CartViewBuilder $cartViewBuilder,
         string $message,
+        ?array $analytics = null,
     ): JsonResponse {
-        $response = $this->json([
+        $payload = [
             'cart' => $cartViewBuilder->build($cart),
             'message' => $message,
-        ]);
+        ];
+
+        if (null !== $analytics) {
+            $payload['analytics'] = $analytics;
+        }
+
+        $response = $this->json($payload);
         $response->headers->setCookie($cartResolver->createCookie($cart, $request));
 
         return $response;

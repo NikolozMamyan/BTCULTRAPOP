@@ -3,6 +3,7 @@
 namespace App\Controller\Front;
 
 use App\Entity\User;
+use App\Service\Analytics\EcommercePayloadBuilder;
 use App\Service\ProductIngredientPresenter;
 use App\Service\ProductSlugger;
 use App\Service\StorefrontProductCatalog;
@@ -61,6 +62,7 @@ final class BoutiqueController extends AbstractController
         StorefrontProductReviews $productReviews,
         ProductIngredientPresenter $ingredientPresenter,
         ProductSlugger $productSlugger,
+        EcommercePayloadBuilder $analytics,
     ): Response
     {
         $product = $catalog->findEntity($id);
@@ -87,6 +89,7 @@ final class BoutiqueController extends AbstractController
             'product' => $presentedProduct,
             'reviews' => $reviews,
             'related_products' => $catalog->related($product, user: $this->getAuthenticatedUser()),
+            'view_item_analytics' => $analytics->viewItem($product),
         ]);
     }
 

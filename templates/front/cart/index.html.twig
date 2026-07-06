@@ -4,6 +4,16 @@
 {% block storefront_data %}data-page="cart"{% endblock %}
 
 {% block main %}
+    {% set ecommerce_cart_payload = cart_analytics|default(null) %}
+    {% if ecommerce_cart_payload %}
+        <div
+            hidden
+            data-controller="ecommerce"
+            data-ecommerce-event-value="view_cart"
+            data-ecommerce-ecommerce-value="{{ ecommerce_cart_payload|json_encode|e('html_attr') }}"
+        ></div>
+    {% endif %}
+
     <section class="bg-bg-light border-b border-border-c">
         <div class="max-w-7xl mx-auto px-5 py-8">
             <p class="text-xs text-text-light font-semibold mb-2">
@@ -159,11 +169,18 @@
                     </div>
                 {% endif %}
                 {% if not cart.empty and checkout_form is defined %}
-                    {{ form_start(checkout_form, {attr: {
+                    {% set checkout_form_attr = {
                         class: 'checkout-address-form',
                         'data-turbo': 'false',
-                        'data-controller': 'checkout-address'
-                    }}) }}
+                        'data-controller': 'checkout-address',
+                        'data-action': 'submit->checkout-address#trackBeginCheckout'
+                    } %}
+                    {% if ecommerce_cart_payload %}
+                        {% set checkout_form_attr = checkout_form_attr|merge({
+                            'data-checkout-address-ecommerce-value': ecommerce_cart_payload|json_encode
+                        }) %}
+                    {% endif %}
+                    {{ form_start(checkout_form, {attr: checkout_form_attr}) }}
                         <div class="checkout-address-form__heading">
                             <span><i class="fa-solid fa-truck-fast"></i></span>
                             <div>

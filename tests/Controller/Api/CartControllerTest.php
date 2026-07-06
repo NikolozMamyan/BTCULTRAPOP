@@ -34,6 +34,18 @@ final class CartControllerTest extends WebTestCase
         self::assertSame('10,62 €', $payload['cart']['totalFormatted']);
         self::assertSame('ULTRA ICE TEA - Vegeta - Dragon Ball Z - Ice Tea Pêche 33cL', $payload['cart']['items'][0]['name']);
         self::assertNotNull($client->getCookieJar()->get('ultrapop_cart'));
+        self::assertSame('add_to_cart', $payload['analytics']['event']);
+        self::assertSame('EUR', $payload['analytics']['ecommerce']['currency']);
+        self::assertSame(2.62, $payload['analytics']['ecommerce']['value']);
+        self::assertCount(1, $payload['analytics']['ecommerce']['items']);
+
+        $analyticsItem = $payload['analytics']['ecommerce']['items'][0];
+
+        self::assertArrayHasKey('item_id', $analyticsItem);
+        self::assertSame($payload['cart']['items'][0]['name'], $analyticsItem['item_name']);
+        self::assertSame('ULTRAPOP', $analyticsItem['item_brand']);
+        self::assertArrayHasKey('price', $analyticsItem);
+        self::assertSame($payload['cart']['items'][0]['quantity'], $analyticsItem['quantity']);
 
         $updateUrl = $payload['cart']['items'][0]['updateUrl'];
 

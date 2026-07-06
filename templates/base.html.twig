@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="{{ app.request.locale }}">
     <head>
+        {% block head_tracking %}{% endblock %}
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#203263">
@@ -86,6 +87,7 @@
         {% endif %}
     </head>
     <body class="{% block body_class %}{% endblock %}">
+        {% block body_tracking %}{% endblock %}
         {% block body %}{% endblock %}
     </body>
 </html>

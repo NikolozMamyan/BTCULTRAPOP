@@ -9,6 +9,7 @@ import AdminWebComponentsController from './controllers/admin_web_components_con
 import AvatarUploadController from './controllers/avatar_upload_controller.js';
 import CartController from './controllers/cart_controller.js';
 import CheckoutAddressController from './controllers/checkout_address_controller.js';
+import EcommerceController from './controllers/ecommerce_controller.js';
 import FavoritesController from './controllers/favorites_controller.js';
 import LanguageController from './controllers/language_controller.js';
 import LicensesCarouselController from './controllers/licenses_carousel_controller.js';
@@ -30,6 +31,7 @@ app.register('admin-web-components', AdminWebComponentsController);
 app.register('avatar-upload', AvatarUploadController);
 app.register('cart', CartController);
 app.register('checkout-address', CheckoutAddressController);
+app.register('ecommerce', EcommerceController);
 app.register('favorites', FavoritesController);
 app.register('language', LanguageController);
 app.register('licenses-carousel', LicensesCarouselController);

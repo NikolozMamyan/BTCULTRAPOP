@@ -1,11 +1,29 @@
 import { Controller } from '@hotwired/stimulus';
+import { pushEcommerceEvent } from '../lib/ecommerce_tracking.js';
 
 export default class extends Controller {
     static targets = ['card', 'editor', 'editButton', 'cancelButton'];
+    static values = {
+        ecommerce: Object,
+    };
 
     connect() {
+        this.beginCheckoutTracked = false;
         this.showCard = this.hasCardTarget && !this.editorTarget.querySelector('.form-error-message, ul');
         this.render();
+    }
+
+    trackBeginCheckout() {
+        if (this.beginCheckoutTracked || !this.hasEcommerceValue) {
+            return;
+        }
+
+        if (!Array.isArray(this.ecommerceValue.items) || this.ecommerceValue.items.length === 0) {
+            return;
+        }
+
+        pushEcommerceEvent('begin_checkout', this.ecommerceValue);
+        this.beginCheckoutTracked = true;
     }
 
     edit() {

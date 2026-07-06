@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import { pushEcommerceEvent } from '../lib/ecommerce_tracking.js';
 
 export default class extends Controller {
     static values = {
@@ -92,10 +93,14 @@ export default class extends Controller {
 
         this.animateAdd(button);
 
-        await this.mutate('POST', this.addUrlValue, {
+        const response = await this.mutate('POST', this.addUrlValue, {
             productId: Number(productId),
             quantity: Number(quantity) || 1,
         }, button);
+
+        if (response?.analytics?.event && response.analytics.ecommerce) {
+            pushEcommerceEvent(response.analytics.event, response.analytics.ecommerce);
+        }
     }
 
     async updateItem(url, quantity, button = null) {
@@ -137,7 +142,7 @@ export default class extends Controller {
         const mutationKey = `${method}:${url}`;
 
         if (this.pendingMutations.has(mutationKey)) {
-            return;
+            return null;
         }
 
         ++this.stateVersion;
@@ -154,18 +159,20 @@ export default class extends Controller {
             if (response?.cart) {
                 this.render(response.cart);
                 this.showToast(response.message || this.errorValue, false);
-                return;
+                return response;
             }
 
             if (method === 'DELETE') {
                 this.setItemLinesHidden(url, false);
             }
+
+            return response;
         };
         const queuedOperation = this.mutationQueue.then(operation, operation);
         this.mutationQueue = queuedOperation.catch(() => {});
 
         try {
-            await queuedOperation;
+            return await queuedOperation;
         } finally {
             this.pendingMutations.delete(mutationKey);
             this.setMutationBusy(url, false, button);

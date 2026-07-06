@@ -11,6 +11,7 @@ use App\Exception\StripeConfigurationException;
 use App\Form\CheckoutAddressType;
 use App\Model\CheckoutAddress;
 use App\Repository\OrderRepository;
+use App\Service\Analytics\EcommercePayloadBuilder;
 use App\Service\CartManager;
 use App\Service\CartResolver;
 use App\Service\CartViewBuilder;
@@ -126,6 +127,7 @@ final class CheckoutController extends AbstractController
         Request $request,
         StripeCheckoutService $stripeCheckout,
         StripeWebhookHandler $stripeWebhookHandler,
+        EcommercePayloadBuilder $analytics,
         EntityManagerInterface $entityManager,
     ): Response {
         $order = null;
@@ -143,6 +145,7 @@ final class CheckoutController extends AbstractController
 
         return $this->render('front/checkout/success.html.twig', [
             'order' => $order,
+            'purchase_analytics' => $order instanceof Order ? $analytics->purchase($order) : null,
         ]);
     }
 
