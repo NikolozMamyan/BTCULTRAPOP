@@ -15,6 +15,30 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class StripeCheckoutServiceTest extends TestCase
 {
+    public function testSuccessUrlKeepsStripeCheckoutSessionPlaceholderUnencoded(): void
+    {
+        $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
+        $urlGenerator
+            ->expects(self::once())
+            ->method('generate')
+            ->with('app_checkout_success', [], UrlGeneratorInterface::ABSOLUTE_URL)
+            ->willReturn('https://preprod.ultrapop.com/checkout/success');
+
+        $service = new StripeCheckoutService(
+            (new \ReflectionClass(StripeConfigProvider::class))->newInstanceWithoutConstructor(),
+            $urlGenerator,
+            $this->createStub(TranslatorInterface::class),
+            new AssetUrlResolver($this->createStub(Packages::class), new RequestStack(), 'https://ultrapop.com'),
+        );
+        $method = new \ReflectionMethod($service, 'checkoutSuccessUrl');
+        $method->setAccessible(true);
+
+        self::assertSame(
+            'https://preprod.ultrapop.com/checkout/success?session_id={CHECKOUT_SESSION_ID}',
+            $method->invoke($service),
+        );
+    }
+
     public function testShippingLineUsesThePublicTruckImage(): void
     {
         $packages = $this->createMock(Packages::class);

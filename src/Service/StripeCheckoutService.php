@@ -45,11 +45,7 @@ final readonly class StripeCheckoutService
                 'order_id' => (string) $order->getId(),
                 'order_number' => $order->getOrderNumber(),
             ],
-            'success_url' => $this->urlGenerator->generate(
-                'app_checkout_success',
-                ['session_id' => '{CHECKOUT_SESSION_ID}'],
-                UrlGeneratorInterface::ABSOLUTE_URL,
-            ),
+            'success_url' => $this->checkoutSuccessUrl(),
             'cancel_url' => $this->urlGenerator->generate(
                 'app_checkout_cancel',
                 ['order' => $order->getOrderNumber()],
@@ -84,6 +80,17 @@ final readonly class StripeCheckoutService
     public function retrieveSession(string $sessionId): Session
     {
         return $this->stripe()->checkout->sessions->retrieve($sessionId, []);
+    }
+
+    private function checkoutSuccessUrl(): string
+    {
+        $successUrl = $this->urlGenerator->generate(
+            'app_checkout_success',
+            [],
+            UrlGeneratorInterface::ABSOLUTE_URL,
+        );
+
+        return $successUrl . (str_contains($successUrl, '?') ? '&' : '?') . 'session_id={CHECKOUT_SESSION_ID}';
     }
 
     /**
