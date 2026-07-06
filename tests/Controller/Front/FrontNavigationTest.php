@@ -237,15 +237,31 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorTextContains('.cart-page__summary', 'Résumé');
     }
 
-    public function testUnknownProductReturnsNotFound(): void
+    public function testUnknownPageRedirectsToShop(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/page-inconnue-ultrapop');
+
+        self::assertResponseRedirects('/boutique', 302);
+    }
+
+    public function testApiNotFoundIsNotRedirected(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/api/page-inconnue-ultrapop');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testUnknownProductRedirectsToShop(): void
     {
         $client = static::createClient();
         $this->skipIfDatabaseIsUnavailable();
         $client->request('GET', '/boutique/product/999');
 
-        self::assertResponseStatusCodeSame(404);
-        self::assertSelectorTextContains('.catalog-empty', 'Ce produit n’est pas disponible');
-        self::assertSelectorExists('.catalog-empty__action[href="/boutique"]');
+        self::assertResponseRedirects('/boutique', 302);
     }
 
     public function testLocaleCookieRendersTheStorefrontInEnglish(): void
