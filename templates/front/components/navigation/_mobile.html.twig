@@ -1,4 +1,5 @@
 {% set current_route = app.request.attributes.get('_route') %}
+{% set has_sales = storefront_has_sales() %}
 
 <nav class="mobile-app-nav lg:hidden" aria-label="{{ 'nav.mobile_label'|trans }}">
     <div class="mobile-app-nav__inner">
@@ -14,10 +15,17 @@
             <span class="mobile-app-nav__primary-icon"><i class="fa-solid fa-store"></i></span>
             <span>{{ 'common.shop'|trans }}</span>
         </a>
-        <a href="{{ path('app_front_favoris') }}" class="mobile-app-nav__item {{ current_route == 'app_front_favoris' ? 'is-active' : '' }}">
-            <span class="mobile-app-nav__icon"><i class="fa-regular fa-heart"></i></span>
-            <span>{{ 'common.favorites'|trans }}</span>
-        </a>
+        {% if has_sales %}
+            <a href="{{ path('app_front_soldes') }}" class="mobile-app-nav__item {{ current_route == 'app_front_soldes' ? 'is-active' : '' }}">
+                <span class="mobile-app-nav__icon"><i class="fa-solid fa-tags"></i></span>
+                <span>{{ 'common.sales'|trans }}</span>
+            </a>
+        {% else %}
+            <a href="{{ path('app_front_favoris') }}" class="mobile-app-nav__item {{ current_route == 'app_front_favoris' ? 'is-active' : '' }}">
+                <span class="mobile-app-nav__icon"><i class="fa-regular fa-heart"></i></span>
+                <span>{{ 'common.favorites'|trans }}</span>
+            </a>
+        {% endif %}
         <a href="{{ path('app_front_cart') }}" class="mobile-app-nav__item {{ current_route == 'app_front_cart' ? 'is-active' : '' }}">
             <span class="mobile-app-nav__icon mobile-app-nav__cart-icon">
                 <i class="fa-solid fa-bag-shopping"></i>

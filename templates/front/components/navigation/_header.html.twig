@@ -1,4 +1,5 @@
 {% set current_route = app.request.attributes.get('_route') %}
+{% set has_sales = storefront_has_sales() %}
 
 <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-border-c">
     <div class="max-w-7xl mx-auto px-5 h-[72px] flex items-center justify-between gap-6">
@@ -12,7 +13,9 @@
             {# <a href="{{ path('app_front_boutique', {filter: 'nouveautes'}) }}" class="nav-link">{{ 'common.new_products'|trans }}</a> #}
             <a href="{{ path('app_front_licences') }}" class="nav-link {{ current_route == 'app_front_licences' ? 'active' : '' }}">{{ 'common.licenses'|trans }}</a>
             {# <a href="{{ path('app_front_blog') }}" class="nav-link {{ current_route starts with 'app_front_blog' ? 'active' : '' }}">{{ 'common.blog'|trans }}</a> #}
-            {# <a href="{{ path('app_front_soldes') }}" class="nav-link text-primary {{ current_route == 'app_front_soldes' ? 'active' : '' }}">{{ 'common.sales'|trans }}</a> #}
+            {% if has_sales %}
+                <a href="{{ path('app_front_soldes') }}" class="nav-link text-primary {{ current_route == 'app_front_soldes' ? 'active' : '' }}">{{ 'common.sales'|trans }}</a>
+            {% endif %}
         </nav>
 
         <div class="flex items-center gap-2 sm:gap-3">

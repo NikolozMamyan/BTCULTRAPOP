@@ -255,6 +255,25 @@ final class ProductRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function hasSalesForStorefront(): bool
+    {
+        $count = $this->createStorefrontQueryBuilder('product', false)
+            ->select('COUNT(product.id)')
+            ->andWhere(
+                'product.status = :promo
+                OR (
+                    product.promoPriceTaxIncluded IS NOT NULL
+                    AND product.promoPriceTaxIncluded > 0
+                    AND product.promoPriceTaxIncluded < product.priceTaxIncluded
+                )',
+            )
+            ->setParameter('promo', ProductStatus::PROMO->value)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return (int) $count > 0;
+    }
+
     /**
      * @return list<Product>
      */
