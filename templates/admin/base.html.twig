@@ -14,7 +14,8 @@
         or current_route starts with 'app_admin_licenses'
         or current_route starts with 'app_admin_prices' %}
     {% set customer_menu_active = current_route starts with 'app_admin_customers' %}
-    {% set erp_menu_active = current_route starts with 'app_admin_stock' %}
+    {% set erp_menu_active = current_route starts with 'app_admin_stock'
+        or current_route starts with 'app_admin_sage_orders' %}
 
     <div class="admin-shell">
         <aside class="admin-sidebar">
@@ -111,6 +112,10 @@
                         <a href="{{ path('app_admin_stock_index') }}" class="admin-sidebar__sublink {{ current_route starts with 'app_admin_stock' ? 'is-active' : '' }}">
                             <i class="fa-solid fa-warehouse"></i>
                             <span>{{ 'admin.nav.stock'|trans }}</span>
+                        </a>
+                        <a href="{{ path('app_admin_sage_orders_index') }}" class="admin-sidebar__sublink {{ current_route starts with 'app_admin_sage_orders' ? 'is-active' : '' }}">
+                            <i class="fa-solid fa-file-invoice"></i>
+                            <span>{{ 'admin.nav.sage_orders'|trans }}</span>
                         </a>
                     </div>
                 </details>

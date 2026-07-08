@@ -1192,6 +1192,20 @@ body {
     transform: translateY(-2px);
 }
 
+.admin-action-button:disabled,
+.admin-secondary-button:disabled {
+    cursor: not-allowed;
+    opacity: .52;
+    transform: none;
+}
+
+.admin-sage-order-send {
+    min-height: 38px;
+    padding: .58rem .82rem;
+    font-size: .72rem;
+    white-space: nowrap;
+}
+
 .admin-flashes {
     display: grid;
     gap: .65rem;
