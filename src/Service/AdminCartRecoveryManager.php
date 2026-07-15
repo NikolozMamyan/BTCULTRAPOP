@@ -11,11 +11,14 @@ final readonly class AdminCartRecoveryManager
 {
     private const ABANDONED_AFTER = '-2 hours';
     private const RESEND_AFTER = '-24 hours';
+    private const PRODUCT_IMAGE_FALLBACK = 'img/products/fr-default-large_default.jpg';
 
     public function __construct(
         private Connection $connection,
         private SimpleMailerService $mailer,
         private UrlGeneratorInterface $urlGenerator,
+        private AssetUrlResolver $assetUrlResolver,
+        private ProductSlugger $productSlugger,
     ) {
     }
 
@@ -58,7 +61,7 @@ final readonly class AdminCartRecoveryManager
         $token = bin2hex(random_bytes(32));
         $cartUrl = $this->urlGenerator->generate('app_front_cart', [], UrlGeneratorInterface::ABSOLUTE_URL);
         $subject = 'Ton panier ULTRAPOP t’attend encore';
-        $products = $this->products((string) ($cart['products'] ?? ''));
+        $products = $this->products($cartId);
 
         $this->mailer->sendTemplateMessage(
             subject: $subject,
@@ -67,10 +70,12 @@ final readonly class AdminCartRecoveryManager
                 'customer_name' => trim((string) ($cart['customer_name'] ?? '')) ?: 'Hello',
                 'cart_url' => $cartUrl,
                 'products' => $products,
+                'products_count' => (int) $cart['total_quantity'],
                 'total' => $this->formatCents((int) $cart['total_cents']),
             ],
             textMessage: sprintf(
-                "Ton panier ULTRAPOP t'attend encore.\nTotal : %s\nReprendre le panier : %s",
+                "Ton panier ULTRAPOP t'attend encore.\n%s\nTotal : %s\nReprendre le panier : %s",
+                $this->productsTextSummary($products),
                 $this->formatCents((int) $cart['total_cents']),
                 $cartUrl,
             ),
@@ -106,12 +111,10 @@ final readonly class AdminCartRecoveryManager
                 u.email,
                 TRIM(CONCAT(COALESCE(u.first_name, \'\'), \' \', COALESCE(u.last_name, \'\'))) AS customer_name,
                 COALESCE(SUM(ci.quantity), 0) AS total_quantity,
-                COALESCE(SUM(ci.quantity * ci.unit_price_tax_included_cents), 0) AS total_cents,
-                GROUP_CONCAT(CONCAT(p.name, \' × \', ci.quantity) ORDER BY ci.updated_at DESC SEPARATOR \'||\') AS products
+                COALESCE(SUM(ci.quantity * ci.unit_price_tax_included_cents), 0) AS total_cents
             FROM cart c
             LEFT JOIN app_user u ON u.id = c.user_id
             LEFT JOIN cart_item ci ON ci.cart_id = c.id
-            LEFT JOIN product p ON p.id = ci.product_id
             WHERE c.id = ?
             GROUP BY c.id, c.status, c.updated_at, u.email, u.first_name, u.last_name',
             [$cartId],
@@ -135,15 +138,75 @@ final readonly class AdminCartRecoveryManager
     }
 
     /**
-     * @return list<string>
+     * @return list<array{
+     *     name: string,
+     *     quantity: int,
+     *     unit_price: string,
+     *     total: string,
+     *     image: string|null,
+     *     url: string
+     * }>
      */
-    private function products(string $products): array
+    private function products(int $cartId): array
     {
-        if ('' === trim($products)) {
-            return [];
+        $rows = $this->connection->executeQuery(
+            'SELECT
+                p.id AS product_id,
+                p.name,
+                ci.quantity,
+                ci.unit_price_tax_included_cents,
+                (ci.quantity * ci.unit_price_tax_included_cents) AS total_cents,
+                pi.path AS image_path
+            FROM cart_item ci
+            INNER JOIN product p ON p.id = ci.product_id
+            LEFT JOIN product_image pi ON pi.id = (
+                SELECT pi2.id
+                FROM product_image pi2
+                WHERE pi2.product_id = p.id
+                ORDER BY pi2.cover DESC, pi2.position ASC, pi2.id ASC
+                LIMIT 1
+            )
+            WHERE ci.cart_id = ?
+            ORDER BY ci.updated_at DESC, ci.id DESC
+            LIMIT 4',
+            [$cartId],
+        )->fetchAllAssociative();
+
+        return array_map(function (array $row): array {
+            $name = (string) $row['name'];
+            $imagePath = trim((string) ($row['image_path'] ?? ''));
+
+            return [
+                'name' => $name,
+                'quantity' => max(1, (int) $row['quantity']),
+                'unit_price' => $this->formatCents((int) $row['unit_price_tax_included_cents']),
+                'total' => $this->formatCents((int) $row['total_cents']),
+                'image' => $this->assetUrlResolver->resolveAbsolute('' !== $imagePath ? $imagePath : self::PRODUCT_IMAGE_FALLBACK),
+                'url' => $this->urlGenerator->generate(
+                    'app_front_product',
+                    [
+                        'id' => (int) $row['product_id'],
+                        'slug' => $this->productSlugger->slug($name),
+                    ],
+                    UrlGeneratorInterface::ABSOLUTE_URL,
+                ),
+            ];
+        }, $rows);
+    }
+
+    /**
+     * @param list<array{name: string, quantity: int, total: string}> $products
+     */
+    private function productsTextSummary(array $products): string
+    {
+        if ([] === $products) {
+            return '';
         }
 
-        return array_slice(array_values(array_filter(explode('||', $products))), 0, 4);
+        return implode("\n", array_map(
+            static fn (array $product): string => sprintf('- %s × %d : %s', $product['name'], $product['quantity'], $product['total']),
+            $products,
+        ));
     }
 
     private function dateFromDatabase(mixed $value): \DateTimeImmutable

@@ -14,6 +14,10 @@ use Doctrine\ORM\EntityManagerInterface;
 final readonly class AdminSageOrderManager
 {
     private const SAGE_CUSTOMER_NUMBER = '9BTOC';
+    private const DISCOUNT_REFERENCE = 'ZREMISE';
+    private const DISCOUNT_DESIGNATION = 'Remise';
+    private const SHIPPING_REFERENCE = 'ZTRANS';
+    private const SHIPPING_DESIGNATION = 'Transport Cost';
     private const DEFAULT_STATUS = 'Saisi';
     private const DEFAULT_SHIPPING_MODE = 'DDP';
     private const DEFAULT_DELIVERY_CONDITION = '';
@@ -130,9 +134,20 @@ final readonly class AdminSageOrderManager
             throw new SageApiException('admin.sage_order.error.empty_order_lines');
         }
 
+        if ($order->getDiscountAmountTaxIncludedCents() > 0) {
+            $orderLines[] = [
+                'reference' => self::DISCOUNT_REFERENCE,
+                'designation' => $this->discountDesignation($order),
+                'prixHT' => 0,
+                'quantite' => 1,
+                'quantitePreparee' => 1,
+                'tauxRemise' => $this->discountRateForSage($order->getDiscountAmountTaxIncludedCents()),
+            ];
+        }
+
         $orderLines[] = [
-            'reference' => 'ZTRANS',
-            'designation' => 'Transport Cost',
+            'reference' => self::SHIPPING_REFERENCE,
+            'designation' => self::SHIPPING_DESIGNATION,
             'prixHT' => $this->centsToAmount($order->getShippingAmountTaxIncludedCents()),
             'quantite' => 1,
             'quantitePreparee' => 1,
@@ -197,6 +212,25 @@ final readonly class AdminSageOrderManager
         }
 
         return 'ORDERITEM-' . (string) $item->getId();
+    }
+
+    private function discountDesignation(Order $order): string
+    {
+        $promoCode = trim((string) $order->getPromoCodeSnapshot());
+
+        if ('' === $promoCode) {
+            return self::DISCOUNT_DESIGNATION;
+        }
+
+        return self::DISCOUNT_DESIGNATION . ' ' . $promoCode;
+    }
+
+    private function discountRateForSage(int $discountCents): string
+    {
+        $amount = number_format($discountCents / 100, 2, '.', '');
+        $amount = rtrim(rtrim($amount, '0'), '.');
+
+        return $amount . 'F';
     }
 
     private function shippingInstruction(Order $order): string

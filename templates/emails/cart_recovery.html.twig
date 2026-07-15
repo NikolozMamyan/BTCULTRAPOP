@@ -3,29 +3,153 @@
 {% block title %}Ton panier ULTRAPOP t’attend{% endblock %}
 
 {% block content %}
-    <p style="margin:0 0 8px;color:#e82118;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;">Panier sauvegardé</p>
-    <h1 style="margin:0 0 16px;color:#203263;font-size:30px;line-height:1.15;">{{ customer_name }}, ton panier t’attend encore.</h1>
-    <p style="margin:0 0 22px;color:#475467;font-size:16px;line-height:1.7;">
-        Tu avais repéré quelques produits ULTRAPOP. On les garde au chaud pour que tu puisses reprendre tranquillement ta commande.
-    </p>
+    {% set product_count = products_count|default(products|length) %}
 
-    {% if products %}
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 22px;border-collapse:collapse;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+
+        <!-- HERO -->
+        <tr>
+            <td style="padding:0;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;border-radius:32px;overflow:hidden;background:#121a38;">
+                    <tr>
+                        <td bgcolor="#192a62" style="padding:36px 30px 30px;background:linear-gradient(135deg,#192a62 0%,#e82118 55%,#ffcc00 100%);">
+                            <span style="display:inline-block;margin:0 0 16px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.16);color:#ffffff;font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;">
+                                <span style="color:#ffcc00;">●</span> Panier sauvegardé
+                            </span>
+                            <h1 style="margin:0;color:#ffffff;font-size:32px;line-height:1.15;font-weight:900;letter-spacing:-.01em;">
+                                {{ customer_name }}, tes produits ULTRAPOP&nbsp;t’attendent.
+                            </h1>
+                            <p style="margin:14px 0 0;color:#fff4f2;font-size:16px;line-height:1.6;">
+                                Reprends ta commande en un clic avant que ton panier ne disparaisse.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td bgcolor="#101933" style="padding:16px 14px;background:#101933;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                                <tr>
+                                    <td width="33.33%" align="center" style="padding:4px;">
+                                        <span style="display:block;padding:9px 6px;border-radius:14px;background:rgba(255,255,255,.06);color:#ffffff;font-size:12px;font-weight:800;">✓ Panier prêt</span>
+                                    </td>
+                                    <td width="33.33%" align="center" style="padding:4px;">
+                                        <span style="display:block;padding:9px 6px;border-radius:14px;background:rgba(255,255,255,.06);color:#ffffff;font-size:12px;font-weight:800;">✓ Paiement sécurisé</span>
+                                    </td>
+                                    <td width="33.34%" align="center" style="padding:4px;">
+                                        <span style="display:block;padding:9px 6px;border-radius:14px;background:rgba(255,255,255,.06);color:#ffffff;font-size:12px;font-weight:800;">✓ Livraison suivie</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- ACCÈS RAPIDE -->
+        <tr>
+            <td align="center" style="padding:16px 0 0;">
+                <a href="{{ cart_url }}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#fff1f0;color:#e82118;text-decoration:none;font-size:13px;font-weight:900;">
+                    Accès direct au panier →
+                </a>
+            </td>
+        </tr>
+
+        <!-- TITRE SECTION -->
+        <tr>
+            <td style="padding:28px 0 10px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                    <tr>
+                        <td style="color:#203263;font-size:22px;line-height:1.25;font-weight:900;">
+                            Dans ton panier
+                        </td>
+                        <td align="right">
+                            <span style="display:inline-block;padding:5px 12px;border-radius:999px;background:#fff1f0;color:#e82118;font-size:12px;font-weight:900;">
+                                {{ product_count }} produit{% if product_count > 1 %}s{% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        {% if products %}
             {% for product in products %}
                 <tr>
-                    <td style="padding:12px 0;border-bottom:1px solid #eaecf0;color:#203263;font-size:14px;font-weight:800;">
-                        {{ product }}
+                    <td style="padding:8px 0;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;border:1px solid #e6ebf3;border-radius:24px;background:#ffffff;box-shadow:0 14px 34px rgba(32,50,99,.08);overflow:hidden;">
+                            <tr>
+                                <td width="6" style="padding:0;background:#e82118;font-size:0;line-height:0;">&nbsp;</td>
+                                <td width="112" valign="middle" style="padding:16px;background:#f6f8fc;">
+                                    <a href="{{ product.url }}" style="display:block;text-decoration:none;">
+                                        <img src="{{ product.image }}" width="82" height="82" alt="{{ product.name }}" style="display:block;width:82px;max-width:82px;height:82px;object-fit:contain;border:0;margin:0 auto;border-radius:16px;background:#ffffff;">
+                                    </a>
+                                </td>
+                                <td valign="middle" style="padding:16px 14px 16px 18px;">
+                                    <p style="margin:0 0 8px;color:#e82118;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;">
+                                        Sélection ULTRAPOP
+                                    </p>
+                                    <a href="{{ product.url }}" style="display:block;color:#203263;text-decoration:none;font-size:16px;line-height:1.35;font-weight:900;">
+                                        {{ product.name }}
+                                    </a>
+                                    <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-top:10px;">
+                                        <tr>
+                                            <td style="padding:4px 8px 4px 0;">
+                                                <span style="display:inline-block;padding:4px 9px;border-radius:8px;background:#f5f8ff;color:#203263;font-size:12px;font-weight:800;">Qté {{ product.quantity }}</span>
+                                            </td>
+                                            <td style="padding:4px 0;">
+                                                <span style="display:inline-block;padding:4px 9px;border-radius:8px;background:#f5f8ff;color:#203263;font-size:12px;font-weight:800;">{{ product.unit_price }} / unité</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td width="96" valign="middle" align="right" style="padding:16px 18px 16px 8px;">
+                                    <span style="display:inline-block;padding:7px 10px;border-radius:999px;background:#fff1f0;color:#e82118;font-size:12px;font-weight:900;">
+                                        x{{ product.quantity }}
+                                    </span>
+                                    <p style="margin:12px 0 0;color:#203263;font-size:17px;font-weight:900;white-space:nowrap;">
+                                        {{ product.total }}
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
                 </tr>
             {% endfor %}
-        </table>
-    {% endif %}
+        {% endif %}
 
-    <p style="margin:0 0 22px;color:#203263;font-size:18px;font-weight:900;">
-        Total estimé : {{ total }}
-    </p>
+        <!-- TOTAL + CTA -->
+        <tr>
+            <td style="padding:18px 0 0;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;border-radius:26px;background:#f5f8ff;border:1px solid #e2e8f5;">
+                    <tr>
+                        <td style="padding:24px;">
+                            <p style="margin:0;color:#667085;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;">
+                                Total estimé
+                            </p>
+                            <p style="margin:8px 0 0;color:#203263;font-size:32px;line-height:1;font-weight:900;">
+                                {{ total }}
+                            </p>
+                        </td>
+                        <td align="right" style="padding:24px;">
+                            <a href="{{ cart_url }}" style="display:inline-block;padding:16px 26px;border-radius:999px;background:#e82118;color:#ffffff;text-decoration:none;font-size:15px;font-weight:900;box-shadow:0 12px 28px rgba(232,33,24,.3);">
+                                Finaliser mon panier →
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
 
-    <a href="{{ cart_url }}" style="display:inline-block;padding:14px 22px;border-radius:999px;background:#e82118;color:#ffffff;text-decoration:none;font-weight:900;">
-        Reprendre mon panier
-    </a>
+        <!-- NOTE FOOTER -->
+        <tr>
+            <td style="padding:26px 8px 0;">
+                <p style="margin:0;color:#667085;font-size:14px;line-height:1.65;text-align:center;">
+                    Un clic suffit pour retrouver ton panier, vérifier les quantités et terminer ta commande.
+                </p>
+                <p style="margin:10px 0 0;color:#98a2b3;font-size:12px;line-height:1.55;text-align:center;">
+                    Si tu as déjà finalisé ton achat, tu peux ignorer ce message.
+                </p>
+            </td>
+        </tr>
+    </table>
 {% endblock %}

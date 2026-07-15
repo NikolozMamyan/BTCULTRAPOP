@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\License;
 use App\Entity\Order;
 use App\Entity\OrderItem;
+use App\Entity\PromoCode;
 use App\Entity\Product;
 use App\Entity\SageOrderExport;
 use App\Service\AdminSageOrderManager;
@@ -89,6 +90,41 @@ final class AdminSageOrderManagerTest extends TestCase
         self::assertSame(200, $export->getSageStatusCode());
         self::assertSame('{"numClient":"9BTOC"}', $export->getPayload());
         self::assertSame('{"ok":true}', $export->getSageResponse());
+    }
+
+    public function testItAddsDiscountLineWhenOrderHasPromoCodeDiscount(): void
+    {
+        $order = (new Order())
+            ->setOrderNumber('UP-20260707-003')
+            ->setDiscountAmountTaxIncludedCents(1000)
+            ->setPromoCode((new PromoCode())->setCode('WELCOME10'));
+        $order->markPaid(new \DateTimeImmutable('2026-07-07 14:00:00', new \DateTimeZone('Europe/Paris')));
+        $order->addItem(
+            (new OrderItem())
+                ->setProduct($this->product())
+                ->setProductName('ULTRAPOP - Naruto - Tropical 33cl')
+                ->setProductReference('28989')
+                ->setQuantity(1)
+                ->setUnitPriceTaxExcludedCents(108)
+                ->setUnitPriceTaxIncludedCents(131),
+        );
+        $order->refreshTotals();
+
+        $manager = (new \ReflectionClass(AdminSageOrderManager::class))->newInstanceWithoutConstructor();
+        \assert($manager instanceof AdminSageOrderManager);
+
+        $payload = $manager->payload($order);
+
+        self::assertCount(3, $payload['orderLines']);
+        self::assertSame([
+            'reference' => 'ZREMISE',
+            'designation' => 'Remise WELCOME10',
+            'prixHT' => 0,
+            'quantite' => 1,
+            'quantitePreparee' => 1,
+            'tauxRemise' => '10F',
+        ], $payload['orderLines'][1]);
+        self::assertSame('ZTRANS', $payload['orderLines'][2]['reference']);
     }
 
     private function product(): Product
