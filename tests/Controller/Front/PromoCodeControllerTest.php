@@ -70,6 +70,8 @@ final class PromoCodeControllerTest extends WebTestCase
             self::assertResponseIsSuccessful();
 
             $cartPage = $client->request('GET', '/cart');
+            self::assertSelectorTextContains('.cart-promo--page .cart-promo__heading', 'Votre avantage vous attend');
+            self::assertSelectorExists('.cart-promo--drawer form[action="/cart/code-promo"]');
             $promoToken = $cartPage->filter('form[action="/cart/code-promo"] input[name="_csrf_token"]')->attr('value');
             $client->request(
                 'POST',
@@ -91,6 +93,7 @@ final class PromoCodeControllerTest extends WebTestCase
 
             $client->request('GET', '/cart');
             self::assertSelectorTextContains('.cart-promo__active', $code);
+            self::assertSelectorCount(2, '.cart-promo__active');
             self::assertSelectorTextContains('#cart-page-discount', '-1,20 €');
             self::assertSelectorTextContains('#cart-page-total', '16,80 €');
         } finally {

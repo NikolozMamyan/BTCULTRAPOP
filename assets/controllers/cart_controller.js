@@ -268,7 +268,6 @@ export default class extends Controller {
         this.setText('cart-discount-label', cart.discountLabel || '');
         this.setText('cart-page-discount-label', cart.discountLabel || '');
         this.setText('cart-page-promo-code', cart.promoCode || '');
-        this.setText('cart-page-active-discount', cart.discountFormatted);
         this.renderPromoControls(cart);
         this.syncPendingMutations();
     }
@@ -284,19 +283,22 @@ export default class extends Controller {
     }
 
     renderPromoControls(cart) {
-        const container = document.getElementById('cart-promo');
+        document.querySelectorAll('[data-cart-promo]').forEach((container) => {
+            const body = container.querySelector('[data-cart-promo-body]');
 
-        if (!container) {
-            return;
-        }
+            if (!body) {
+                return;
+            }
 
-        if (cart.promoCode) {
-            container.innerHTML = `
+            container.classList.toggle('hidden', Boolean(cart.empty));
+
+            if (cart.promoCode) {
+                body.innerHTML = `
                 <div class="cart-promo__active">
                     <span>
-                        <i class="fa-solid fa-ticket"></i>
+                        <i class="fa-solid fa-circle-check"></i>
                         <strong>${this.escape(cart.promoCode)}</strong>
-                        <small id="cart-page-active-discount">${this.escape(cart.discountFormatted)}</small>
+                        <small data-cart-promo-active-discount>${this.escape(cart.discountFormatted)}</small>
                     </span>
                     <form action="${this.escapeAttribute(container.dataset.removeUrl)}" method="post" data-action="submit->cart#removePromo">
                         <input type="hidden" name="_csrf_token" value="${this.escapeAttribute(container.dataset.csrfToken)}">
@@ -306,19 +308,21 @@ export default class extends Controller {
                     </form>
                 </div>
             `;
-            return;
-        }
+                return;
+            }
 
-        container.innerHTML = `
+            const inputId = `${container.dataset.prefix || 'cart'}-cart-promo-code`;
+            body.innerHTML = `
             <form action="${this.escapeAttribute(container.dataset.applyUrl)}" method="post" class="cart-promo__form" data-action="submit->cart#applyPromo">
                 <input type="hidden" name="_csrf_token" value="${this.escapeAttribute(container.dataset.csrfToken)}">
-                <label for="cart-promo-code">${this.escape(container.dataset.label)}</label>
+                <label for="${this.escapeAttribute(inputId)}">${this.escape(container.dataset.label)}</label>
                 <div>
-                    <input id="cart-promo-code" name="promo_code" type="text" required autocomplete="off" placeholder="${this.escapeAttribute(container.dataset.placeholder)}">
+                    <input id="${this.escapeAttribute(inputId)}" name="promo_code" type="text" required autocomplete="off" placeholder="${this.escapeAttribute(container.dataset.placeholder)}">
                     <button type="submit">${this.escape(container.dataset.applyLabel)}</button>
                 </div>
             </form>
         `;
+        });
     }
 
     renderShippingMeter(prefix, cart) {

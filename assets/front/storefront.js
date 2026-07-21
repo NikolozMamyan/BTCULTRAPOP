@@ -46,6 +46,7 @@ function initializeStorefront() {
     let toastTimer;
     let promoPopupTimer;
     let promoPopupCloseTimer;
+    let promoPopupTracking = Promise.resolve();
     let slideIndex = 0;
 
     const on = (target, eventName, listener, options = {}) => {
@@ -110,6 +111,32 @@ function initializeStorefront() {
         }
     };
 
+    const trackPromoPopupEngagement = (eventName) => {
+        const url = promoPopup?.dataset.engagementUrl;
+        const csrfToken = promoPopup?.dataset.engagementCsrf;
+        const version = promoPopup?.dataset.version;
+
+        if (!url || !csrfToken || !version) {
+            return promoPopupTracking;
+        }
+
+        promoPopupTracking = promoPopupTracking
+            .catch(() => {})
+            .then(() => fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken,
+                },
+                body: JSON.stringify({ event: eventName, version }),
+            }))
+            .catch(() => {});
+
+        return promoPopupTracking;
+    };
+
     const closePromoPopup = (remember = true) => {
         if (!promoPopup || promoPopup.classList.contains('hidden')) {
             return;
@@ -147,6 +174,7 @@ function initializeStorefront() {
             promoPopup.classList.add('is-open');
             promoPopup.querySelector('[data-promo-popup-copy]')?.focus();
         });
+        trackPromoPopupEngagement('viewed');
         setBodyLocked(true);
     };
 
@@ -181,6 +209,7 @@ function initializeStorefront() {
             status.classList.remove('is-error');
             status.textContent = promoPopup.dataset.copySuccess || '';
             rememberPromoPopup();
+            trackPromoPopupEngagement('copied');
             promoPopupCloseTimer = window.setTimeout(() => closePromoPopup(false), 1100);
         } catch (error) {
             status.classList.add('is-error');

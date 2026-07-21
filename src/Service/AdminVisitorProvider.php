@@ -90,6 +90,10 @@ final readonly class AdminVisitorProvider
                 sv.human_score,
                 sv.suspected_bot,
                 sv.bot_reason,
+                sv.popup_promo_code,
+                sv.popup_promo_version,
+                sv.popup_promo_viewed_at,
+                sv.popup_promo_copied_at,
                 sv.user_id,
                 u.email,
                 u.first_name,
@@ -103,7 +107,7 @@ final readonly class AdminVisitorProvider
             LEFT JOIN cart c ON c.id = sv.cart_id
             LEFT JOIN cart_item ci ON ci.cart_id = c.id
             WHERE sv.last_seen_at >= ?
-            GROUP BY sv.id, sv.visitor_token, sv.visitor_type, sv.device_name, sv.current_path, sv.current_route, sv.referer, sv.first_seen_at, sv.last_seen_at, sv.hit_count, sv.human_score, sv.suspected_bot, sv.bot_reason, sv.user_id, u.email, u.first_name, u.last_name, c.id, c.status
+            GROUP BY sv.id, sv.visitor_token, sv.visitor_type, sv.device_name, sv.current_path, sv.current_route, sv.referer, sv.first_seen_at, sv.last_seen_at, sv.hit_count, sv.human_score, sv.suspected_bot, sv.bot_reason, sv.popup_promo_code, sv.popup_promo_version, sv.popup_promo_viewed_at, sv.popup_promo_copied_at, sv.user_id, u.email, u.first_name, u.last_name, c.id, c.status
             ORDER BY sv.last_seen_at DESC, sv.id DESC
             LIMIT ' . self::MAX_ROWS,
             [$threshold->format('Y-m-d H:i:s')],
@@ -136,6 +140,10 @@ final readonly class AdminVisitorProvider
             'human_score' => (int) ($row['human_score'] ?? 0),
             'suspected_bot' => (bool) ($row['suspected_bot'] ?? false),
             'bot_reason' => trim((string) ($row['bot_reason'] ?? '')),
+            'promo_code' => trim((string) ($row['popup_promo_code'] ?? '')),
+            'promo_viewed_at' => $this->nullableDateFromDatabase($row['popup_promo_viewed_at'] ?? null),
+            'promo_copied' => null !== ($row['popup_promo_copied_at'] ?? null),
+            'promo_copied_at' => $this->nullableDateFromDatabase($row['popup_promo_copied_at'] ?? null),
             'cart_id' => null === $row['cart_id'] ? null : (int) $row['cart_id'],
             'cart_status' => $row['cart_status'],
             'cart_quantity' => (int) $row['cart_quantity'],
@@ -199,6 +207,15 @@ final readonly class AdminVisitorProvider
         }
 
         return (new \DateTimeImmutable((string) $value, $this->storageTimezone()))->setTimezone($this->displayTimezone());
+    }
+
+    private function nullableDateFromDatabase(mixed $value): ?\DateTimeImmutable
+    {
+        if (null === $value || (is_string($value) && '' === trim($value))) {
+            return null;
+        }
+
+        return $this->dateFromDatabase($value);
     }
 
     private function shortToken(mixed $token): string

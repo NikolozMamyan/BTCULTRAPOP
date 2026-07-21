@@ -6,6 +6,8 @@
     aria-hidden="true"
     aria-labelledby="visitor-promo-popup-title"
     data-version="{{ popup.version }}"
+    data-engagement-url="{{ path('app_api_popup_engagement') }}"
+    data-engagement-csrf="{{ csrf_token('popup_engagement') }}"
     data-copy-success="{{ 'popup.copy.success'|trans }}"
     data-copy-error="{{ 'popup.copy.error'|trans }}"
 >

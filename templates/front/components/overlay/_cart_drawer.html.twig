@@ -19,6 +19,11 @@
             <span id="cart-discount-label">{{ 'promo.cart.discount'|trans }}</span>
             <span id="cart-discount" class="font-bold">0,00 €</span>
         </div>
+        {% include 'front/components/cart/_promo_code.html.twig' with {
+            prefix: 'drawer',
+            variant: 'drawer',
+            cart: cart|default(null)
+        } only %}
         <a href="{{ path('app_front_cart') }}" class="cart-drawer__checkout">
             <span>{{ 'cart.go_to_cart'|trans }}</span>
             <i class="fa-solid fa-arrow-right"></i>

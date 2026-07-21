@@ -1,0 +1,51 @@
+{% set promo_cart = cart|default(null) %}
+{% set promo_empty = promo_cart ? promo_cart.empty : true %}
+{% set promo_variant = variant|default('page') %}
+
+<div
+    class="cart-promo cart-promo--{{ promo_variant }} {{ promo_empty ? 'hidden' : '' }}"
+    data-cart-promo
+    data-prefix="{{ prefix }}"
+    data-apply-url="{{ path('app_front_cart_promo_apply') }}"
+    data-remove-url="{{ path('app_front_cart_promo_remove') }}"
+    data-csrf-token="{{ csrf_token('cart_promo') }}"
+    data-label="{{ 'promo.cart.label'|trans }}"
+    data-placeholder="{{ 'promo.cart.placeholder'|trans }}"
+    data-apply-label="{{ 'promo.cart.apply'|trans }}"
+    data-remove-label="{{ 'promo.cart.remove'|trans }}"
+>
+    <div class="cart-promo__heading">
+        <span><i class="fa-solid fa-ticket"></i></span>
+        <div>
+            <strong>{{ 'promo.cart.title'|trans }}</strong>
+            <small>{{ 'promo.cart.help'|trans }}</small>
+        </div>
+    </div>
+
+    <div data-cart-promo-body>
+        {% if promo_cart and promo_cart.promoCode %}
+            <div class="cart-promo__active">
+                <span>
+                    <i class="fa-solid fa-circle-check"></i>
+                    <strong>{{ promo_cart.promoCode }}</strong>
+                    <small data-cart-promo-active-discount>{{ promo_cart.discountFormatted }}</small>
+                </span>
+                <form action="{{ path('app_front_cart_promo_remove') }}" method="post" data-action="submit->cart#removePromo">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('cart_promo') }}">
+                    <button type="submit" aria-label="{{ 'promo.cart.remove'|trans }}">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <form action="{{ path('app_front_cart_promo_apply') }}" method="post" class="cart-promo__form" data-action="submit->cart#applyPromo">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('cart_promo') }}">
+                <label for="{{ prefix }}-cart-promo-code">{{ 'promo.cart.label'|trans }}</label>
+                <div>
+                    <input id="{{ prefix }}-cart-promo-code" name="promo_code" type="text" required autocomplete="off" placeholder="{{ 'promo.cart.placeholder'|trans }}">
+                    <button type="submit">{{ 'promo.cart.apply'|trans }}</button>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+</div>

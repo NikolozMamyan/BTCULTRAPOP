@@ -63,6 +63,7 @@
                         <span>{{ 'admin.viewer.table.visitor'|trans }}</span>
                         <span>{{ 'admin.viewer.table.page'|trans }}</span>
                         <span>{{ 'admin.viewer.table.cart'|trans }}</span>
+                        <span>{{ 'admin.viewer.table.promo_code'|trans }}</span>
                         <span>{{ 'admin.viewer.table.device'|trans }}</span>
                         <span>{{ 'admin.viewer.table.last_seen'|trans }}</span>
                     </div>
@@ -99,6 +100,28 @@
                                     <small>{{ visitor.cart_total }} · {{ visitor.cart_status }}</small>
                                 {% else %}
                                     <span class="admin-crm-muted">{{ 'admin.viewer.table.no_cart'|trans }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="admin-viewer-promo">
+                                {% if visitor.promo_code %}
+                                    <strong><i class="fa-solid fa-ticket"></i> {{ visitor.promo_code }}</strong>
+                                    {% if visitor.promo_copied %}
+                                        <span class="admin-viewer-promo__status is-copied">
+                                            <i class="fa-solid fa-check"></i>
+                                            {{ 'admin.viewer.table.promo_copied'|trans }}
+                                        </span>
+                                        <small>{{ 'admin.viewer.table.promo_copied_at'|trans({'%time%': visitor.promo_copied_at|date('H:i:s')}) }}</small>
+                                    {% else %}
+                                        <span class="admin-viewer-promo__status is-pending">
+                                            <i class="fa-solid fa-clock"></i>
+                                            {{ 'admin.viewer.table.promo_not_copied'|trans }}
+                                        </span>
+                                        {% if visitor.promo_viewed_at %}
+                                            <small>{{ 'admin.viewer.table.promo_viewed_at'|trans({'%time%': visitor.promo_viewed_at|date('H:i:s')}) }}</small>
+                                        {% endif %}
+                                    {% endif %}
+                                {% else %}
+                                    <span class="admin-crm-muted">{{ 'admin.viewer.table.promo_not_seen'|trans }}</span>
                                 {% endif %}
                             </div>
                             <div class="admin-crm-date">
