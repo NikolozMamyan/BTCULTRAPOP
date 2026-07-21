@@ -73,6 +73,10 @@
                     <i class="fa-solid fa-ticket"></i>
                     <span>{{ 'admin.nav.promo_codes'|trans }}</span>
                 </a>
+                <a href="{{ path('app_admin_popup_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_popup' ? 'is-active' : '' }}">
+                    <i class="fa-solid fa-window-restore"></i>
+                    <span>{{ 'admin.nav.popup'|trans }}</span>
+                </a>
                 <a href="{{ path('app_admin_web_components_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_web_components' ? 'is-active' : '' }}">
                     <i class="fa-solid fa-puzzle-piece"></i>
                     <span>{{ 'admin.nav.web_components'|trans }}</span>

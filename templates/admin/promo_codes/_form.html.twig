@@ -10,12 +10,21 @@
 
         {{ form_errors(form) }}
 
-        <div class="admin-form-grid admin-form-grid--three">
+        <div class="admin-form-grid admin-form-grid--two">
             <div class="admin-field">
                 {{ form_label(form.code) }}
                 {{ form_widget(form.code) }}
                 {{ form_errors(form.code) }}
             </div>
+            <div class="admin-field">
+                {{ form_label(form.applicationType) }}
+                {{ form_widget(form.applicationType) }}
+                {{ form_errors(form.applicationType) }}
+                <small>{{ 'admin.promo.form.application_help'|trans }}</small>
+            </div>
+        </div>
+
+        <div class="admin-form-grid admin-form-grid--two">
             <div class="admin-field">
                 {{ form_label(form.discountType) }}
                 {{ form_widget(form.discountType) }}

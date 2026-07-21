@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\PromoApplicationType;
 use App\Enum\PromoDiscountType;
 use App\Repository\PromoCodeRepository;
 use Doctrine\ORM\Mapping as ORM;
@@ -29,6 +30,9 @@ class PromoCode
 
     #[ORM\Column(length: 20, enumType: PromoDiscountType::class)]
     private PromoDiscountType $discountType = PromoDiscountType::PERCENTAGE;
+
+    #[ORM\Column(length: 20, enumType: PromoApplicationType::class, options: ['default' => 'products'])]
+    private PromoApplicationType $applicationType = PromoApplicationType::PRODUCTS;
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     #[Assert\Positive]
@@ -98,6 +102,23 @@ class PromoCode
         $this->discountType = $discountType;
 
         return $this;
+    }
+
+    public function getApplicationType(): PromoApplicationType
+    {
+        return $this->applicationType;
+    }
+
+    public function setApplicationType(PromoApplicationType $applicationType): self
+    {
+        $this->applicationType = $applicationType;
+
+        return $this;
+    }
+
+    public function appliesToShipping(): bool
+    {
+        return PromoApplicationType::SHIPPING === $this->applicationType;
     }
 
     public function getValue(): string
@@ -216,19 +237,23 @@ class PromoCode
         return null !== $user->getId() && $this->assignedUser->getId() === $user->getId();
     }
 
-    public function calculateDiscountCents(int $subtotalCents): int
+    public function calculateDiscountCents(int $eligibleAmountCents): int
     {
-        $subtotalCents = max(0, $subtotalCents);
+        $eligibleAmountCents = max(0, $eligibleAmountCents);
 
-        if ($subtotalCents <= 50) {
+        if ($eligibleAmountCents <= 0 || (!$this->appliesToShipping() && $eligibleAmountCents <= 50)) {
             return 0;
         }
 
         $discount = PromoDiscountType::PERCENTAGE === $this->discountType
-            ? (int) round($subtotalCents * ((float) $this->value / 100))
+            ? (int) round($eligibleAmountCents * ((float) $this->value / 100))
             : (int) round((float) $this->value * 100);
 
-        return min(max(0, $discount), $subtotalCents - 50);
+        $maximumDiscount = $this->appliesToShipping()
+            ? $eligibleAmountCents
+            : $eligibleAmountCents - 50;
+
+        return min(max(0, $discount), $maximumDiscount);
     }
 
     public function getCreatedAt(): \DateTimeImmutable

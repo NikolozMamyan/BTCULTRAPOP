@@ -122,7 +122,7 @@
                         <dd id="cart-page-shipping" class="{{ cart.shippingFree ? 'is-free' : '' }}">{{ cart.shippingDisplay }}</dd>
                     </div>
                     <div id="cart-page-discount-row" class="cart-promo-discount {{ cart.hasDiscount ? '' : 'hidden' }}">
-                        <dt>{{ 'promo.cart.discount'|trans }} <small id="cart-page-promo-code">{{ cart.promoCode }}</small></dt>
+                        <dt><span id="cart-page-discount-label">{{ cart.discountLabel }}</span> <small id="cart-page-promo-code">{{ cart.promoCode }}</small></dt>
                         <dd id="cart-page-discount">{{ cart.discountFormatted }}</dd>
                     </div>
                     <div class="cart-page__summary-total">

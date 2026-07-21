@@ -1,0 +1,89 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.popup.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section>
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.popup.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.popup.index.title'|trans }}</h1>
+                <p>{{ 'admin.popup.index.subtitle'|trans }}</p>
+            </div>
+            <span class="admin-order-badge {{ settings.active ? 'admin-order-badge--paid' : 'admin-order-badge--cancelled' }}">
+                {{ (settings.active ? 'admin.popup.status.active' : 'admin.popup.status.inactive')|trans }}
+            </span>
+        </div>
+
+        {{ form_start(form, {attr: {class: 'admin-category-form'}}) }}
+            <div class="admin-popup-layout">
+                <article class="admin-panel admin-form-card">
+                    <div class="admin-form-card__heading">
+                        <span><i class="fa-solid fa-window-restore"></i></span>
+                        <div>
+                            <strong>{{ 'admin.popup.form.configuration_title'|trans }}</strong>
+                            <small>{{ 'admin.popup.form.configuration_text'|trans }}</small>
+                        </div>
+                    </div>
+
+                    {{ form_errors(form) }}
+
+                    <div class="admin-field admin-field--switch">
+                        {{ form_widget(form.active) }}
+                        {{ form_label(form.active) }}
+                        {{ form_errors(form.active) }}
+                    </div>
+
+                    <div class="admin-field">
+                        {{ form_label(form.title) }}
+                        {{ form_widget(form.title) }}
+                        {{ form_errors(form.title) }}
+                    </div>
+
+                    <div class="admin-field">
+                        {{ form_label(form.message) }}
+                        {{ form_widget(form.message) }}
+                        {{ form_errors(form.message) }}
+                    </div>
+
+                    <div class="admin-field">
+                        {{ form_label(form.promoCode) }}
+                        {{ form_widget(form.promoCode) }}
+                        {{ form_errors(form.promoCode) }}
+                        <small>{{ 'admin.popup.form.promo_code_help'|trans }}</small>
+                    </div>
+
+                    <div class="admin-category-warning">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>{{ 'admin.popup.form.visitor_help'|trans }}</span>
+                    </div>
+
+                    <div class="admin-product-form__actions">
+                        <button type="submit" class="admin-action-button">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            {{ 'admin.popup.form.save'|trans }}
+                        </button>
+                    </div>
+                </article>
+
+                <aside class="admin-popup-preview" aria-label="{{ 'admin.popup.preview.label'|trans }}">
+                    <span class="admin-popup-preview__eyebrow">{{ 'admin.popup.preview.eyebrow'|trans }}</span>
+                    <div class="admin-popup-preview__card">
+                        <span class="admin-popup-preview__spark"><i class="fa-solid fa-sparkles"></i></span>
+                        <strong>{{ settings.title }}</strong>
+                        <p>{{ settings.message }}</p>
+                        {% if settings.promoCode %}
+                            <span class="admin-popup-preview__target">
+                                <i class="fa-solid {{ settings.promoCode.appliesToShipping ? 'fa-truck-fast' : 'fa-bag-shopping' }}"></i>
+                                {{ (settings.promoCode.appliesToShipping ? 'admin.promo.application.shipping' : 'admin.promo.application.products')|trans }}
+                            </span>
+                            <span class="admin-popup-preview__code">{{ settings.promoCode.code }} <i class="fa-regular fa-copy"></i></span>
+                        {% else %}
+                            <span class="admin-popup-preview__empty">{{ 'admin.popup.preview.no_code'|trans }}</span>
+                        {% endif %}
+                    </div>
+                </aside>
+            </div>
+        {{ form_end(form) }}
+    </section>
+{% endblock %}

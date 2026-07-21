@@ -23,6 +23,7 @@
 {% endblock %}
 
 {% block body %}
+    {% set promotional_popup = app.user ? null : storefront_popup() %}
     <div
         id="storefront-app"
         data-controller="cart favorites product-preview"
@@ -67,6 +68,9 @@
         {% include 'front/components/overlay/_product_preview.html.twig' %}
         {% include 'front/components/overlay/_cart_drawer.html.twig' %}
         {% include 'front/components/overlay/_toast.html.twig' %}
+        {% if promotional_popup %}
+            {% include 'front/components/overlay/_visitor_promo_popup.html.twig' with {popup: promotional_popup} only %}
+        {% endif %}
         {% include 'front/components/overlay/_back_to_top.html.twig' %}
         {% include 'front/components/_footer.html.twig' %}
         {% include 'front/components/navigation/_mobile.html.twig' %}

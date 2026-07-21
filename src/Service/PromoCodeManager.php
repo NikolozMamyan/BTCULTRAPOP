@@ -10,8 +10,10 @@ use Doctrine\ORM\EntityManagerInterface;
 
 final readonly class PromoCodeManager
 {
-    public function __construct(private EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private ShippingRateCalculator $shippingRateCalculator,
+    ) {
     }
 
     public function apply(Cart $cart, PromoCode $promoCode, ?User $user): int
@@ -22,10 +24,10 @@ final readonly class PromoCodeManager
             throw new \InvalidArgumentException($error);
         }
 
-        $discount = $promoCode->calculateDiscountCents($cart->getTotalTaxIncludedCents());
+        $discount = $this->calculateDiscount($cart, $promoCode);
 
         if ($discount <= 0) {
-            throw new \InvalidArgumentException('promo.flash.cart_too_small');
+            throw new \InvalidArgumentException($this->ineligibleAmountMessage($promoCode));
         }
 
         $cart->setPromoCode($promoCode);
@@ -56,10 +58,10 @@ final readonly class PromoCodeManager
             return 0;
         }
 
-        $discount = $promoCode->calculateDiscountCents($cart->getTotalTaxIncludedCents());
+        $discount = $this->calculateDiscount($cart, $promoCode);
 
         if ($strict && $discount <= 0) {
-            throw new \InvalidArgumentException('promo.flash.cart_too_small');
+            throw new \InvalidArgumentException($this->ineligibleAmountMessage($promoCode));
         }
 
         return $discount;
@@ -183,5 +185,22 @@ final readonly class PromoCodeManager
         }
 
         return null;
+    }
+
+    private function calculateDiscount(Cart $cart, PromoCode $promoCode): int
+    {
+        $subtotalCents = $cart->getTotalTaxIncludedCents();
+        $eligibleAmountCents = $promoCode->appliesToShipping()
+            ? $this->shippingRateCalculator->amountForSubtotal($subtotalCents)
+            : $subtotalCents;
+
+        return $promoCode->calculateDiscountCents($eligibleAmountCents);
+    }
+
+    private function ineligibleAmountMessage(PromoCode $promoCode): string
+    {
+        return $promoCode->appliesToShipping()
+            ? 'promo.flash.shipping_already_free'
+            : 'promo.flash.cart_too_small';
     }
 }

@@ -41,7 +41,7 @@
                     {% for promo in promo_codes %}
                         <article class="admin-category-card">
                             <a href="{{ path('app_admin_promo_codes_edit', {id: promo.id}) }}" class="admin-category-card__main">
-                                <span class="admin-category-card__icon"><i class="fa-solid fa-ticket"></i></span>
+                                <span class="admin-category-card__icon"><i class="fa-solid {{ promo.appliesToShipping ? 'fa-truck-fast' : 'fa-ticket' }}"></i></span>
                                 <span>
                                     <em class="admin-category-card__level">{{ promo.active ? 'admin.promo.active.enabled'|trans : 'admin.promo.active.disabled'|trans }}</em>
                                     <strong>{{ promo.code }}</strong>
@@ -52,6 +52,7 @@
                                             -{{ promo.value|number_format(2, ',', ' ') }} €
                                         {% endif %}
                                     </small>
+                                    <small>{{ (promo.appliesToShipping ? 'admin.promo.application.shipping' : 'admin.promo.application.products')|trans }}</small>
                                     <small>{{ promo.assignedUser ? promo.assignedUser.email : 'admin.promo.index.everyone'|trans }}</small>
                                 </span>
                             </a>

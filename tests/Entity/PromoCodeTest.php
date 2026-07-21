@@ -4,6 +4,7 @@ namespace App\Tests\Entity;
 
 use App\Entity\PromoCode;
 use App\Entity\User;
+use App\Enum\PromoApplicationType;
 use App\Enum\PromoDiscountType;
 use PHPUnit\Framework\TestCase;
 
@@ -29,6 +30,22 @@ final class PromoCodeTest extends TestCase
 
         self::assertSame(950, $promoCode->calculateDiscountCents(1000));
         self::assertSame(0, $promoCode->calculateDiscountCents(50));
+    }
+
+    public function testItCanDiscountAllOrPartOfShipping(): void
+    {
+        $percentageCode = (new PromoCode())
+            ->setApplicationType(PromoApplicationType::SHIPPING)
+            ->setDiscountType(PromoDiscountType::PERCENTAGE)
+            ->setValue(50);
+        $fixedCode = (new PromoCode())
+            ->setApplicationType(PromoApplicationType::SHIPPING)
+            ->setDiscountType(PromoDiscountType::FIXED)
+            ->setValue(10);
+
+        self::assertSame(300, $percentageCode->calculateDiscountCents(600));
+        self::assertSame(600, $fixedCode->calculateDiscountCents(600));
+        self::assertSame(0, $fixedCode->calculateDiscountCents(0));
     }
 
     public function testItChecksValidityUsageAndUserAssignment(): void

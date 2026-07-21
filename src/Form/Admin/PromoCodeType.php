@@ -4,6 +4,7 @@ namespace App\Form\Admin;
 
 use App\Entity\PromoCode;
 use App\Entity\User;
+use App\Enum\PromoApplicationType;
 use App\Enum\PromoDiscountType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -35,6 +36,14 @@ final class PromoCodeType extends AbstractType
                     'admin.promo.type.fixed' => PromoDiscountType::FIXED,
                 ],
                 'choice_value' => static fn (?PromoDiscountType $type): ?string => $type?->value,
+            ])
+            ->add('applicationType', ChoiceType::class, [
+                'label' => 'admin.promo.form.application_type',
+                'choices' => [
+                    'admin.promo.application.products' => PromoApplicationType::PRODUCTS,
+                    'admin.promo.application.shipping' => PromoApplicationType::SHIPPING,
+                ],
+                'choice_value' => static fn (?PromoApplicationType $type): ?string => $type?->value,
             ])
             ->add('value', NumberType::class, [
                 'label' => 'admin.promo.form.value',

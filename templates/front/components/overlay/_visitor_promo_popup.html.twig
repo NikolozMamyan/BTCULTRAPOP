@@ -1,0 +1,54 @@
+<section
+    id="visitor-promo-popup"
+    class="visitor-promo-popup hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-labelledby="visitor-promo-popup-title"
+    data-version="{{ popup.version }}"
+    data-copy-success="{{ 'popup.copy.success'|trans }}"
+    data-copy-error="{{ 'popup.copy.error'|trans }}"
+>
+    <button type="button" class="visitor-promo-popup__backdrop" data-promo-popup-close aria-label="{{ 'common.close'|trans }}"></button>
+    <article class="visitor-promo-popup__dialog">
+        <button type="button" class="visitor-promo-popup__close" data-promo-popup-close aria-label="{{ 'common.close'|trans }}">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="visitor-promo-popup__visual" aria-hidden="true">
+            <span class="visitor-promo-popup__orb visitor-promo-popup__orb--yellow"></span>
+            <span class="visitor-promo-popup__orb visitor-promo-popup__orb--red"></span>
+            <span class="visitor-promo-popup__icon">
+                <i class="fa-solid {{ popup.shipping ? 'fa-truck-fast' : 'fa-gift' }}"></i>
+            </span>
+        </div>
+
+        <div class="visitor-promo-popup__content">
+            <span class="visitor-promo-popup__eyebrow"><i class="fa-solid fa-sparkles"></i> {{ 'popup.eyebrow'|trans }}</span>
+            <h2 id="visitor-promo-popup-title">{{ popup.title }}</h2>
+            <p>{{ popup.message }}</p>
+
+            <span class="visitor-promo-popup__offer">
+                {% if popup.percentage %}
+                    {{ 'popup.offer.percentage'|trans({'%value%': popup.value|number_format(popup.value matches '/\.00$/' ? 0 : 2, ',', ' '), '%target%': (popup.shipping ? 'popup.target.shipping' : 'popup.target.products')|trans}) }}
+                {% else %}
+                    {{ 'popup.offer.fixed'|trans({'%value%': popup.value|number_format(2, ',', ' '), '%target%': (popup.shipping ? 'popup.target.shipping' : 'popup.target.products')|trans}) }}
+                {% endif %}
+            </span>
+
+            <button type="button" class="visitor-promo-popup__code" data-promo-popup-copy data-code="{{ popup.code }}">
+                <span>
+                    <small>{{ 'popup.code.label'|trans }}</small>
+                    <strong>{{ popup.code }}</strong>
+                </span>
+                <span class="visitor-promo-popup__copy-action">
+                    <i class="fa-regular fa-copy"></i>
+                    {{ 'popup.code.copy'|trans }}
+                </span>
+            </button>
+
+            <p class="visitor-promo-popup__status" data-promo-popup-status role="status" aria-live="polite"></p>
+            <small class="visitor-promo-popup__hint">{{ 'popup.hint'|trans }}</small>
+        </div>
+    </article>
+</section>

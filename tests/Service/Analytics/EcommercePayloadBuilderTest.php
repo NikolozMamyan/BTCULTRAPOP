@@ -9,6 +9,7 @@ use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\Product;
 use App\Entity\PromoCode;
+use App\Enum\PromoApplicationType;
 use App\Enum\PromoDiscountType;
 use App\Service\Analytics\EcommercePayloadBuilder;
 use App\Service\CartManager;
@@ -100,6 +101,29 @@ final class EcommercePayloadBuilderTest extends TestCase
         self::assertSame('ORDER400', $payload['coupon']);
     }
 
+    public function testShippingCouponKeepsProductRevenueAndReportsNetShipping(): void
+    {
+        $promoCode = (new PromoCode())
+            ->setCode('SHIPFREE')
+            ->setApplicationType(PromoApplicationType::SHIPPING)
+            ->setDiscountType(PromoDiscountType::PERCENTAGE)
+            ->setValue(100);
+        $order = $this->orderWithSnapshotItem()
+            ->setOrderNumber('UP-2026-SHIPPING')
+            ->setShippingAmountTaxIncludedCents(490)
+            ->setDiscountAmountTaxIncludedCents(490)
+            ->setPromoCode($promoCode);
+        $order->refreshTotals();
+        $order->markPaid();
+
+        $payload = $this->builder()->purchase($order);
+
+        self::assertNotNull($payload);
+        self::assertSame(24.0, $payload['value']);
+        self::assertSame(0.0, $payload['shipping']);
+        self::assertSame('SHIPFREE', $payload['coupon']);
+    }
+
     public function testProductIdentifierFallsBackToInternalProductId(): void
     {
         $product = $this->product(reference: '', ean: null);
@@ -112,7 +136,10 @@ final class EcommercePayloadBuilderTest extends TestCase
 
     private function builder(): EcommercePayloadBuilder
     {
-        return new EcommercePayloadBuilder(new PromoCodeManager($this->createStub(EntityManagerInterface::class)));
+        return new EcommercePayloadBuilder(new PromoCodeManager(
+            $this->createStub(EntityManagerInterface::class),
+            new \App\Service\ShippingRateCalculator(),
+        ));
     }
 
     private function cartWithProducts(): Cart

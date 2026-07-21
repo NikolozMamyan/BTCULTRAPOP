@@ -265,6 +265,8 @@ export default class extends Controller {
         this.setShippingText('cart-page-shipping', cart);
         this.renderDiscount('cart-discount-row', 'cart-discount', cart);
         this.renderDiscount('cart-page-discount-row', 'cart-page-discount', cart);
+        this.setText('cart-discount-label', cart.discountLabel || '');
+        this.setText('cart-page-discount-label', cart.discountLabel || '');
         this.setText('cart-page-promo-code', cart.promoCode || '');
         this.setText('cart-page-active-discount', cart.discountFormatted);
         this.renderPromoControls(cart);

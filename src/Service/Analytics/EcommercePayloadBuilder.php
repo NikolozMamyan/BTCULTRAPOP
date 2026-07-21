@@ -71,9 +71,10 @@ final readonly class EcommercePayloadBuilder
         }
 
         $discountCents = $this->promoCodeManager->discountForCart($cart);
+        $productDiscountCents = $cart->getPromoCode()?->appliesToShipping() ? 0 : $discountCents;
         $payload = [
             'currency' => self::CURRENCY,
-            'value' => $this->centsToEuros(max(0, $cart->getTotalTaxIncludedCents() - $discountCents)),
+            'value' => $this->centsToEuros(max(0, $cart->getTotalTaxIncludedCents() - $productDiscountCents)),
             'items' => $items,
         ];
 
@@ -122,10 +123,18 @@ final readonly class EcommercePayloadBuilder
             static fn (int $total, OrderItem $item): int => $total + $item->getTotalTaxIncludedCents(),
             0,
         );
+        $shippingDiscount = $order->getPromoCode()?->appliesToShipping() ?? false;
         $payload = [
             'transaction_id' => $transactionId,
-            'value' => $this->centsToEuros(max(0, $itemsTotalCents - $order->getDiscountAmountTaxIncludedCents())),
-            'shipping' => $this->centsToEuros($order->getShippingAmountTaxIncludedCents()),
+            'value' => $this->centsToEuros(max(
+                0,
+                $itemsTotalCents - ($shippingDiscount ? 0 : $order->getDiscountAmountTaxIncludedCents()),
+            )),
+            'shipping' => $this->centsToEuros(max(
+                0,
+                $order->getShippingAmountTaxIncludedCents()
+                    - ($shippingDiscount ? $order->getDiscountAmountTaxIncludedCents() : 0),
+            )),
             'currency' => $this->clean($order->getCurrency()) ?: self::CURRENCY,
             'items' => $items,
         ];

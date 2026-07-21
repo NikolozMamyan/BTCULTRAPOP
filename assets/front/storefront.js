@@ -44,6 +44,8 @@ function initializeStorefront() {
     const { signal } = abortController;
     let carouselTimer;
     let toastTimer;
+    let promoPopupTimer;
+    let promoPopupCloseTimer;
     let slideIndex = 0;
 
     const on = (target, eventName, listener, options = {}) => {
@@ -90,6 +92,109 @@ function initializeStorefront() {
         document.getElementById('cart-drawer')?.classList.add('open');
         setBodyLocked(true);
     };
+
+    const promoPopup = document.getElementById('visitor-promo-popup');
+    const promoPopupStorageKey = promoPopup?.dataset.version
+        ? `ultrapop-promo-popup:${promoPopup.dataset.version}`
+        : null;
+
+    const rememberPromoPopup = () => {
+        if (!promoPopupStorageKey) {
+            return;
+        }
+
+        try {
+            window.sessionStorage.setItem(promoPopupStorageKey, 'seen');
+        } catch (error) {
+            // Private browsing can disable storage without preventing the popup itself.
+        }
+    };
+
+    const closePromoPopup = (remember = true) => {
+        if (!promoPopup || promoPopup.classList.contains('hidden')) {
+            return;
+        }
+
+        window.clearTimeout(promoPopupTimer);
+        window.clearTimeout(promoPopupCloseTimer);
+
+        if (remember) {
+            rememberPromoPopup();
+        }
+
+        promoPopup.classList.remove('is-open');
+        promoPopup.setAttribute('aria-hidden', 'true');
+        promoPopupCloseTimer = window.setTimeout(() => promoPopup.classList.add('hidden'), 280);
+        setBodyLocked(false);
+    };
+
+    const openPromoPopup = () => {
+        if (!promoPopup) {
+            return;
+        }
+
+        try {
+            if (promoPopupStorageKey && window.sessionStorage.getItem(promoPopupStorageKey)) {
+                return;
+            }
+        } catch (error) {
+            // The popup can still be displayed if storage is unavailable.
+        }
+
+        promoPopup.classList.remove('hidden');
+        promoPopup.setAttribute('aria-hidden', 'false');
+        requestAnimationFrame(() => {
+            promoPopup.classList.add('is-open');
+            promoPopup.querySelector('[data-promo-popup-copy]')?.focus();
+        });
+        setBodyLocked(true);
+    };
+
+    const copyPromoCode = async (button) => {
+        const code = button.dataset.code || '';
+        const status = promoPopup?.querySelector('[data-promo-popup-status]');
+
+        if (!code || !status) {
+            return;
+        }
+
+        try {
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(code);
+            } else {
+                const input = document.createElement('textarea');
+                input.value = code;
+                input.setAttribute('readonly', '');
+                input.style.position = 'fixed';
+                input.style.opacity = '0';
+                document.body.appendChild(input);
+                input.select();
+                const copied = document.execCommand('copy');
+                input.remove();
+
+                if (!copied) {
+                    throw new Error('Copy failed');
+                }
+            }
+
+            button.classList.add('is-copied');
+            status.classList.remove('is-error');
+            status.textContent = promoPopup.dataset.copySuccess || '';
+            rememberPromoPopup();
+            promoPopupCloseTimer = window.setTimeout(() => closePromoPopup(false), 1100);
+        } catch (error) {
+            status.classList.add('is-error');
+            status.textContent = promoPopup.dataset.copyError || '';
+        }
+    };
+
+    if (promoPopup) {
+        promoPopupTimer = window.setTimeout(openPromoPopup, 650);
+        promoPopup.querySelectorAll('[data-promo-popup-close]').forEach((button) => {
+            on(button, 'click', () => closePromoPopup());
+        });
+        on(promoPopup.querySelector('[data-promo-popup-copy]'), 'click', (event) => copyPromoCode(event.currentTarget));
+    }
 
     const visitCard = (card) => {
         const url = card.dataset.productUrl;
@@ -269,6 +374,7 @@ function initializeStorefront() {
         if (event.key === 'Escape') {
             closeSearch();
             closeCart();
+            closePromoPopup();
         }
     });
 
@@ -287,6 +393,8 @@ function initializeStorefront() {
         abortController.abort();
         window.clearInterval(carouselTimer);
         window.clearTimeout(toastTimer);
+        window.clearTimeout(promoPopupTimer);
+        window.clearTimeout(promoPopupCloseTimer);
         setBodyLocked(false);
         document.getElementById('search-modal')?.classList.add('hidden');
         document.getElementById('product-preview')?.classList.add('hidden');

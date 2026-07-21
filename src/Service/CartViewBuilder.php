@@ -37,6 +37,9 @@ final readonly class CartViewBuilder
         $shipping = $this->shippingRateCalculator->quote($subtotal);
         $shippingAmount = $shipping['amountCents'];
         $promoCode = $cart->getPromoCode();
+        $discountLabel = $promoCode?->appliesToShipping()
+            ? 'promo.cart.shipping_discount'
+            : 'promo.cart.discount';
 
         return [
             'items' => array_map(fn (CartItem $item): array => $this->item($item), $cart->getItems()->toArray()),
@@ -50,9 +53,11 @@ final readonly class CartViewBuilder
                 : $this->formatCents($shippingAmount),
             'shippingFree' => $shipping['free'],
             'promoCode' => $promoCode?->getCode(),
+            'promoAppliesToShipping' => $promoCode?->appliesToShipping() ?? false,
             'hasDiscount' => $discount > 0,
             'discountCents' => $discount,
             'discountFormatted' => '-' . $this->formatCents($discount),
+            'discountLabel' => $this->translator->trans($discountLabel),
             'totalCents' => max(0, $subtotal + $shippingAmount - $discount),
             'totalFormatted' => $this->formatCents(max(0, $subtotal + $shippingAmount - $discount)),
             'shippingProgress' => $shipping['progress'],
@@ -77,9 +82,11 @@ final readonly class CartViewBuilder
             'shippingDisplay' => '—',
             'shippingFree' => false,
             'promoCode' => null,
+            'promoAppliesToShipping' => false,
             'hasDiscount' => false,
             'discountCents' => 0,
             'discountFormatted' => $this->formatCents(0),
+            'discountLabel' => $this->translator->trans('promo.cart.discount'),
             'totalCents' => 0,
             'totalFormatted' => $this->formatCents(0),
             'shippingProgress' => 0,

@@ -4,28 +4,27 @@ namespace App\Tests\Controller\Admin;
 
 use App\Entity\PromoCode;
 use App\Entity\User;
-use App\Enum\PromoDiscountType;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-final class AdminPromoCodeControllerTest extends WebTestCase
+final class AdminPopupControllerTest extends WebTestCase
 {
-    public function testAdminCanOpenPromoCodeManagementScreens(): void
+    public function testAdminCanConfigureTheVisitorPopup(): void
     {
         $client = static::createClient();
         $this->skipIfDatabaseIsUnavailable();
         $connection = $this->connection();
 
-        if (!$connection->createSchemaManager()->tablesExist(['promo_code'])) {
-            self::markTestSkipped('Run Doctrine migrations before testing promo-code administration.');
+        if (!$connection->createSchemaManager()->tablesExist(['promo_code', 'popup_settings'])) {
+            self::markTestSkipped('Run Doctrine migrations before testing popup administration.');
         }
 
         $suffix = strtoupper(bin2hex(random_bytes(4)));
-        $email = sprintf('admin-promo-%s@example.com', mb_strtolower($suffix));
+        $email = sprintf('admin-popup-%s@example.com', mb_strtolower($suffix));
         $password = 'admin-password';
-        $code = 'PROMO-' . $suffix;
+        $code = 'POPUP-' . $suffix;
         $entityManager = static::getContainer()->get(EntityManagerInterface::class);
         $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
         \assert($entityManager instanceof EntityManagerInterface);
@@ -34,17 +33,13 @@ final class AdminPromoCodeControllerTest extends WebTestCase
         $admin = (new User())
             ->setEmail($email)
             ->setFirstName('Admin')
-            ->setLastName('Promo')
+            ->setLastName('Popup')
             ->setRoles(['ROLE_ADMIN']);
         $admin->setPassword($passwordHasher->hashPassword($admin, $password));
-
-        $promoCode = (new PromoCode())
-            ->setCode($code)
-            ->setDiscountType(PromoDiscountType::PERCENTAGE)
-            ->setValue(15)
-            ->setMaxUses(10);
+        $promoCode = (new PromoCode())->setCode($code);
 
         try {
+            $connection->executeStatement('DELETE FROM popup_settings');
             $entityManager->persist($admin);
             $entityManager->persist($promoCode);
             $entityManager->flush();
@@ -57,24 +52,32 @@ final class AdminPromoCodeControllerTest extends WebTestCase
                 'password' => $password,
             ]);
 
-            self::assertResponseRedirects('/admin/dashboard');
+            $crawler = $client->request('GET', '/admin/popup');
 
-            $client->request('GET', '/admin/codes-promo');
             self::assertResponseIsSuccessful();
-            self::assertSelectorTextContains('h1', 'Codes promo');
-            self::assertSelectorTextContains('.admin-category-grid', $code);
-            self::assertSelectorExists('a[href="/admin/codes-promo/new"]');
-            self::assertSelectorExists('.admin-sidebar__link.is-active[href="/admin/codes-promo"]');
+            self::assertSelectorTextContains('h1', 'Popup promotionnel');
+            self::assertSelectorExists('input[name="popup_settings[active]"]');
+            self::assertSelectorExists('input[name="popup_settings[title]"]');
+            self::assertSelectorExists('textarea[name="popup_settings[message]"]');
+            self::assertSelectorExists('select[name="popup_settings[promoCode]"]');
+            self::assertSelectorExists('.admin-sidebar__link.is-active[href="/admin/popup"]');
 
-            $client->request('GET', sprintf('/admin/codes-promo/%d/edit', $promoCode->getId()));
-            self::assertResponseIsSuccessful();
-            self::assertSelectorExists('input[name="promo_code[code]"]');
-            self::assertSelectorExists('select[name="promo_code[applicationType]"]');
-            self::assertSelectorExists('select[name="promo_code[discountType]"]');
-            self::assertSelectorExists('input[name="promo_code[value]"]');
-            self::assertSelectorExists('input[name="promo_code[maxUses]"]');
-            self::assertSelectorExists('select[name="promo_code[assignedUser]"]');
+            $form = $crawler->selectButton('Enregistrer le popup')->form([
+                'popup_settings[active]' => '1',
+                'popup_settings[title]' => 'Offre visiteurs',
+                'popup_settings[message]' => 'Copiez ce code et profitez de votre avantage.',
+                'popup_settings[promoCode]' => (string) $promoCode->getId(),
+            ]);
+            $client->submit($form);
+
+            self::assertResponseRedirects('/admin/popup');
+            $settings = $connection->fetchAssociative('SELECT active, title, promo_code_id FROM popup_settings LIMIT 1');
+            self::assertIsArray($settings);
+            self::assertSame(1, (int) $settings['active']);
+            self::assertSame('Offre visiteurs', $settings['title']);
+            self::assertSame($promoCode->getId(), (int) $settings['promo_code_id']);
         } finally {
+            $connection->executeStatement('DELETE FROM popup_settings');
             $connection->delete('promo_code', ['code' => $code]);
             $connection->delete('app_user', ['email' => $email]);
         }
