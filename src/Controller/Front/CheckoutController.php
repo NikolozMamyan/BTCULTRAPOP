@@ -26,6 +26,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/checkout')]
 final class CheckoutController extends AbstractController
@@ -41,6 +42,7 @@ final class CheckoutController extends AbstractController
         PromoCodeManager $promoCodeManager,
         StripeCheckoutService $stripeCheckout,
         EntityManagerInterface $entityManager,
+        TranslatorInterface $translator,
     ): Response {
         $user = $this->getAuthenticatedUser();
         $cart = $cartResolver->resolve($request, $user);
@@ -53,6 +55,15 @@ final class CheckoutController extends AbstractController
 
         $cartManager->refreshPrices($cart);
         $entityManager->flush();
+        $shippingQuote = $shippingRateCalculator->quote($cart->getTotalTaxIncludedCents());
+
+        if (!$shippingQuote['minimumReached']) {
+            $this->addFlash('error', $translator->trans('checkout.flash.minimum_order', [
+                '%minimum%' => number_format($shippingQuote['minimumOrderCents'] / 100, 2, ',', ' ') . ' €',
+            ]));
+
+            return $this->redirectToRoute('app_front_cart');
+        }
 
         $address = CheckoutAddress::fromUser($user);
         $form = $this->createForm(CheckoutAddressType::class, $address, [
@@ -86,9 +97,7 @@ final class CheckoutController extends AbstractController
                 cart: $cart,
                 shippingAddress: $address,
                 user: $user,
-                shippingAmountTaxIncludedCents: $shippingRateCalculator->amountForSubtotal(
-                    $cart->getTotalTaxIncludedCents(),
-                ),
+                shippingAmountTaxIncludedCents: $shippingQuote['amountCents'],
                 discountAmountTaxIncludedCents: $discountAmount,
             );
             $entityManager->persist($order);

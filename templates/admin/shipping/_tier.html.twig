@@ -1,0 +1,24 @@
+<article class="admin-shipping-tier" data-admin-shipping-target="row">
+    <span class="admin-shipping-tier__number" data-tier-number></span>
+    <div class="admin-field">
+        {{ form_label(tier.thresholdCents) }}
+        {{ form_widget(tier.thresholdCents) }}
+        {{ form_errors(tier.thresholdCents) }}
+        <small>{{ 'admin.shipping.form.threshold_help'|trans }}</small>
+    </div>
+    <div class="admin-field">
+        {{ form_label(tier.shippingAmountCents) }}
+        {{ form_widget(tier.shippingAmountCents) }}
+        {{ form_errors(tier.shippingAmountCents) }}
+        <small>{{ 'admin.shipping.form.shipping_price_help'|trans }}</small>
+    </div>
+    <button
+        type="button"
+        class="admin-shipping-tier__remove"
+        data-action="admin-shipping#remove"
+        aria-label="{{ 'admin.shipping.form.remove_tier'|trans }}"
+        title="{{ 'admin.shipping.form.remove_tier'|trans }}"
+    >
+        <i class="fa-solid fa-trash-can"></i>
+    </button>
+</article>

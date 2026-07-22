@@ -29,9 +29,13 @@ final class CartControllerTest extends WebTestCase
         $payload = $this->jsonResponse($client->getResponse()->getContent());
         self::assertSame(2, $payload['cart']['totalQuantity']);
         self::assertSame('2,62 €', $payload['cart']['subtotalFormatted']);
-        self::assertSame(800, $payload['cart']['shippingAmountCents']);
-        self::assertSame('8,00 €', $payload['cart']['shippingAmountFormatted']);
-        self::assertSame('10,62 €', $payload['cart']['totalFormatted']);
+        self::assertSame(600, $payload['cart']['shippingAmountCents']);
+        self::assertSame('6,00 €', $payload['cart']['shippingAmountFormatted']);
+        self::assertSame('8,62 €', $payload['cart']['totalFormatted']);
+        self::assertFalse($payload['cart']['checkoutAllowed']);
+        self::assertSame(1000, $payload['cart']['minimumOrderCents']);
+        self::assertSame(26, $payload['cart']['minimumOrderProgress']);
+        self::assertSame('Encore 7,38 € pour pouvoir commander', $payload['cart']['minimumOrderTitle']);
         self::assertSame('ULTRA ICE TEA - Vegeta - Dragon Ball Z - Ice Tea Pêche 33cL', $payload['cart']['items'][0]['name']);
         self::assertNotNull($client->getCookieJar()->get('ultrapop_cart'));
         self::assertSame('add_to_cart', $payload['analytics']['event']);
@@ -46,6 +50,9 @@ final class CartControllerTest extends WebTestCase
         self::assertSame('ULTRAPOP', $analyticsItem['item_brand']);
         self::assertArrayHasKey('price', $analyticsItem);
         self::assertSame($payload['cart']['items'][0]['quantity'], $analyticsItem['quantity']);
+
+        $client->request('POST', '/checkout/stripe');
+        self::assertResponseRedirects('/cart');
 
         $updateUrl = $payload['cart']['items'][0]['updateUrl'];
 
@@ -63,7 +70,8 @@ final class CartControllerTest extends WebTestCase
         $payload = $this->jsonResponse($client->getResponse()->getContent());
         self::assertSame(3, $payload['cart']['totalQuantity']);
         self::assertSame('3,93 €', $payload['cart']['subtotalFormatted']);
-        self::assertSame('11,93 €', $payload['cart']['totalFormatted']);
+        self::assertSame('9,93 €', $payload['cart']['totalFormatted']);
+        self::assertFalse($payload['cart']['checkoutAllowed']);
 
         $removeUrl = $payload['cart']['items'][0]['removeUrl'];
 

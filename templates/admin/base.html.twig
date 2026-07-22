@@ -65,6 +65,10 @@
                     <i class="fa-solid fa-credit-card"></i>
                     <span>{{ 'admin.nav.payments'|trans }}</span>
                 </a>
+                <a href="{{ path('app_admin_shipping_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_shipping' ? 'is-active' : '' }}">
+                    <i class="fa-solid fa-truck-fast"></i>
+                    <span>{{ 'admin.nav.shipping'|trans }}</span>
+                </a>
                 <a href="{{ path('app_admin_orders_index') }}" class="admin-sidebar__link {{ current_route starts with 'app_admin_orders' ? 'is-active' : '' }}">
                     <i class="fa-solid fa-receipt"></i>
                     <span>{{ 'admin.nav.orders'|trans }}</span>

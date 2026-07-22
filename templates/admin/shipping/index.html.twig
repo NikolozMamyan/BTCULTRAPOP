@@ -1,0 +1,98 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.shipping.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section
+        class="admin-shipping-page"
+        data-controller="admin-shipping"
+    >
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.shipping.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.shipping.index.title'|trans }}</h1>
+                <p>{{ 'admin.shipping.index.subtitle'|trans }}</p>
+            </div>
+            <span class="admin-order-badge admin-order-badge--paid">
+                <i class="fa-solid fa-truck-fast"></i>
+                {{ 'admin.shipping.status.active'|trans }}
+            </span>
+        </div>
+
+        {{ form_start(form, {attr: {class: 'admin-shipping-form'}}) }}
+            <div class="admin-shipping-layout">
+                <div class="admin-shipping-form__main">
+                    <article class="admin-panel admin-form-card">
+                        <div class="admin-form-card__heading">
+                            <span><i class="fa-solid fa-basket-shopping"></i></span>
+                            <div>
+                                <strong>{{ 'admin.shipping.form.minimum_title'|trans }}</strong>
+                                <small>{{ 'admin.shipping.form.minimum_text'|trans }}</small>
+                            </div>
+                        </div>
+
+                        {{ form_errors(form) }}
+
+                        <div class="admin-field admin-shipping-minimum">
+                            {{ form_label(form.minimumOrderCents) }}
+                            {{ form_widget(form.minimumOrderCents) }}
+                            {{ form_errors(form.minimumOrderCents) }}
+                            <small>{{ 'admin.shipping.form.minimum_help'|trans }}</small>
+                        </div>
+                    </article>
+
+                    <article class="admin-panel admin-form-card">
+                        <div class="admin-shipping-section-heading">
+                            <div class="admin-form-card__heading">
+                                <span><i class="fa-solid fa-stairs"></i></span>
+                                <div>
+                                    <strong>{{ 'admin.shipping.form.tiers_title'|trans }}</strong>
+                                    <small>{{ 'admin.shipping.form.tiers_text'|trans }}</small>
+                                </div>
+                            </div>
+                            <button type="button" class="admin-action-button admin-action-button--secondary" data-action="admin-shipping#add">
+                                <i class="fa-solid fa-plus"></i>
+                                {{ 'admin.shipping.form.add_tier'|trans }}
+                            </button>
+                        </div>
+
+                        {{ form_errors(form.tiers) }}
+
+                        <div
+                            class="admin-shipping-tiers"
+                            data-admin-shipping-target="tiers"
+                            data-index="{{ form.tiers|length }}"
+                            data-prototype="{{ include('admin/shipping/_tier.html.twig', {tier: form.tiers.vars.prototype}, with_context = false)|e('html_attr') }}"
+                        >
+                            {% for tier in form.tiers %}
+                                {% include 'admin/shipping/_tier.html.twig' with {tier: tier} only %}
+                            {% endfor %}
+                        </div>
+
+                        <div class="admin-product-form__actions">
+                            <button type="submit" class="admin-action-button">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                {{ 'admin.shipping.form.save'|trans }}
+                            </button>
+                        </div>
+                    </article>
+                </div>
+
+                <aside class="admin-shipping-help">
+                    <span class="admin-shipping-help__icon"><i class="fa-solid fa-route"></i></span>
+                    <p>{{ 'admin.shipping.help.eyebrow'|trans }}</p>
+                    <h2>{{ 'admin.shipping.help.title'|trans }}</h2>
+                    <ol>
+                        <li>{{ 'admin.shipping.help.minimum'|trans }}</li>
+                        <li>{{ 'admin.shipping.help.order'|trans }}</li>
+                        <li>{{ 'admin.shipping.help.free'|trans }}</li>
+                    </ol>
+                    <div class="admin-shipping-help__example">
+                        <strong>{{ 'admin.shipping.help.example_title'|trans }}</strong>
+                        <span>{{ 'admin.shipping.help.example'|trans }}</span>
+                    </div>
+                </aside>
+            </div>
+        {{ form_end(form) }}
+    </section>
+{% endblock %}

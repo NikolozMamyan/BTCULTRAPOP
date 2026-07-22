@@ -8,4 +8,9 @@
     ,"contact.validation.message_required": "Veuillez saisir votre message."
     ,"contact.validation.message_too_short": "Votre message doit contenir au moins 10 caractères."
     ,"contact.validation.message_too_long": "Votre message ne peut pas dépasser 5 000 caractères."
+    ,"admin.shipping.error.first_threshold": "Le premier palier doit commencer exactement au montant minimum de commande."
+    ,"admin.shipping.error.duplicate_threshold": "Deux paliers ne peuvent pas avoir le même seuil."
+    ,"admin.shipping.error.increasing_price": "Le prix de livraison ne peut pas augmenter sur un palier supérieur."
+    ,"admin.shipping.error.free_must_be_last": "Seul le dernier palier peut offrir la livraison."
+    ,"admin.shipping.error.free_tier_required": "Le dernier palier doit avoir un prix de livraison de 0 €."
 }

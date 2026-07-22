@@ -3,6 +3,7 @@
 namespace App\Tests\Service;
 
 use App\Service\ShippingRateCalculator;
+use App\Service\ShippingConfigurationProviderInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -21,8 +22,8 @@ final class ShippingRateCalculatorTest extends TestCase
      */
     public static function shippingTiers(): iterable
     {
-        yield 'zero subtotal' => [0, 800];
-        yield 'below ten euros' => [999, 800];
+        yield 'zero subtotal' => [0, 600];
+        yield 'below ten euros' => [999, 600];
         yield 'ten euros' => [1000, 600];
         yield 'below twenty euros' => [1999, 600];
         yield 'twenty euros' => [2000, 475];
@@ -44,9 +45,35 @@ final class ShippingRateCalculatorTest extends TestCase
         self::assertSame(550, $quote['remainingToNextCents']);
         self::assertSame(350, $quote['nextShippingAmountCents']);
         self::assertFalse($quote['free']);
-        self::assertCount(6, $quote['checkpoints']);
-        self::assertTrue($quote['checkpoints'][2]['current']);
-        self::assertFalse($quote['checkpoints'][3]['reached']);
-        self::assertSame(100, $quote['checkpoints'][5]['position']);
+        self::assertTrue($quote['minimumReached']);
+        self::assertSame(1000, $quote['minimumOrderCents']);
+        self::assertCount(5, $quote['checkpoints']);
+        self::assertTrue($quote['checkpoints'][1]['current']);
+        self::assertFalse($quote['checkpoints'][2]['reached']);
+        self::assertSame(100, $quote['checkpoints'][4]['position']);
+    }
+
+    public function testQuoteBlocksCheckoutBelowTheConfiguredMinimum(): void
+    {
+        $provider = new class implements ShippingConfigurationProviderInterface {
+            public function configuration(): array
+            {
+                return [
+                    'minimumOrderCents' => 1500,
+                    'tiers' => [
+                        ['thresholdCents' => 1500, 'shippingAmountCents' => 700],
+                        ['thresholdCents' => 2500, 'shippingAmountCents' => 0],
+                    ],
+                ];
+            }
+        };
+        $calculator = new ShippingRateCalculator($provider);
+        $quote = $calculator->quote(1200);
+
+        self::assertSame(700, $quote['amountCents']);
+        self::assertFalse($quote['minimumReached']);
+        self::assertSame(300, $quote['remainingToMinimumCents']);
+        self::assertFalse($calculator->isMinimumReached(1499));
+        self::assertTrue($calculator->isMinimumReached(1500));
     }
 }

@@ -20,6 +20,8 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    App\Service\ShippingConfigurationProviderInterface: '@App\Service\ShippingSettingsProvider'
+
     App\Service\Mailer\SimpleMailerService:
         arguments:
             $defaultFrom: '%env(MAILER_DEFAULT_FROM)%'

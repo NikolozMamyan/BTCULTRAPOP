@@ -8,4 +8,9 @@
     ,"contact.validation.message_required": "Please enter your message."
     ,"contact.validation.message_too_short": "Your message must contain at least 10 characters."
     ,"contact.validation.message_too_long": "Your message cannot exceed 5,000 characters."
+    ,"admin.shipping.error.first_threshold": "The first tier must start exactly at the minimum order amount."
+    ,"admin.shipping.error.duplicate_threshold": "Two tiers cannot use the same threshold."
+    ,"admin.shipping.error.increasing_price": "The shipping price cannot increase at a higher tier."
+    ,"admin.shipping.error.free_must_be_last": "Only the final tier can offer free shipping."
+    ,"admin.shipping.error.free_tier_required": "The final tier must have a shipping price of €0."
 }

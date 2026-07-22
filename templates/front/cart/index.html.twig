@@ -25,6 +25,47 @@
     </section>
 
     <section class="cart-page max-w-7xl mx-auto px-5 py-10 md:py-16">
+        <div
+            id="cart-minimum-order"
+            class="cart-minimum-order {{ cart.minimumOrderReached or cart.empty ? 'hidden' : '' }}"
+            role="status"
+            aria-live="polite"
+        >
+            <span class="cart-minimum-order__visual" aria-hidden="true">
+                <i class="fa-solid fa-basket-shopping"></i>
+            </span>
+            <div class="cart-minimum-order__content">
+                <span class="cart-minimum-order__eyebrow">{{ 'cart.minimum_order.eyebrow'|trans }}</span>
+                <h2 id="cart-minimum-order-title">{{ cart.minimumOrderTitle }}</h2>
+                <p>{{ 'cart.minimum_order.explanation'|trans }}</p>
+                <div
+                    class="cart-minimum-order__progress"
+                    role="progressbar"
+                    aria-label="{{ 'cart.minimum_order.progress_label'|trans }}"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="{{ cart.minimumOrderProgress }}"
+                    data-cart-minimum-progress
+                >
+                    <span style="width: {{ cart.minimumOrderProgress }}%" data-cart-minimum-progress-bar></span>
+                </div>
+                <div class="cart-minimum-order__values">
+                    <span>
+                        {{ 'cart.minimum_order.cart_label'|trans }}
+                        <strong id="cart-minimum-order-current">{{ cart.subtotalFormatted }}</strong>
+                    </span>
+                    <span>
+                        {{ 'cart.minimum_order.target_label'|trans }}
+                        <strong>{{ cart.minimumOrderFormatted }}</strong>
+                    </span>
+                </div>
+            </div>
+            <a href="{{ path('app_front_boutique') }}" class="cart-minimum-order__action">
+                {{ 'cart.minimum_order.action'|trans }}
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
         <div class="cart-page__layout">
             <section class="cart-page__panel" aria-label="{{ 'cart.title'|trans }}">
                 <div class="cart-page__panel-head">
@@ -236,8 +277,13 @@
                         {{ form_widget(checkout_form.countryCode) }}
                         {{ form_rest(checkout_form) }}
 
-                        <button type="submit" class="cart-page__checkout cart-page__checkout--enabled">
-                            {{ 'checkout.pay_with_stripe'|trans }}
+                        <button
+                            type="submit"
+                            class="cart-page__checkout {{ cart.checkoutAllowed ? 'cart-page__checkout--enabled' : '' }}"
+                            data-cart-checkout-button
+                            {{ cart.checkoutAllowed ? '' : 'disabled' }}
+                        >
+                            <span id="cart-checkout-label">{{ cart.checkoutLabel }}</span>
                             <i class="fa-solid fa-arrow-right"></i>
                         </button>
                         <p class="checkout-address-form__secure">

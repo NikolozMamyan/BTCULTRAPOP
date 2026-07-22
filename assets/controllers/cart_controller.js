@@ -268,6 +268,29 @@ export default class extends Controller {
         this.setText('cart-discount-label', cart.discountLabel || '');
         this.setText('cart-page-discount-label', cart.discountLabel || '');
         this.setText('cart-page-promo-code', cart.promoCode || '');
+        this.setText('cart-minimum-order-title', cart.minimumOrderTitle || '');
+        this.setText('cart-minimum-order-current', cart.subtotalFormatted || '');
+        this.setText('cart-checkout-label', cart.checkoutLabel || '');
+
+        const minimumOrder = document.getElementById('cart-minimum-order');
+        if (minimumOrder) {
+            minimumOrder.classList.toggle('hidden', Boolean(cart.minimumOrderReached || cart.empty));
+
+            const progress = Math.max(0, Math.min(100, Number(cart.minimumOrderProgress) || 0));
+            const progressElement = minimumOrder.querySelector('[data-cart-minimum-progress]');
+            const progressBar = minimumOrder.querySelector('[data-cart-minimum-progress-bar]');
+
+            progressElement?.setAttribute('aria-valuenow', String(progress));
+
+            if (progressBar) {
+                progressBar.style.width = `${progress}%`;
+            }
+        }
+
+        document.querySelectorAll('[data-cart-checkout-button]').forEach((button) => {
+            button.disabled = !cart.checkoutAllowed;
+            button.classList.toggle('cart-page__checkout--enabled', Boolean(cart.checkoutAllowed));
+        });
         this.renderPromoControls(cart);
         this.syncPendingMutations();
     }

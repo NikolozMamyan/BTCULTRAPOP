@@ -52,6 +52,21 @@ final readonly class CartViewBuilder
                 ? $this->translator->trans('overlay.free')
                 : $this->formatCents($shippingAmount),
             'shippingFree' => $shipping['free'],
+            'minimumOrderCents' => $shipping['minimumOrderCents'],
+            'minimumOrderFormatted' => $this->formatCents($shipping['minimumOrderCents']),
+            'minimumOrderReached' => $shipping['minimumReached'],
+            'minimumOrderRemainingCents' => $shipping['remainingToMinimumCents'],
+            'minimumOrderProgress' => min(100, (int) round(($subtotal / max(1, $shipping['minimumOrderCents'])) * 100)),
+            'minimumOrderTitle' => $this->translator->trans('cart.minimum_order.title', [
+                '%amount%' => $this->formatCents($shipping['remainingToMinimumCents']),
+            ]),
+            'minimumOrderMessage' => $this->minimumOrderMessage($shipping),
+            'checkoutAllowed' => $shipping['minimumReached'],
+            'checkoutLabel' => $shipping['minimumReached']
+                ? $this->translator->trans('checkout.pay_with_stripe')
+                : $this->translator->trans('checkout.minimum_order_button', [
+                    '%minimum%' => $this->formatCents($shipping['minimumOrderCents']),
+                ]),
             'promoCode' => $promoCode?->getCode(),
             'promoAppliesToShipping' => $promoCode?->appliesToShipping() ?? false,
             'hasDiscount' => $discount > 0,
@@ -72,6 +87,8 @@ final readonly class CartViewBuilder
      */
     private function empty(): array
     {
+        $shipping = $this->shippingRateCalculator->quote(0);
+
         return [
             'items' => [],
             'totalQuantity' => 0,
@@ -81,6 +98,19 @@ final readonly class CartViewBuilder
             'shippingAmountFormatted' => $this->formatCents(0),
             'shippingDisplay' => '—',
             'shippingFree' => false,
+            'minimumOrderCents' => $shipping['minimumOrderCents'],
+            'minimumOrderFormatted' => $this->formatCents($shipping['minimumOrderCents']),
+            'minimumOrderReached' => false,
+            'minimumOrderRemainingCents' => $shipping['minimumOrderCents'],
+            'minimumOrderProgress' => 0,
+            'minimumOrderTitle' => $this->translator->trans('cart.minimum_order.title', [
+                '%amount%' => $this->formatCents($shipping['minimumOrderCents']),
+            ]),
+            'minimumOrderMessage' => $this->minimumOrderMessage($shipping),
+            'checkoutAllowed' => false,
+            'checkoutLabel' => $this->translator->trans('checkout.minimum_order_button', [
+                '%minimum%' => $this->formatCents($shipping['minimumOrderCents']),
+            ]),
             'promoCode' => null,
             'promoAppliesToShipping' => false,
             'hasDiscount' => false,
@@ -91,7 +121,7 @@ final readonly class CartViewBuilder
             'totalFormatted' => $this->formatCents(0),
             'shippingProgress' => 0,
             'shippingMessage' => $this->translator->trans('overlay.shipping_empty'),
-            'shippingCheckpoints' => $this->shippingCheckpoints($this->shippingRateCalculator->quote(0), false),
+            'shippingCheckpoints' => $this->shippingCheckpoints($shipping, false),
             'empty' => true,
         ];
     }
@@ -126,6 +156,8 @@ final readonly class CartViewBuilder
     /**
      * @param array{
      *     amountCents: int,
+     *     minimumReached: bool,
+     *     remainingToMinimumCents: int,
      *     nextShippingAmountCents: ?int,
      *     remainingToNextCents: int,
      *     free: bool
@@ -133,6 +165,10 @@ final readonly class CartViewBuilder
      */
     private function shippingMessage(array $shipping): string
     {
+        if (!$shipping['minimumReached']) {
+            return $this->minimumOrderMessage($shipping);
+        }
+
         if ($shipping['free']) {
             return $this->translator->trans('cart.shipping.free_unlocked');
         }
@@ -146,6 +182,17 @@ final readonly class CartViewBuilder
         return $this->translator->trans('cart.shipping.next_tier', [
             '%amount%' => $this->formatCents($shipping['remainingToNextCents']),
             '%next%' => $this->formatCents((int) $shipping['nextShippingAmountCents']),
+        ]);
+    }
+
+    /**
+     * @param array{minimumOrderCents: int, remainingToMinimumCents: int} $shipping
+     */
+    private function minimumOrderMessage(array $shipping): string
+    {
+        return $this->translator->trans('cart.minimum_order.remaining', [
+            '%amount%' => $this->formatCents($shipping['remainingToMinimumCents']),
+            '%minimum%' => $this->formatCents($shipping['minimumOrderCents']),
         ]);
     }
 
