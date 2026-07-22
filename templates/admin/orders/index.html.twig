@@ -10,6 +10,16 @@
                 <h1>{{ 'admin.order.index.title'|trans }}</h1>
                 <p>{{ 'admin.order.index.subtitle'|trans }}</p>
             </div>
+            <div class="admin-heading-actions">
+                <a href="{{ path('app_admin_orders_export') }}" class="admin-secondary-button">
+                    <i class="fa-solid fa-file-export"></i>
+                    {{ 'admin.order.action.export'|trans }}
+                </a>
+                <a href="{{ path('app_admin_orders_new') }}" class="admin-action-button">
+                    <i class="fa-solid fa-plus"></i>
+                    {{ 'admin.order.action.create'|trans }}
+                </a>
+            </div>
         </div>
 
         <div class="admin-stats-grid admin-order-stats">
@@ -102,6 +112,15 @@
                                 <a href="{{ path('app_admin_orders_show', {id: order.id}) }}" title="{{ 'admin.order.action.view'|trans }}">
                                     <i class="fa-solid fa-eye"></i>
                                 </a>
+                                <a href="{{ path('app_admin_orders_export', {order: order.id}) }}" title="{{ 'admin.order.action.export_one'|trans }}">
+                                    <i class="fa-solid fa-file-export"></i>
+                                </a>
+                                <form method="post" action="{{ path('app_admin_orders_delete', {id: order.id}) }}" onsubmit="return confirm('{{ 'admin.order.delete.confirm'|trans|e('js') }}')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('admin_order_delete_' ~ order.id) }}">
+                                    <button type="submit" title="{{ 'admin.order.action.delete'|trans }}">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     {% endfor %}

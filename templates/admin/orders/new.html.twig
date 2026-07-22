@@ -1,0 +1,165 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.order.manual.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-manual-order-page" data-controller="admin-manual-order">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.order.manual.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.order.manual.title'|trans }}</h1>
+                <p>{{ 'admin.order.manual.subtitle'|trans }}</p>
+            </div>
+            <a href="{{ path('app_admin_orders_index') }}" class="admin-secondary-button">
+                <i class="fa-solid fa-arrow-left"></i>
+                {{ 'admin.order.back_to_list'|trans }}
+            </a>
+        </div>
+
+        {{ form_start(form, {attr: {class: 'admin-manual-order-form'}}) }}
+            {{ form_errors(form) }}
+            <div class="admin-manual-order-layout">
+                <div class="admin-manual-order-main">
+                    <article class="admin-panel admin-form-card">
+                        <div class="admin-form-card__heading">
+                            <span><i class="fa-solid fa-user"></i></span>
+                            <div>
+                                <strong>{{ 'admin.order.manual.customer_title'|trans }}</strong>
+                                <small>{{ 'admin.order.manual.customer_text'|trans }}</small>
+                            </div>
+                        </div>
+
+                        <div class="admin-field">
+                            {{ form_label(form.customer) }}
+                            {{ form_widget(form.customer) }}
+                            {{ form_errors(form.customer) }}
+                            <small>{{ 'admin.order.manual.form.customer_help'|trans }}</small>
+                        </div>
+                        <div class="admin-form-grid admin-form-grid--two">
+                            <div class="admin-field">
+                                {{ form_label(form.firstName) }}
+                                {{ form_widget(form.firstName) }}
+                                {{ form_errors(form.firstName) }}
+                            </div>
+                            <div class="admin-field">
+                                {{ form_label(form.lastName) }}
+                                {{ form_widget(form.lastName) }}
+                                {{ form_errors(form.lastName) }}
+                            </div>
+                        </div>
+                        <div class="admin-form-grid admin-form-grid--two">
+                            <div class="admin-field">
+                                {{ form_label(form.email) }}
+                                {{ form_widget(form.email) }}
+                                {{ form_errors(form.email) }}
+                            </div>
+                            <div class="admin-field">
+                                {{ form_label(form.phone) }}
+                                {{ form_widget(form.phone) }}
+                                {{ form_errors(form.phone) }}
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="admin-panel admin-form-card">
+                        <div class="admin-form-card__heading">
+                            <span><i class="fa-solid fa-location-dot"></i></span>
+                            <div>
+                                <strong>{{ 'admin.order.manual.address_title'|trans }}</strong>
+                                <small>{{ 'admin.order.manual.address_text'|trans }}</small>
+                            </div>
+                        </div>
+                        <div class="admin-field">
+                            {{ form_label(form.street) }}
+                            {{ form_widget(form.street) }}
+                            {{ form_errors(form.street) }}
+                        </div>
+                        <div class="admin-form-grid admin-form-grid--three">
+                            <div class="admin-field">
+                                {{ form_label(form.postalCode) }}
+                                {{ form_widget(form.postalCode) }}
+                                {{ form_errors(form.postalCode) }}
+                            </div>
+                            <div class="admin-field">
+                                {{ form_label(form.city) }}
+                                {{ form_widget(form.city) }}
+                                {{ form_errors(form.city) }}
+                            </div>
+                            <div class="admin-field">
+                                {{ form_label(form.countryCode) }}
+                                {{ form_widget(form.countryCode) }}
+                                {{ form_errors(form.countryCode) }}
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="admin-panel admin-form-card">
+                        <div class="admin-manual-order-section-heading">
+                            <div class="admin-form-card__heading">
+                                <span><i class="fa-solid fa-boxes-stacked"></i></span>
+                                <div>
+                                    <strong>{{ 'admin.order.manual.products_title'|trans }}</strong>
+                                    <small>{{ 'admin.order.manual.products_text'|trans }}</small>
+                                </div>
+                            </div>
+                            <button type="button" class="admin-action-button admin-action-button--secondary" data-action="admin-manual-order#add">
+                                <i class="fa-solid fa-plus"></i>
+                                {{ 'admin.order.manual.form.add_product'|trans }}
+                            </button>
+                        </div>
+
+                        {{ form_errors(form.items) }}
+                        <div
+                            class="admin-manual-order-items"
+                            data-admin-manual-order-target="items"
+                            data-index="{{ form.items|length }}"
+                            data-prototype="{{ include('admin/orders/_manual_item.html.twig', {item: form.items.vars.prototype}, with_context = false)|e('html_attr') }}"
+                        >
+                            {% for item in form.items %}
+                                {% include 'admin/orders/_manual_item.html.twig' with {item: item} only %}
+                            {% endfor %}
+                        </div>
+                    </article>
+                </div>
+
+                <aside class="admin-manual-order-side">
+                    <article class="admin-panel admin-form-card">
+                        <div class="admin-form-card__heading">
+                            <span><i class="fa-solid fa-sliders"></i></span>
+                            <div>
+                                <strong>{{ 'admin.order.manual.settings_title'|trans }}</strong>
+                                <small>{{ 'admin.order.manual.settings_text'|trans }}</small>
+                            </div>
+                        </div>
+                        <div class="admin-field">
+                            {{ form_label(form.status) }}
+                            {{ form_widget(form.status) }}
+                            {{ form_errors(form.status) }}
+                        </div>
+                        <div class="admin-field">
+                            {{ form_label(form.promoCode) }}
+                            {{ form_widget(form.promoCode) }}
+                            {{ form_errors(form.promoCode) }}
+                        </div>
+                        <div class="admin-field">
+                            {{ form_label(form.shippingAmountCents) }}
+                            {{ form_widget(form.shippingAmountCents) }}
+                            {{ form_errors(form.shippingAmountCents) }}
+                            <small>{{ 'admin.order.manual.form.shipping_help'|trans }}</small>
+                        </div>
+                    </article>
+
+                    <article class="admin-manual-order-preview">
+                        <span>{{ 'admin.order.manual.preview_eyebrow'|trans }}</span>
+                        <strong data-admin-manual-order-target="total">0,00 €</strong>
+                        <small>{{ 'admin.order.manual.preview_help'|trans }}</small>
+                        <button type="submit" class="admin-action-button">
+                            <i class="fa-solid fa-circle-plus"></i>
+                            {{ 'admin.order.manual.form.submit'|trans }}
+                        </button>
+                    </article>
+                </aside>
+            </div>
+        {{ form_end(form) }}
+    </section>
+{% endblock %}

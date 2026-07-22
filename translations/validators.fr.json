@@ -13,4 +13,11 @@
     ,"admin.shipping.error.increasing_price": "Le prix de livraison ne peut pas augmenter sur un palier supérieur."
     ,"admin.shipping.error.free_must_be_last": "Seul le dernier palier peut offrir la livraison."
     ,"admin.shipping.error.free_tier_required": "Le dernier palier doit avoir un prix de livraison de 0 €."
+    ,"admin.order.manual.error.customer_name_required": "Indique le prénom et le nom, ou sélectionne un client enregistré."
+    ,"admin.order.manual.error.email_required": "Indique un email, ou sélectionne un client enregistré."
+    ,"admin.order.manual.error.address_required": "Complète l’adresse de livraison ou sélectionne un client possédant une adresse."
+    ,"admin.order.manual.error.item_required": "Ajoute au moins un produit à la commande."
+    ,"admin.order.manual.error.too_many_items": "Une commande manuelle est limitée à 50 lignes de produits."
+    ,"admin.order.export.error.selection_required": "Sélectionne au moins une commande à exporter."
+    ,"admin.order.export.error.too_many_orders": "Un export est limité à 200 commandes."
 }

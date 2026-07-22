@@ -1,0 +1,28 @@
+<article class="admin-manual-order-item" data-admin-manual-order-target="row">
+    <span class="admin-manual-order-item__number" data-order-item-number></span>
+    <div class="admin-field admin-manual-order-item__product">
+        {{ form_label(item.product) }}
+        {{ form_widget(item.product) }}
+        {{ form_errors(item.product) }}
+    </div>
+    <div class="admin-field">
+        {{ form_label(item.quantity) }}
+        {{ form_widget(item.quantity) }}
+        {{ form_errors(item.quantity) }}
+    </div>
+    <div class="admin-field">
+        {{ form_label(item.unitPriceTaxIncludedCents) }}
+        {{ form_widget(item.unitPriceTaxIncludedCents) }}
+        {{ form_errors(item.unitPriceTaxIncludedCents) }}
+        <small>{{ 'admin.order.manual.form.unit_price_help'|trans }}</small>
+    </div>
+    <button
+        type="button"
+        class="admin-manual-order-item__remove"
+        data-action="admin-manual-order#remove"
+        aria-label="{{ 'admin.order.manual.form.remove_product'|trans }}"
+        title="{{ 'admin.order.manual.form.remove_product'|trans }}"
+    >
+        <i class="fa-solid fa-trash-can"></i>
+    </button>
+</article>

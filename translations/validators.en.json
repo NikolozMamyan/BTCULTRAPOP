@@ -13,4 +13,11 @@
     ,"admin.shipping.error.increasing_price": "The shipping price cannot increase at a higher tier."
     ,"admin.shipping.error.free_must_be_last": "Only the final tier can offer free shipping."
     ,"admin.shipping.error.free_tier_required": "The final tier must have a shipping price of €0."
+    ,"admin.order.manual.error.customer_name_required": "Enter a first and last name, or select a registered customer."
+    ,"admin.order.manual.error.email_required": "Enter an email, or select a registered customer."
+    ,"admin.order.manual.error.address_required": "Complete the shipping address or select a customer with a saved address."
+    ,"admin.order.manual.error.item_required": "Add at least one product to the order."
+    ,"admin.order.manual.error.too_many_items": "A manual order is limited to 50 product lines."
+    ,"admin.order.export.error.selection_required": "Select at least one order to export."
+    ,"admin.order.export.error.too_many_orders": "An export is limited to 200 orders."
 }

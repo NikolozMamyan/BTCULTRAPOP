@@ -1,0 +1,71 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.order.export.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-order-export" data-controller="admin-order-export">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.order.export.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.order.export.title'|trans }}</h1>
+                <p>{{ 'admin.order.export.subtitle'|trans }}</p>
+            </div>
+            <a href="{{ path('app_admin_orders_index') }}" class="admin-secondary-button">
+                <i class="fa-solid fa-arrow-left"></i>
+                {{ 'admin.order.back_to_list'|trans }}
+            </a>
+        </div>
+
+        {{ form_start(form, {attr: {
+            class: 'admin-order-export-form',
+            'data-turbo': 'false'
+        }}) }}
+            {{ form_errors(form) }}
+            <div class="admin-order-export-layout">
+                <article class="admin-panel admin-order-export-selection">
+                    <div class="admin-order-export-selection__head">
+                        <div>
+                            <span>{{ 'admin.order.export.selection_eyebrow'|trans }}</span>
+                            <h2>{{ 'admin.order.export.selection_title'|trans }}</h2>
+                        </div>
+                        <label class="admin-order-export-select-all">
+                            <input type="checkbox" data-admin-order-export-target="selectAll" data-action="change->admin-order-export#toggleAll">
+                            <span>{{ 'admin.order.export.select_all'|trans }}</span>
+                        </label>
+                    </div>
+
+                    {{ form_errors(form.orders) }}
+                    <div class="admin-order-export-list">
+                        {% for choice in form.orders %}
+                            <label class="admin-order-export-choice">
+                                {{ form_widget(choice) }}
+                                <span><i class="fa-solid fa-receipt"></i></span>
+                                <strong>{{ choice.vars.label }}</strong>
+                            </label>
+                        {% else %}
+                            <div class="admin-empty-state">
+                                <i class="fa-solid fa-receipt"></i>
+                                <p>{{ 'admin.order.export.empty'|trans }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </article>
+
+                <aside class="admin-order-export-summary">
+                    <span class="admin-order-export-summary__icon"><i class="fa-solid fa-file-csv"></i></span>
+                    <small>{{ 'admin.order.export.summary_eyebrow'|trans }}</small>
+                    <h2>{{ 'admin.order.export.summary_title'|trans }}</h2>
+                    <p>{{ 'admin.order.export.summary_text'|trans }}</p>
+                    <div class="admin-order-export-counter">
+                        <span data-admin-order-export-target="selectedCount">0</span>
+                        <small>{{ 'admin.order.export.selected'|trans }}</small>
+                    </div>
+                    <button type="submit" class="admin-action-button" data-admin-order-export-target="submit">
+                        <i class="fa-solid fa-download"></i>
+                        {{ 'admin.order.export.submit'|trans }}
+                    </button>
+                </aside>
+            </div>
+        {{ form_end(form) }}
+    </section>
+{% endblock %}

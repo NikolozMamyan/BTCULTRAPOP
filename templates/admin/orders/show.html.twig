@@ -10,11 +10,37 @@
                 <h1>{{ order.number }}</h1>
                 <p>{{ 'admin.order.show.subtitle'|trans({'%date%': order.created_at|date('d/m/Y H:i')}) }}</p>
             </div>
-            <a href="{{ path('app_admin_orders_index') }}" class="admin-secondary-button">
-                <i class="fa-solid fa-arrow-left"></i>
-                {{ 'admin.order.back_to_list'|trans }}
-            </a>
+            <div class="admin-heading-actions">
+                <a href="{{ path('app_admin_orders_export', {order: order.id}) }}" class="admin-secondary-button">
+                    <i class="fa-solid fa-file-export"></i>
+                    {{ 'admin.order.action.export_one'|trans }}
+                </a>
+                <a href="{{ path('app_admin_orders_index') }}" class="admin-secondary-button">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    {{ 'admin.order.back_to_list'|trans }}
+                </a>
+            </div>
         </div>
+
+        <article class="admin-panel admin-order-management">
+            <div>
+                <span class="admin-order-management__icon"><i class="fa-solid fa-arrows-rotate"></i></span>
+                <div>
+                    <strong>{{ 'admin.order.status.manage_title'|trans }}</strong>
+                    <small>{{ 'admin.order.status.manage_text'|trans }}</small>
+                </div>
+            </div>
+            {{ form_start(status_form, {attr: {class: 'admin-order-status-form'}}) }}
+                <div class="admin-field">
+                    {{ form_widget(status_form.status) }}
+                    {{ form_errors(status_form.status) }}
+                </div>
+                <button type="submit" class="admin-action-button">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    {{ 'admin.order.status.submit'|trans }}
+                </button>
+            {{ form_end(status_form) }}
+        </article>
 
         <div class="admin-order-show__grid">
             <article class="admin-panel admin-order-summary-panel">
@@ -183,5 +209,19 @@
                 </div>
             </div>
         </article>
+
+        <div class="admin-danger-zone">
+            <div>
+                <strong>{{ 'admin.order.delete.title'|trans }}</strong>
+                <span>{{ 'admin.order.delete.text'|trans }}</span>
+            </div>
+            <form method="post" action="{{ path('app_admin_orders_delete', {id: order.id}) }}" onsubmit="return confirm('{{ 'admin.order.delete.confirm'|trans|e('js') }}')">
+                <input type="hidden" name="_token" value="{{ csrf_token('admin_order_delete_' ~ order.id) }}">
+                <button type="submit">
+                    <i class="fa-solid fa-trash-can"></i>
+                    {{ 'admin.order.action.delete'|trans }}
+                </button>
+            </form>
+        </div>
     </section>
 {% endblock %}
