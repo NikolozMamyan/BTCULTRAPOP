@@ -993,7 +993,7 @@
     "contact.validation.message_too_short": "Votre message doit contenir au moins 10 caractères.",
     "contact.validation.message_too_long": "Votre message ne peut pas dépasser 5 000 caractères.",
     "contact.flash.sent": "Votre message a bien été envoyé. Notre équipe vous répondra dès que possible.",
-    "contact.flash.error": "Le message n’a pas pu être envoyé. Réessayez ou écrivez à customer@ultrapop.com.",
+    "contact.flash.error": "Le message n’a pas pu être envoyé. Réessayez ou écrivez à support@ultrapop.com.",
     "contact.flash.too_many": "Un message vient déjà d’être envoyé. Patientez quelques secondes avant de réessayer.",
     "overlay.back_to_top": "Retour en haut",
     "overlay.close_cart": "Fermer le panier",
