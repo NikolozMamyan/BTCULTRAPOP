@@ -10,6 +10,7 @@ use App\Service\AdminCartProvider;
 use App\Service\AdminCartRecoveryManager;
 use App\Service\AdminCustomerManager;
 use App\Service\AdminCustomerProvider;
+use App\Service\AdminEmailVariableRenderer;
 use App\Service\AdminEmailingManager;
 use App\Service\AdminVisitorProvider;
 use App\Service\AssetUrlResolver;
@@ -45,6 +46,7 @@ final class CustomerController extends AbstractController
         Request $request,
         EmailTemplateRepository $emailTemplates,
         AdminEmailingManager $emailingManager,
+        AdminEmailVariableRenderer $emailVariables,
         AssetUrlResolver $assetUrlResolver,
     ): Response {
         $adminUser = $this->resolveAdminUser();
@@ -54,6 +56,7 @@ final class CustomerController extends AbstractController
         }
 
         $formData = [
+            'template_id' => 0,
             'template_name' => '',
             'subject' => '',
             'selected_user_ids' => [],
@@ -63,8 +66,21 @@ final class CustomerController extends AbstractController
             ),
         ];
 
+        if (!$request->isMethod('POST')) {
+            $selectedTemplateId = max(0, $request->query->getInt('template'));
+            $selectedTemplate = $selectedTemplateId > 0 ? $emailTemplates->find($selectedTemplateId) : null;
+
+            if (null !== $selectedTemplate) {
+                $formData['template_id'] = (int) $selectedTemplate->getId();
+                $formData['template_name'] = $selectedTemplate->getName();
+                $formData['subject'] = $selectedTemplate->getSubject();
+                $formData['html_content'] = $selectedTemplate->getHtmlContent();
+            }
+        }
+
         if ($request->isMethod('POST')) {
             $formData = [
+                'template_id' => max(0, $request->request->getInt('template_id')),
                 'template_name' => $request->request->getString('template_name'),
                 'subject' => $request->request->getString('subject'),
                 'selected_user_ids' => array_map('strval', $request->request->all('selected_user_ids')),
@@ -79,11 +95,27 @@ final class CustomerController extends AbstractController
             }
 
             try {
+                $formAction = $request->request->getString('form_action', 'send');
+
+                if ('save' === $formAction) {
+                    $template = $emailingManager->saveTemplate($adminUser, $formData);
+                    $this->addFlash('success', 'admin.emailing.flash.saved');
+
+                    return $this->redirectToRoute('app_admin_customers_emailing', [
+                        'template' => $template->getId(),
+                    ]);
+                }
+
+                if ('send' !== $formAction) {
+                    throw new \InvalidArgumentException('admin.emailing.flash.invalid_action');
+                }
+
                 $result = $emailingManager->createAndSend($adminUser, $formData);
                 $this->addFlash('success', 'admin.emailing.flash.sent');
 
                 return $this->redirectToRoute('app_admin_customers_emailing', [
                     'sent' => $result['recipient_count'],
+                    'template' => $result['template']->getId(),
                 ]);
             } catch (\InvalidArgumentException $exception) {
                 $this->addFlash('error', $exception->getMessage());
@@ -96,6 +128,8 @@ final class CustomerController extends AbstractController
             'admin_user' => $adminUser,
             'templates' => $emailTemplates->findLatestForAdmin(),
             'recipient_choices' => $emailingManager->recipientChoices(),
+            'email_variables' => $emailVariables->definitions(),
+            'preview_variables' => $emailVariables->previewVariables(),
             'form_data' => $formData,
             'sent_count' => max(0, $request->query->getInt('sent')),
         ]);
@@ -270,7 +304,7 @@ final class CustomerController extends AbstractController
         <tr>
           <td style="padding:34px 30px;color:#203263;">
             <p style="margin:0 0 8px;color:#e82118;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;">Nouvelle campagne</p>
-            <h1 style="margin:0 0 16px;font-size:30px;line-height:1.15;">Titre de ton email</h1>
+            <h1 style="margin:0 0 16px;font-size:30px;line-height:1.15;">Bonjour {{ client.firstName }},</h1>
             <p style="margin:0 0 22px;color:#475467;font-size:16px;line-height:1.7;">
               Ajoute ici ton contenu HTML. Tu peux intégrer des images publiques, des boutons et tes sections marketing.
             </p>

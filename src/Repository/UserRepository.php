@@ -60,6 +60,8 @@ final class UserRepository extends ServiceEntityRepository implements UserLoader
     public function findForEmailingAudience(string $audience): array
     {
         $queryBuilder = $this->createQueryBuilder('user')
+            ->leftJoin('user.addresses', 'emailingAddress')
+            ->addSelect('emailingAddress')
             ->andWhere('user.email != :emptyEmail')
             ->setParameter('emptyEmail', '')
             ->orderBy('user.email', 'ASC');
@@ -97,6 +99,8 @@ final class UserRepository extends ServiceEntityRepository implements UserLoader
         }
 
         $users = $this->createQueryBuilder('user')
+            ->leftJoin('user.addresses', 'emailingAddress')
+            ->addSelect('emailingAddress')
             ->andWhere('user.id IN (:ids)')
             ->andWhere('user.email != :emptyEmail')
             ->setParameter('ids', $ids)

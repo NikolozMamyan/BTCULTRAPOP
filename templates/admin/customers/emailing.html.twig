@@ -3,7 +3,16 @@
 {% block admin_title %}{{ 'admin.emailing.index.title'|trans }}{% endblock %}
 
 {% block admin_content %}
-    <section class="admin-emailing" data-controller="admin-emailing">
+    <section
+        class="admin-emailing"
+        data-controller="admin-emailing"
+        data-admin-emailing-recipient-empty-value="{{ 'admin.emailing.recipients.empty'|trans }}"
+        data-admin-emailing-recipient-count-value="{{ 'admin.emailing.recipients.count'|trans({'%count%': '__COUNT__'}) }}"
+        data-admin-emailing-manual-invalid-value="{{ 'admin.emailing.recipients.invalid_manual'|trans }}"
+        data-admin-emailing-preview-variables-value="{{ preview_variables|json_encode|e('html_attr') }}"
+        data-admin-emailing-subject-empty-value="{{ 'admin.emailing.preview.subject_empty'|trans }}"
+        data-admin-emailing-selection-empty-value="{{ 'admin.emailing.recipients.visual_empty'|trans }}"
+    >
         <div class="admin-page-heading admin-page-heading--actions">
             <div>
                 <span>{{ 'admin.emailing.index.eyebrow'|trans }}</span>
@@ -25,8 +34,14 @@
         {% set manual_emails = form_data.manual_emails|default([]) %}
 
         <div class="admin-emailing-layout">
-            <form class="admin-panel admin-emailing-form" method="post" action="{{ path('app_admin_customers_emailing') }}">
+            <form
+                class="admin-panel admin-emailing-form"
+                method="post"
+                action="{{ path('app_admin_customers_emailing') }}"
+                data-action="submit->admin-emailing#prepareSubmit"
+            >
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_customer_emailing') }}">
+                <input type="hidden" name="template_id" value="{{ form_data.template_id|default(0) }}" data-admin-emailing-target="templateId">
 
                 <div class="admin-form-card__heading">
                     <span><i class="fa-solid fa-code"></i></span>
@@ -60,30 +75,36 @@
                             required
                             autocomplete="off"
                             data-admin-emailing-target="subject"
+                            data-action="input->admin-emailing#refreshPreview"
                             placeholder="{{ 'admin.emailing.form.subject_placeholder'|trans }}"
                         >
                     </label>
                 </div>
 
-                <div
-                    class="admin-field admin-emailing-recipient-picker"
-                    data-admin-emailing-recipient-empty-value="{{ 'admin.emailing.recipients.empty'|trans }}"
-                    data-admin-emailing-recipient-count-value="{{ 'admin.emailing.recipients.count'|trans({'%count%': '__COUNT__'}) }}"
-                    data-admin-emailing-manual-invalid-value="{{ 'admin.emailing.recipients.invalid_manual'|trans }}"
-                >
+                <div class="admin-field admin-emailing-recipient-picker">
                     <span>{{ 'admin.emailing.form.audience'|trans }}</span>
-                    <button
-                        type="button"
-                        class="admin-emailing-recipient-toggle"
-                        data-admin-emailing-target="recipientToggle"
-                        data-action="admin-emailing#toggleRecipients"
-                    >
-                        <i class="fa-solid fa-users"></i>
-                        <span data-admin-emailing-target="recipientSummary">{{ 'admin.emailing.recipients.empty'|trans }}</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </button>
+                    <div class="admin-emailing-recipient-dropdown">
+                        <button
+                            type="button"
+                            class="admin-emailing-recipient-toggle"
+                            data-admin-emailing-target="recipientToggle"
+                            data-action="admin-emailing#toggleRecipients"
+                        >
+                            <i class="fa-solid fa-users"></i>
+                            <span data-admin-emailing-target="recipientSummary">{{ 'admin.emailing.recipients.empty'|trans }}</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
 
-                    <div class="admin-emailing-recipient-panel" data-admin-emailing-target="recipientPanel" hidden>
+                        <div class="admin-emailing-recipient-panel" data-admin-emailing-target="recipientPanel" hidden>
+                            <div class="admin-emailing-recipient-panel__head">
+                                <div>
+                                    <strong>{{ 'admin.emailing.recipients.panel_title'|trans }}</strong>
+                                    <small>{{ 'admin.emailing.recipients.panel_text'|trans }}</small>
+                                </div>
+                                <button type="button" data-action="admin-emailing#closeRecipients" aria-label="{{ 'common.close'|trans }}">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
                         <label class="admin-emailing-select-all">
                             <input
                                 type="checkbox"
@@ -101,7 +122,7 @@
                                 autocomplete="email"
                                 placeholder="{{ 'admin.emailing.recipients.manual_placeholder'|trans }}"
                                 data-admin-emailing-target="manualInput"
-                                data-action="keydown->admin-emailing#manualKeydown"
+                                data-action="keydown->admin-emailing#manualKeydown blur->admin-emailing#addManualEmail"
                             >
                             <button type="button" data-action="admin-emailing#addManualEmail">
                                 {{ 'admin.emailing.recipients.add_manual'|trans }}
@@ -130,6 +151,9 @@
                                         value="{{ recipient.id }}"
                                         data-admin-emailing-target="recipientCheckbox"
                                         data-action="admin-emailing#updateRecipientSummary"
+                                        data-recipient-name="{{ recipient.name }}"
+                                        data-recipient-email="{{ recipient.email }}"
+                                        data-recipient-variables="{{ recipient.variables|json_encode|e('html_attr') }}"
                                         {{ is_checked ? 'checked' : '' }}
                                     >
                                     <span>
@@ -153,13 +177,49 @@
                                 </div>
                             {% endfor %}
                         </div>
+                        </div>
                     </div>
+
+                    <details class="admin-emailing-selection-overview">
+                        <summary class="admin-emailing-selection-overview__head">
+                            <span><i class="fa-solid fa-at"></i> {{ 'admin.emailing.recipients.visual_title'|trans }}</span>
+                            <strong data-admin-emailing-target="visualCount">0</strong>
+                            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                        </summary>
+                        <div class="admin-emailing-selected-list" data-admin-emailing-target="selectedList"></div>
+                    </details>
 
                     <small>{{ 'admin.emailing.form.audience_help'|trans }}</small>
                 </div>
 
-                <label class="admin-field admin-field--full admin-emailing-html-field">
+                <div class="admin-field admin-field--full admin-emailing-html-field">
                     <span>{{ 'admin.emailing.form.html_content'|trans }}</span>
+
+                    <div class="admin-emailing-variable-sheet">
+                        <div class="admin-emailing-variable-sheet__heading">
+                            <span><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                            <div>
+                                <strong>{{ 'admin.emailing.variables.title'|trans }}</strong>
+                                <small>{{ 'admin.emailing.variables.text'|trans }}</small>
+                            </div>
+                        </div>
+                        <div class="admin-emailing-variable-list">
+                            {% for variable in email_variables %}
+                                {% set variable_token = '{{ ' ~ variable.key ~ ' }}' %}
+                                <button
+                                    type="button"
+                                    data-action="admin-emailing#insertVariable"
+                                    data-admin-emailing-variable-param="{{ variable.key }}"
+                                    title="{{ 'admin.emailing.variables.insert'|trans({'%variable%': variable_token}) }}"
+                                >
+                                    <code>{{ variable_token }}</code>
+                                    <small>{{ variable.label_key|trans }}</small>
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+
                     <textarea
                         name="html_content"
                         rows="22"
@@ -168,7 +228,7 @@
                         data-admin-emailing-target="html"
                         data-action="input->admin-emailing#refreshPreview"
                     >{{ form_data.html_content }}</textarea>
-                </label>
+                </div>
 
                 <div class="admin-emailing-warning">
                     <i class="fa-solid fa-triangle-exclamation"></i>
@@ -176,9 +236,13 @@
                 </div>
 
                 <div class="admin-product-form__actions">
-                    <button type="submit" class="admin-action-button" onclick="return confirm('{{ 'admin.emailing.form.confirm_send'|trans|e('js') }}');">
+                    <button type="submit" name="form_action" value="send" class="admin-action-button" onclick="return confirm('{{ 'admin.emailing.form.confirm_send'|trans|e('js') }}');">
                         <i class="fa-solid fa-paper-plane"></i>
                         {{ 'admin.emailing.form.send_submit'|trans }}
+                    </button>
+                    <button type="submit" name="form_action" value="save" class="admin-secondary-button">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        {{ 'admin.emailing.form.save_submit'|trans }}
                     </button>
                 </div>
             </form>
@@ -191,6 +255,10 @@
                             <strong>{{ 'admin.emailing.preview.title'|trans }}</strong>
                             <small>{{ 'admin.emailing.preview.text'|trans }}</small>
                         </div>
+                    </div>
+                    <div class="admin-emailing-preview-subject">
+                        <span>{{ 'admin.emailing.form.subject'|trans }}</span>
+                        <strong data-admin-emailing-target="previewSubject">{{ 'admin.emailing.preview.subject_empty'|trans }}</strong>
                     </div>
                     <iframe
                         class="admin-emailing-preview"
@@ -214,12 +282,16 @@
                             {% for template in templates %}
                                 <button
                                     type="button"
-                                    class="admin-emailing-template"
+                                    class="admin-emailing-template {{ form_data.template_id|default(0) == template.id ? 'is-selected' : '' }}"
                                     data-action="admin-emailing#loadTemplate"
-                                    data-template-name-param="{{ template.name }}"
-                                    data-template-subject-param="{{ template.subject }}"
-                                    data-template-html-param="{{ template.htmlContent|e('html_attr') }}"
+                                    data-admin-emailing-target="template"
+                                    data-admin-emailing-id-param="{{ template.id }}"
+                                    data-admin-emailing-name-param="{{ template.name }}"
+                                    data-admin-emailing-subject-param="{{ template.subject }}"
+                                    data-admin-emailing-html-param="{{ template.htmlContent|e('html_attr') }}"
+                                    aria-pressed="{{ form_data.template_id|default(0) == template.id ? 'true' : 'false' }}"
                                 >
+                                    <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
                                     <strong>{{ template.name }}</strong>
                                     <span>{{ template.subject }}</span>
                                     <small>

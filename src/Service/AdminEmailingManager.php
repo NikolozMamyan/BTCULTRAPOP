@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\EmailTemplate;
 use App\Entity\User;
+use App\Repository\EmailTemplateRepository;
 use App\Repository\UserRepository;
 use App\Service\Mailer\SimpleMailerService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,7 +29,9 @@ final readonly class AdminEmailingManager
     public function __construct(
         private EntityManagerInterface $entityManager,
         private UserRepository $users,
+        private EmailTemplateRepository $templates,
         private SimpleMailerService $mailer,
+        private AdminEmailVariableRenderer $variableRenderer,
     ) {
     }
 
@@ -55,17 +58,18 @@ final readonly class AdminEmailingManager
     }
 
     /**
-     * @return list<array{id: int, name: string, email: string, active: bool, verified: bool}>
+     * @return list<array{id: int, name: string, email: string, active: bool, verified: bool, variables: array<string, string>}>
      */
     public function recipientChoices(): array
     {
         return array_map(
-            static fn (User $user): array => [
+            fn (User $user): array => [
                 'id' => (int) $user->getId(),
                 'name' => $user->getFullName() ?: $user->getEmail(),
                 'email' => $user->getEmail(),
                 'active' => $user->isActive(),
                 'verified' => $user->isVerified(),
+                'variables' => $this->variableRenderer->variables($user, $user->getEmail()),
             ],
             $this->users->findForEmailingAudience(self::AUDIENCE_ALL_CUSTOMERS),
         );
@@ -87,32 +91,39 @@ final readonly class AdminEmailingManager
         $manualEmails = $this->normalizeEmails($payload['manual_emails'] ?? []);
 
         $this->validate($name, $subject, $htmlContent);
+        $this->variableRenderer->assertSupportedVariables($subject, $htmlContent);
 
-        $recipients = $this->recipientEmails($selectedUserIds, $manualEmails);
+        $recipients = $this->recipients($selectedUserIds, $manualEmails);
 
         if ([] === $recipients) {
             throw new \InvalidArgumentException('admin.emailing.flash.no_recipients');
         }
 
-        $template = (new EmailTemplate())
-            ->setName($name)
-            ->setSubject($subject)
-            ->setHtmlContent($htmlContent)
-            ->setAudience(self::AUDIENCE_CUSTOM_SELECTION)
-            ->setRecipientCount(count($recipients))
-            ->setCreatedBy($admin);
-
-        $this->entityManager->persist($template);
-        $this->entityManager->flush();
-
-        $textMessage = $this->htmlToText($htmlContent);
+        $template = $this->persistTemplate(
+            $admin,
+            $payload,
+            $name,
+            $subject,
+            $htmlContent,
+            count($recipients),
+        );
 
         foreach ($recipients as $recipient) {
+            $renderedSubject = $this->variableRenderer->renderText(
+                $subject,
+                $recipient['user'],
+                $recipient['email'],
+            );
+            $renderedHtml = $this->variableRenderer->renderHtml(
+                $htmlContent,
+                $recipient['user'],
+                $recipient['email'],
+            );
             $this->mailer->sendHtmlMessage(
-                subject: $subject,
-                htmlMessage: $htmlContent,
-                textMessage: $textMessage,
-                to: [$recipient],
+                subject: $renderedSubject,
+                htmlMessage: $renderedHtml,
+                textMessage: $this->htmlToText($renderedHtml),
+                to: [$recipient['email']],
             );
         }
 
@@ -126,23 +137,84 @@ final readonly class AdminEmailingManager
     }
 
     /**
+     * @param array<string, mixed> $payload
+     */
+    public function saveTemplate(User $admin, array $payload): EmailTemplate
+    {
+        $name = trim((string) ($payload['template_name'] ?? ''));
+        $subject = trim((string) ($payload['subject'] ?? ''));
+        $htmlContent = trim((string) ($payload['html_content'] ?? ''));
+
+        $this->validate($name, $subject, $htmlContent);
+        $this->variableRenderer->assertSupportedVariables($subject, $htmlContent);
+
+        return $this->persistTemplate($admin, $payload, $name, $subject, $htmlContent);
+    }
+
+    /**
      * @param list<int>    $selectedUserIds
      * @param list<string> $manualEmails
      *
-     * @return list<string>
+     * @return list<array{email: string, user: ?User}>
      */
-    private function recipientEmails(array $selectedUserIds, array $manualEmails): array
+    private function recipients(array $selectedUserIds, array $manualEmails): array
     {
-        return array_values(array_unique(array_filter(
-            [
-                ...array_map(
-                    static fn (User $user): string => $user->getEmail(),
-                    $this->users->findForEmailingSelection($selectedUserIds),
-                ),
-                ...$manualEmails,
-            ],
-            static fn (string $email): bool => '' !== $email && false !== filter_var($email, FILTER_VALIDATE_EMAIL),
-        )));
+        $recipients = [];
+
+        foreach ($this->users->findForEmailingSelection($selectedUserIds) as $user) {
+            $email = mb_strtolower(trim($user->getEmail()));
+
+            if (false !== filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $recipients[$email] = ['email' => $email, 'user' => $user];
+            }
+        }
+
+        foreach ($manualEmails as $email) {
+            if (!isset($recipients[$email])) {
+                $recipients[$email] = ['email' => $email, 'user' => null];
+            }
+        }
+
+        return array_values($recipients);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function persistTemplate(
+        User $admin,
+        array $payload,
+        string $name,
+        string $subject,
+        string $htmlContent,
+        ?int $recipientCount = null,
+    ): EmailTemplate {
+        $templateId = max(0, (int) ($payload['template_id'] ?? 0));
+        $template = $templateId > 0 ? $this->templates->find($templateId) : null;
+
+        if ($templateId > 0 && !$template instanceof EmailTemplate) {
+            throw new \InvalidArgumentException('admin.emailing.flash.invalid_template');
+        }
+
+        if (!$template instanceof EmailTemplate) {
+            $template = (new EmailTemplate())
+                ->setCreatedBy($admin)
+                ->setAudience(self::AUDIENCE_CUSTOM_SELECTION);
+        }
+
+        $template
+            ->setName($name)
+            ->setSubject($subject)
+            ->setHtmlContent($htmlContent);
+
+        if (null !== $recipientCount) {
+            $template->setRecipientCount($recipientCount);
+        }
+
+        $this->entityManager->persist($template);
+        $this->entityManager->flush();
+
+        return $template;
     }
 
     /**
