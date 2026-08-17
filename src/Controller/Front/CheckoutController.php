@@ -108,6 +108,7 @@ final class CheckoutController extends AbstractController
                 cart: $cart,
                 shippingAddress: $address,
                 user: $user,
+                customerEmail: $address->email,
                 shippingAmountTaxIncludedCents: $shippingQuote['amountCents'],
                 discountAmountTaxIncludedCents: $discountAmount,
             );

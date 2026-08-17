@@ -219,6 +219,7 @@
                                 </span>
                                 <address>
                                     <strong>{{ checkout_address.name }}</strong>
+                                    <span>{{ checkout_address.email }}</span>
                                     <span>{{ checkout_address.street }}</span>
                                     <span>{{ checkout_address.postalCode }} {{ checkout_address.city }}</span>
                                     <small>
@@ -250,6 +251,11 @@
                                 {{ form_label(checkout_form.name) }}
                                 {{ form_widget(checkout_form.name, {attr: {placeholder: 'checkout.address.name_placeholder'|trans}}) }}
                                 {{ form_errors(checkout_form.name) }}
+                            </div>
+                            <div class="checkout-address-form__field checkout-address-form__field--wide">
+                                {{ form_label(checkout_form.email) }}
+                                {{ form_widget(checkout_form.email, {attr: {placeholder: 'checkout.address.email_placeholder'|trans}}) }}
+                                {{ form_errors(checkout_form.email) }}
                             </div>
                             <div class="checkout-address-form__field checkout-address-form__field--wide">
                                 {{ form_label(checkout_form.street) }}

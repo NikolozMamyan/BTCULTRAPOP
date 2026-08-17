@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Model\CheckoutAddress;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -20,6 +21,14 @@ final class CheckoutAddressType extends AbstractType
                 'attr' => [
                     'autocomplete' => 'shipping name',
                     'placeholder' => 'checkout.address.name_placeholder',
+                ],
+            ])
+            ->add('email', EmailType::class, [
+                'label' => 'common.email',
+                'attr' => [
+                    'autocomplete' => 'email',
+                    'inputmode' => 'email',
+                    'placeholder' => 'checkout.address.email_placeholder',
                 ],
             ])
             ->add('street', TextType::class, [

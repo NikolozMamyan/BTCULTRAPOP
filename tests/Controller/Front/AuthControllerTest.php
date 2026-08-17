@@ -295,7 +295,9 @@ final class AuthControllerTest extends WebTestCase
             self::assertResponseIsSuccessful();
             self::assertSelectorExists('form.checkout-address-form[data-controller="checkout-address"]');
             self::assertSelectorTextContains('.checkout-address-card', 'Client Adresse');
+            self::assertSelectorTextContains('.checkout-address-card', $email);
             self::assertSelectorTextContains('.checkout-address-card', '12 rue de la Livraison');
+            self::assertSelectorExists(sprintf('input[name="checkout_address[email]"][value="%s"]', $email));
             self::assertSelectorExists('.checkout-address-card__edit[data-action="checkout-address#edit"]');
             self::assertSelectorExists('#checkout-address-editor[hidden]');
             self::assertSelectorNotExists('input[name="checkout_address[acceptTerms]"]');

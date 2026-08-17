@@ -199,10 +199,11 @@ final class CartOrderManagerTest extends TestCase
         self::assertSame(3, $product->getQuantity());
     }
 
-    public function testOrderManagerCreatesGuestOrderWithoutCustomerEmail(): void
+    public function testOrderManagerCreatesGuestOrderWithCheckoutEmail(): void
     {
         $address = new CheckoutAddress();
         $address->name = 'Client Invite';
+        $address->email = 'invite@example.com';
         $address->street = '20 rue de Lyon';
         $address->postalCode = '69001';
         $address->city = 'Lyon';
@@ -220,6 +221,7 @@ final class CartOrderManagerTest extends TestCase
         $order = (new OrderManager())->createGuestFromCart(
             cart: $cart,
             shippingAddress: $address,
+            customerEmail: $address->email,
             shippingAmountTaxIncludedCents: (new ShippingRateCalculator())->amountForSubtotal(
                 $cart->getTotalTaxIncludedCents(),
             ),
@@ -229,7 +231,7 @@ final class CartOrderManagerTest extends TestCase
         self::assertSame(CartStatus::CONVERTED, $cart->getStatus());
         self::assertSame($cart, $order->getCart());
         self::assertNull($order->getUser());
-        self::assertNull($order->getCustomerEmail());
+        self::assertSame('invite@example.com', $order->getCustomerEmail());
         self::assertSame('Client Invite', $order->getCustomerName());
         self::assertSame('20 rue de Lyon', $order->getShippingStreet());
         self::assertSame(475, $order->getShippingAmountTaxIncludedCents());

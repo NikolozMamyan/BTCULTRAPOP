@@ -13,6 +13,11 @@ final class CheckoutAddress
     public string $name = '';
 
     #[Assert\NotBlank]
+    #[Assert\Email]
+    #[Assert\Length(max: 180)]
+    public string $email = '';
+
+    #[Assert\NotBlank]
     #[Assert\Length(max: 255)]
     public string $street = '';
 
@@ -35,6 +40,7 @@ final class CheckoutAddress
     {
         $model = new self();
         $model->name = $user?->getFullName() ?: $address->getName();
+        $model->email = $user?->getEmail() ?? '';
         $model->street = $address->getStreet();
         $model->postalCode = $address->getPostalCode();
         $model->city = $address->getCity();
@@ -58,6 +64,7 @@ final class CheckoutAddress
 
         $model = new self();
         $model->name = $user->getFullName();
+        $model->email = $user->getEmail();
         $model->phone = $user->getPhone();
 
         return $model;
