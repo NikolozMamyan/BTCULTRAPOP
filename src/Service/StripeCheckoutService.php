@@ -16,6 +16,7 @@ final readonly class StripeCheckoutService
         private UrlGeneratorInterface $urlGenerator,
         private TranslatorInterface $translator,
         private AssetUrlResolver $assetUrlResolver,
+        private OrderPaymentLinkSigner $paymentLinkSigner,
     ) {
     }
 
@@ -24,7 +25,7 @@ final readonly class StripeCheckoutService
         return $this->stripeConfig->isConfigured();
     }
 
-    public function createSession(Order $order): Session
+    public function createSession(Order $order, ?string $idempotencyKey = null): Session
     {
         $stripe = $this->stripe();
         $lineItems = array_map(
@@ -46,11 +47,7 @@ final readonly class StripeCheckoutService
                 'order_number' => $order->getOrderNumber(),
             ],
             'success_url' => $this->checkoutSuccessUrl(),
-            'cancel_url' => $this->urlGenerator->generate(
-                'app_checkout_cancel',
-                ['order' => $order->getOrderNumber()],
-                UrlGeneratorInterface::ABSOLUTE_URL,
-            ),
+            'cancel_url' => $this->paymentLinkSigner->checkoutCancelUrl($order),
         ];
 
         if (null !== $order->getCustomerEmail()) {
@@ -74,12 +71,21 @@ final readonly class StripeCheckoutService
             $payload['discounts'] = [['coupon' => $coupon->id]];
         }
 
-        return $stripe->checkout->sessions->create($payload);
+        $requestOptions = null === $idempotencyKey
+            ? []
+            : ['idempotency_key' => $idempotencyKey];
+
+        return $stripe->checkout->sessions->create($payload, $requestOptions);
     }
 
     public function retrieveSession(string $sessionId): Session
     {
         return $this->stripe()->checkout->sessions->retrieve($sessionId, []);
+    }
+
+    public function expireSession(string $sessionId): Session
+    {
+        return $this->stripe()->checkout->sessions->expire($sessionId, []);
     }
 
     private function checkoutSuccessUrl(): string

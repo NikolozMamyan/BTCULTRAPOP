@@ -27,6 +27,8 @@ final class OrderRepository extends ServiceEntityRepository
         $queryBuilder = $this->createQueryBuilder('o')
             ->leftJoin('o.user', 'u')
             ->addSelect('u')
+            ->leftJoin('o.cart', 'cart')
+            ->addSelect('cart')
             ->orderBy('o.createdAt', 'DESC')
             ->addOrderBy('o.id', 'DESC')
             ->setMaxResults(200);
@@ -99,8 +101,12 @@ final class OrderRepository extends ServiceEntityRepository
         }
 
         return $this->createQueryBuilder('o')
+            ->leftJoin('o.cart', 'cart')
+            ->addSelect('cart')
             ->leftJoin('o.items', 'item')
             ->addSelect('item')
+            ->leftJoin('item.product', 'product')
+            ->addSelect('product')
             ->andWhere('o.id IN (:ids)')
             ->setParameter('ids', $ids)
             ->orderBy('o.createdAt', 'DESC')

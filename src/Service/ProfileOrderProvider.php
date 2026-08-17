@@ -6,6 +6,7 @@ use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\User;
 use App\Enum\OrderStatus;
+use App\Enum\PaymentStatus;
 use App\Repository\OrderRepository;
 
 final readonly class ProfileOrderProvider
@@ -15,6 +16,9 @@ final readonly class ProfileOrderProvider
     public function __construct(
         private OrderRepository $orders,
         private AssetUrlResolver $assetUrlResolver,
+        private OrderPaymentRecoveryManager $paymentRecovery,
+        private OrderCartRecoveryManager $cartRecovery,
+        private OrderReorderManager $reorderManager,
     ) {
     }
 
@@ -34,6 +38,8 @@ final readonly class ProfileOrderProvider
      */
     private function present(Order $order): array
     {
+        $cartRecovery = $this->cartRecovery->status($order);
+        $reorder = $this->reorderManager->status($order);
         $items = array_map(
             fn (OrderItem $item): array => [
                 'name' => $item->getProductName(),
@@ -50,9 +56,20 @@ final readonly class ProfileOrderProvider
             'number' => $order->getOrderNumber(),
             'created_at' => $order->getCreatedAt(),
             'status' => $order->getStatus()->value,
-            'status_key' => 'admin.order.status.' . $order->getStatus()->value,
+            'id' => $order->getId(),
+            'status_key' => OrderStatus::PENDING_PAYMENT === $order->getStatus()
+                && (null !== $order->getCart() || null !== $order->getStripeCheckoutSessionId())
+                ? 'admin.order.status.cart_to_finalize'
+                : 'admin.order.status.' . $order->getStatus()->value,
             'status_tone' => $this->statusTone($order->getStatus()),
             'payment_status_key' => 'admin.order.payment_status.' . $order->getPaymentStatus()->value,
+            'payment_recovery_url' => $this->paymentRecovery->customerRecoveryUrl($order),
+            'cart_recovery_available' => $cartRecovery['available'],
+            'cart_recovery_reason' => $cartRecovery['reason'],
+            'reorder_available' => $reorder['available'],
+            'reorder_reason' => $reorder['reason'],
+            'reorder_visible' => PaymentStatus::PAID === $order->getPaymentStatus()
+                && null !== $order->getPaidAt(),
             'total' => $this->formatCents($order->getTotalTaxIncludedCents()),
             'shipping_amount' => $this->formatCents($order->getShippingAmountTaxIncludedCents()),
             'discount' => $this->formatCents($order->getDiscountAmountTaxIncludedCents()),

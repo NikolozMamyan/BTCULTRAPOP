@@ -6,7 +6,6 @@ use App\Entity\Cart;
 use App\Entity\Order;
 use App\Entity\User;
 use App\Enum\CartStatus;
-use App\Enum\OrderStatus;
 use App\Exception\StripeConfigurationException;
 use App\Form\CheckoutAddressType;
 use App\Model\CheckoutAddress;
@@ -16,6 +15,9 @@ use App\Service\CartManager;
 use App\Service\CartResolver;
 use App\Service\CartViewBuilder;
 use App\Service\OrderManager;
+use App\Service\OrderCartRecoveryManager;
+use App\Service\OrderPaymentLinkSigner;
+use App\Service\OrderPaymentRecoveryManager;
 use App\Service\PromoCodeManager;
 use App\Service\ShippingRateCalculator;
 use App\Service\StripeCheckoutService;
@@ -55,6 +57,15 @@ final class CheckoutController extends AbstractController
 
         $cartManager->refreshPrices($cart);
         $entityManager->flush();
+
+        try {
+            $cartManager->assertAvailableForCheckout($cart);
+        } catch (\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+
+            return $this->redirectToRoute('app_front_cart');
+        }
+
         $shippingQuote = $shippingRateCalculator->quote($cart->getTotalTaxIncludedCents());
 
         if (!$shippingQuote['minimumReached']) {
@@ -107,7 +118,8 @@ final class CheckoutController extends AbstractController
             $order
                 ->setStripeCheckoutSessionId($session->id)
                 ->setStripePaymentIntentId($this->stripeObjectId($session->payment_intent ?? null))
-                ->setStripeCustomerId($this->stripeObjectId($session->customer ?? null));
+                ->setStripeCustomerId($this->stripeObjectId($session->customer ?? null))
+                ->markPaymentProcessing();
             $entityManager->flush();
 
             return $this->redirect((string) $session->url, Response::HTTP_SEE_OTHER);
@@ -158,28 +170,36 @@ final class CheckoutController extends AbstractController
         ]);
     }
 
-    #[Route('/cancel', name: 'app_checkout_cancel', methods: ['GET'])]
+    #[Route('/cancel', name: 'app_checkout_cancel_legacy', methods: ['GET'])]
+    #[Route('/cancel/{id}', name: 'app_checkout_cancel', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function cancel(
         Request $request,
         OrderRepository $orders,
-        OrderManager $orderManager,
-        EntityManagerInterface $entityManager,
-    ): Response
-    {
+        OrderPaymentLinkSigner $paymentLinkSigner,
+        OrderPaymentRecoveryManager $paymentRecovery,
+        OrderCartRecoveryManager $cartRecovery,
+    ): Response {
         $order = null;
-        $orderNumber = trim($request->query->getString('order'));
+        $orderId = $request->attributes->getInt('id');
 
-        if ('' !== $orderNumber) {
-            $order = $orders->findOneBy(['orderNumber' => $orderNumber]);
-
-            if ($order instanceof Order && OrderStatus::PENDING_PAYMENT === $order->getStatus()) {
-                $orderManager->cancel($order);
-                $entityManager->flush();
-            }
+        if ($orderId > 0 && $paymentLinkSigner->isValid($request)) {
+            $candidate = $orders->find($orderId);
+            $order = $candidate instanceof Order ? $candidate : null;
         }
+
+        $user = $this->getAuthenticatedUser();
+        $canRecoverCart = $order instanceof Order
+            && $this->canAccessCart($order, $user)
+            && $cartRecovery->status($order)['available'];
 
         return $this->render('front/checkout/cancel.html.twig', [
             'order' => $order,
+            'payment_recovery_url' => $order instanceof Order
+                ? $paymentRecovery->customerRecoveryUrl($order)
+                : null,
+            'cart_recovery_url' => $canRecoverCart
+                ? $paymentLinkSigner->cartRecoveryUrl($order)
+                : null,
         ]);
     }
 
@@ -197,6 +217,14 @@ final class CheckoutController extends AbstractController
         if ($order instanceof Order) {
             $orderManager->cancel($order);
         }
+    }
+
+    private function canAccessCart(Order $order, ?User $user): bool
+    {
+        $orderUser = $order->getUser();
+
+        return !$orderUser instanceof User
+            || ($user instanceof User && $orderUser->getId() === $user->getId());
     }
 
     private function stripeObjectId(mixed $value): ?string

@@ -156,6 +156,7 @@ final class CartOrderManagerTest extends TestCase
         );
 
         self::assertSame(CartStatus::CONVERTED, $cart->getStatus());
+        self::assertSame($cart, $order->getCart());
         self::assertSame('UP-TEST-0001', $order->getOrderNumber());
         self::assertSame(OrderStatus::PENDING_PAYMENT, $order->getStatus());
         self::assertSame(PaymentStatus::PENDING, $order->getPaymentStatus());
@@ -226,6 +227,7 @@ final class CartOrderManagerTest extends TestCase
         );
 
         self::assertSame(CartStatus::CONVERTED, $cart->getStatus());
+        self::assertSame($cart, $order->getCart());
         self::assertNull($order->getUser());
         self::assertNull($order->getCustomerEmail());
         self::assertSame('Client Invite', $order->getCustomerName());

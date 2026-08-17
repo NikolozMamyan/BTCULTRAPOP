@@ -14,9 +14,11 @@ use App\Repository\OrderRepository;
 use App\Service\AdminOrderCsvExporter;
 use App\Service\AdminOrderManager;
 use App\Service\AdminOrderProvider;
+use App\Service\OrderPaymentRecoveryManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/admin/orders')]
@@ -124,7 +126,11 @@ final class OrderController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_admin_orders_show', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function show(Order $order, AdminOrderProvider $orders): Response
+    public function show(
+        Order $order,
+        AdminOrderProvider $orders,
+        OrderPaymentRecoveryManager $paymentRecovery,
+    ): Response
     {
         $adminUser = $this->resolveAdminUser();
 
@@ -135,6 +141,11 @@ final class OrderController extends AbstractController
         return $this->render('admin/orders/show.html.twig', [
             'admin_user' => $adminUser,
             'order' => $orders->show($order),
+            'payment_recovery' => [
+                ...$paymentRecovery->reminderStatus($order),
+                'last_sent_at' => $order->getPaymentReminderSentAt(),
+                'sent_count' => $order->getPaymentReminderCount(),
+            ],
             'status_form' => $this->createForm(OrderStatusType::class, [
                 'status' => $order->getStatus(),
             ], [
@@ -142,6 +153,37 @@ final class OrderController extends AbstractController
                 'method' => 'POST',
             ])->createView(),
         ]);
+    }
+
+    #[Route('/{id}/payment-reminder', name: 'app_admin_orders_payment_reminder', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function paymentReminder(
+        Request $request,
+        Order $order,
+        OrderPaymentRecoveryManager $paymentRecovery,
+    ): Response {
+        if (!$this->resolveAdminUser() instanceof User) {
+            return $this->redirectToRoute('app_front_profil');
+        }
+
+        if (!$this->isCsrfTokenValid(
+            'admin_order_payment_reminder_' . $order->getId(),
+            $request->request->getString('_token'),
+        )) {
+            $this->addFlash('error', 'admin.order.recovery.error.invalid_csrf');
+
+            return $this->redirectToRoute('app_admin_orders_show', ['id' => $order->getId()]);
+        }
+
+        try {
+            $paymentRecovery->sendReminder($order);
+            $this->addFlash('success', 'admin.order.recovery.flash.sent');
+        } catch (TransportExceptionInterface) {
+            $this->addFlash('error', 'admin.order.recovery.error.transport');
+        } catch (\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('app_admin_orders_show', ['id' => $order->getId()]);
     }
 
     #[Route('/{id}/status', name: 'app_admin_orders_status', requirements: ['id' => '\d+'], methods: ['POST'])]

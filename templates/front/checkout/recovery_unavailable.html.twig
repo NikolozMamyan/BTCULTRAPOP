@@ -1,0 +1,27 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}{{ 'checkout.recovery.page_title'|trans }}{% endblock %}
+{% block storefront_data %}data-page="checkout-recovery-unavailable"{% endblock %}
+
+{% block main %}
+    <section class="checkout-result">
+        <article class="checkout-result__card checkout-result__card--cancel">
+            <span class="checkout-result__icon">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </span>
+            <p class="checkout-result__eyebrow">{{ 'checkout.recovery.eyebrow'|trans }}</p>
+            <h1>{{ 'checkout.recovery.title'|trans }}</h1>
+            <p>{{ message|trans }}</p>
+
+            <div class="checkout-result__actions">
+                <a href="{{ path('app_front_contact') }}" class="checkout-result__primary">
+                    {{ 'checkout.recovery.contact'|trans }}
+                    <i class="fa-solid fa-message"></i>
+                </a>
+                <a href="{{ path('app_front_boutique') }}" class="checkout-result__secondary">
+                    {{ 'common.shop'|trans }}
+                </a>
+            </div>
+        </article>
+    </section>
+{% endblock %}

@@ -43,6 +43,11 @@ final class CartController extends AbstractController
         }
 
         $cartView = $cartViewBuilder->build($cart);
+        $resumedOrderNumber = mb_strtoupper(trim($request->query->getString('reprise')));
+
+        if (!preg_match('/^[A-Z0-9-]{1,32}$/', $resumedOrderNumber)) {
+            $resumedOrderNumber = null;
+        }
 
         $response = $this->render('front/cart/index.html.twig', [
             'cart' => $cartView,
@@ -52,6 +57,7 @@ final class CartController extends AbstractController
             ])->createView(),
             'checkout_address' => $hasSavedAddress ? $checkoutAddress : null,
             'checkout_address_saved' => $hasSavedAddress,
+            'resumed_order_number' => $resumedOrderNumber,
         ]);
 
         if ($cart instanceof Cart) {

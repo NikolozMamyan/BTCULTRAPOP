@@ -25,6 +25,17 @@
     </section>
 
     <section class="cart-page max-w-7xl mx-auto px-5 py-10 md:py-16">
+        {% if resumed_order_number|default(null) %}
+            <aside class="cart-resumed-order" role="status">
+                <span class="cart-resumed-order__icon"><i class="fa-solid fa-rotate-left"></i></span>
+                <span>
+                    <strong>{{ 'cart.resumed.title'|trans({'%number%': resumed_order_number}) }}</strong>
+                    <small>{{ 'cart.resumed.text'|trans }}</small>
+                </span>
+                <i class="fa-solid fa-circle-check cart-resumed-order__check"></i>
+            </aside>
+        {% endif %}
+
         <div
             id="cart-minimum-order"
             class="cart-minimum-order {{ cart.minimumOrderReached or cart.empty ? 'hidden' : '' }}"

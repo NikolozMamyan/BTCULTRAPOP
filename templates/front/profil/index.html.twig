@@ -151,7 +151,7 @@
                     {% if profile_orders %}
                         <div class="profile-orders__list">
                             {% for order in profile_orders %}
-                                <details class="profile-order-card">
+                                <details class="profile-order-card"{% if order.payment_recovery_url %} open{% endif %}>
                                     <summary class="profile-order-card__summary">
                                         <span class="profile-order-card__package"><i class="fa-solid fa-box"></i></span>
                                         <span class="profile-order-card__identity">
@@ -167,6 +167,69 @@
                                     </summary>
 
                                     <div class="profile-order-card__details">
+                                        {% if order.payment_recovery_url %}
+                                            <div class="profile-order-recovery">
+                                                <span class="profile-order-recovery__icon">
+                                                    <i class="fa-solid fa-credit-card"></i>
+                                                </span>
+                                                <span class="profile-order-recovery__copy">
+                                                    <strong>{{ 'profile.order_recovery_title'|trans }}</strong>
+                                                    <small>{{ 'profile.order_recovery_text'|trans }}</small>
+                                                </span>
+                                                <span class="profile-order-recovery__actions">
+                                                    <a href="{{ order.payment_recovery_url }}" data-turbo="false">
+                                                        {{ 'profile.order_recovery_action'|trans }}
+                                                        <i class="fa-solid fa-arrow-right"></i>
+                                                    </a>
+                                                    {% if order.cart_recovery_available %}
+                                                        <form
+                                                            method="post"
+                                                            action="{{ path('app_front_profile_order_cart_recovery', {id: order.id}) }}"
+                                                            data-turbo="false"
+                                                        >
+                                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('profile_order_cart_recovery_' ~ order.id) }}">
+                                                            <button type="submit" class="profile-order-recovery__modify">
+                                                                {{ 'profile.order_modify_action'|trans }}
+                                                                <i class="fa-solid fa-basket-shopping"></i>
+                                                            </button>
+                                                        </form>
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if order.reorder_visible %}
+                                            <div class="profile-order-reorder">
+                                                <span class="profile-order-reorder__icon">
+                                                    <i class="fa-solid fa-rotate"></i>
+                                                </span>
+                                                <span class="profile-order-reorder__copy">
+                                                    <strong>{{ 'profile.reorder.title'|trans }}</strong>
+                                                    <small>
+                                                        {{ (order.reorder_available ? 'profile.reorder.text' : order.reorder_reason)|trans }}
+                                                    </small>
+                                                </span>
+                                                {% if order.reorder_available %}
+                                                    <form
+                                                        method="post"
+                                                        action="{{ path('app_front_profile_order_reorder', {id: order.id}) }}"
+                                                        data-turbo="false"
+                                                        onsubmit="return confirm('{{ 'profile.reorder.confirm'|trans|e('js') }}')"
+                                                    >
+                                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('profile_order_reorder_' ~ order.id) }}">
+                                                        <button type="submit">
+                                                            {{ 'profile.reorder.action'|trans }}
+                                                            <i class="fa-solid fa-lock"></i>
+                                                        </button>
+                                                    </form>
+                                                {% else %}
+                                                    <span class="profile-order-reorder__unavailable">
+                                                        <i class="fa-solid fa-circle-info"></i>
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+
                                         <div class="profile-order-items">
                                             {% for item in order.items %}
                                                 <article class="profile-order-item">

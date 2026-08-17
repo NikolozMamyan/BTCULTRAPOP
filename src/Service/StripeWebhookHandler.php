@@ -7,6 +7,7 @@ use App\Entity\StripeWebhookEvent;
 use App\Enum\PaymentStatus;
 use App\Repository\OrderRepository;
 use App\Repository\StripeWebhookEventRepository;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Stripe\Event;
 use Stripe\Exception\SignatureVerificationException;
@@ -49,16 +50,47 @@ final readonly class StripeWebhookHandler
 
     public function synchronizeCheckoutSession(object $session, string $eventType = 'checkout.session.completed'): ?Order
     {
+        return $this->entityManager->wrapInTransaction(
+            fn (): ?Order => $this->synchronizeCheckoutSessionLocked($session, $eventType),
+        );
+    }
+
+    private function synchronizeCheckoutSessionLocked(object $session, string $eventType): ?Order
+    {
         $order = $this->resolveOrderFromSession($session);
 
         if (!$order instanceof Order) {
             return null;
         }
 
-        $order
-            ->setStripeCheckoutSessionId($this->stringProperty($session, 'id'))
-            ->setStripePaymentIntentId($this->objectIdProperty($session, 'payment_intent'))
-            ->setStripeCustomerId($this->objectIdProperty($session, 'customer'));
+        // Serialize Stripe state transitions with payment recovery session creation.
+        // Refreshing under a write lock guarantees the session comparison uses the
+        // latest committed attempt, even when an old webhook arrives concurrently.
+        $this->entityManager->refresh($order, LockMode::PESSIMISTIC_WRITE);
+
+        $sessionId = $this->stringProperty($session, 'id');
+        $isPaid = 'paid' === $this->stringProperty($session, 'payment_status');
+        $currentSessionId = $order->getStripeCheckoutSessionId();
+        $isCurrentSession = null === $currentSessionId || $currentSessionId === $sessionId;
+
+        // A payment received from any valid session must be honored. Non-paid events
+        // from an older retry must never overwrite or cancel the current attempt.
+        if (!$isPaid && !$isCurrentSession) {
+            return null;
+        }
+
+        // A deliberately reopened cart has replaced this payment attempt. Stripe's
+        // later expiration event must not make the old order payable again.
+        if (!$isPaid && Order::PAYMENT_FAILURE_CART_REOPENED === $order->getPaymentFailureReason()) {
+            return null;
+        }
+
+        if ($isCurrentSession || $isPaid) {
+            $order
+                ->setStripeCheckoutSessionId($sessionId)
+                ->setStripePaymentIntentId($this->objectIdProperty($session, 'payment_intent'))
+                ->setStripeCustomerId($this->objectIdProperty($session, 'customer'));
+        }
 
         $customerEmail = $this->customerEmail($session);
 
@@ -73,12 +105,12 @@ final readonly class StripeWebhookHandler
         }
 
         if ('checkout.session.expired' === $eventType && PaymentStatus::PAID !== $order->getPaymentStatus()) {
-            $this->orderManager->cancel($order);
+            $this->orderManager->markPaymentFailed($order, 'stripe.checkout_session_expired');
 
             return $order;
         }
 
-        if ('paid' === $this->stringProperty($session, 'payment_status')) {
+        if ($isPaid) {
             $this->orderManager->markPaid($order);
 
             return $order;

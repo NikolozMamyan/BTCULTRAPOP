@@ -7,7 +7,7 @@
     <section class="checkout-result">
         <article class="checkout-result__card checkout-result__card--cancel">
             <span class="checkout-result__icon">
-                <i class="fa-solid fa-circle-xmark"></i>
+                <i class="fa-solid fa-arrow-rotate-left"></i>
             </span>
             <p class="checkout-result__eyebrow">{{ 'checkout.cancel.eyebrow'|trans }}</p>
             <h1>{{ 'checkout.cancel.title'|trans }}</h1>
@@ -21,10 +21,21 @@
             {% endif %}
 
             <div class="checkout-result__actions">
-                <a href="{{ path('app_front_cart') }}" class="checkout-result__primary">
-                    {{ 'common.cart'|trans }}
-                    <i class="fa-solid fa-arrow-right"></i>
-                </a>
+                {% if payment_recovery_url %}
+                    <a href="{{ payment_recovery_url }}" class="checkout-result__primary" data-turbo="false">
+                        {{ 'checkout.cancel.resume'|trans }}
+                        <i class="fa-solid fa-lock"></i>
+                    </a>
+                {% endif %}
+                {% if cart_recovery_url %}
+                    <form method="post" action="{{ cart_recovery_url }}" data-turbo="false">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('checkout_cart_recovery_' ~ order.id) }}">
+                        <button type="submit" class="checkout-result__secondary">
+                            {{ 'checkout.cancel.modify_cart'|trans }}
+                            <i class="fa-solid fa-basket-shopping"></i>
+                        </button>
+                    </form>
+                {% endif %}
                 <a href="{{ path('app_front_boutique') }}" class="checkout-result__secondary">
                     {{ 'common.shop'|trans }}
                 </a>

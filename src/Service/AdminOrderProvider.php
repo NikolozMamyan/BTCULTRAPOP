@@ -108,7 +108,10 @@ final readonly class AdminOrderProvider
             'email' => $order->getCustomerEmail(),
             'status' => $order->getStatus()->value,
             'payment_status' => $order->getPaymentStatus()->value,
-            'status_key' => 'admin.order.status.' . $order->getStatus()->value,
+            'status_key' => OrderStatus::PENDING_PAYMENT === $order->getStatus()
+                && (null !== $order->getCart() || null !== $order->getStripeCheckoutSessionId())
+                ? 'admin.order.status.cart_to_finalize'
+                : 'admin.order.status.' . $order->getStatus()->value,
             'payment_status_key' => 'admin.order.payment_status.' . $order->getPaymentStatus()->value,
             'total' => $this->formatCents($order->getTotalTaxIncludedCents()),
             'total_cents' => $order->getTotalTaxIncludedCents(),

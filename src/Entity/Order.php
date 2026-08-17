@@ -17,6 +17,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\HasLifecycleCallbacks]
 class Order
 {
+    public const PAYMENT_FAILURE_CART_REOPENED = 'checkout.cart_reopened';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -30,6 +32,10 @@ class Order
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?User $user = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Cart $cart = null;
 
     #[ORM\Column(length: 30, enumType: OrderStatus::class)]
     private OrderStatus $status = OrderStatus::PENDING_PAYMENT;
@@ -157,6 +163,13 @@ class Order
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $confirmationEmailSentAt = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $paymentReminderSentAt = null;
+
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
+    private int $paymentReminderCount = 0;
+
     public function __construct()
     {
         $this->items = new ArrayCollection();
@@ -189,6 +202,18 @@ class Order
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getCart(): ?Cart
+    {
+        return $this->cart;
+    }
+
+    public function setCart(?Cart $cart): self
+    {
+        $this->cart = $cart;
 
         return $this;
     }
@@ -547,6 +572,7 @@ class Order
         $this->paymentStatus = PaymentStatus::PAID;
         $this->paymentFailureReason = null;
         $this->paidAt = $paidAt ?? new \DateTimeImmutable();
+        $this->cancelledAt = null;
 
         return $this;
     }
@@ -556,6 +582,7 @@ class Order
         $this->status = OrderStatus::PENDING_PAYMENT;
         $this->paymentStatus = PaymentStatus::PROCESSING;
         $this->paymentFailureReason = null;
+        $this->cancelledAt = null;
 
         return $this;
     }
@@ -565,14 +592,16 @@ class Order
         $this->status = OrderStatus::PENDING_PAYMENT;
         $this->paymentStatus = PaymentStatus::FAILED;
         $this->setPaymentFailureReason($reason);
+        $this->cancelledAt = null;
 
         return $this;
     }
 
-    public function cancel(?\DateTimeImmutable $cancelledAt = null): self
+    public function cancel(?\DateTimeImmutable $cancelledAt = null, ?string $reason = null): self
     {
         $this->status = OrderStatus::CANCELLED;
         $this->paymentStatus = PaymentStatus::FAILED;
+        $this->setPaymentFailureReason($reason);
         $this->cancelledAt = $cancelledAt ?? new \DateTimeImmutable();
 
         return $this;
@@ -606,6 +635,24 @@ class Order
     public function markConfirmationEmailSent(?\DateTimeImmutable $sentAt = null): self
     {
         $this->confirmationEmailSentAt = $sentAt ?? new \DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function getPaymentReminderSentAt(): ?\DateTimeImmutable
+    {
+        return $this->paymentReminderSentAt;
+    }
+
+    public function getPaymentReminderCount(): int
+    {
+        return $this->paymentReminderCount;
+    }
+
+    public function markPaymentReminderSent(?\DateTimeImmutable $sentAt = null): self
+    {
+        $this->paymentReminderSentAt = $sentAt ?? new \DateTimeImmutable();
+        ++$this->paymentReminderCount;
 
         return $this;
     }

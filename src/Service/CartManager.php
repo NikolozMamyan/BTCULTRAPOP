@@ -57,6 +57,20 @@ final class CartManager
         }
     }
 
+    public function assertAvailableForCheckout(Cart $cart): void
+    {
+        foreach ($cart->getItems() as $item) {
+            $product = $item->getProduct();
+
+            if (!$product instanceof Product
+                || !$product->isActive()
+                || $product->getQuantity() < $item->getQuantity()
+            ) {
+                throw new \InvalidArgumentException('cart.error.product_unavailable');
+            }
+        }
+    }
+
     public function updateQuantity(CartItem $item, int $quantity): void
     {
         $item->setQuantity($quantity);

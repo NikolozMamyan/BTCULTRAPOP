@@ -119,6 +119,11 @@ final class AdminOrderControllerTest extends WebTestCase
             self::assertSelectorTextContains('.admin-order-show', 'Client Order Fixture');
             self::assertSelectorTextContains('.admin-order-items', 'Order Product Fixture');
             self::assertSelectorTextContains('.admin-order-show__grid > article:nth-child(4)', 'pi_test_' . $suffix);
+            self::assertSelectorTextContains('.admin-order-recovery', 'Ultra relance');
+            self::assertSelectorNotExists(sprintf(
+                'form[action="/admin/orders/%d/payment-reminder"]',
+                $order->getId(),
+            ));
             self::assertSelectorExists(sprintf('a[href="/admin/orders/export?order=%d"]', $order->getId()));
             self::assertSelectorExists(sprintf('form[action="/admin/orders/%d/delete"]', $order->getId()));
 

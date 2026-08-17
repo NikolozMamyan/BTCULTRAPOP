@@ -42,6 +42,7 @@ final class OrderManager
         $order = (new Order())
             ->setOrderNumber($orderNumber ?? $this->generateOrderNumber())
             ->setUser($user)
+            ->setCart($cart)
             ->setCustomerEmail($user->getEmail())
             ->setCustomerName($user->getFullName() ?: $user->getEmail())
             ->setShippingName($shippingAddress->getName())
@@ -85,6 +86,7 @@ final class OrderManager
         $order = (new Order())
             ->setOrderNumber($orderNumber ?? $this->generateOrderNumber())
             ->setUser($user)
+            ->setCart($cart)
             ->setCustomerEmail($customerEmail ?? $user?->getEmail())
             ->setCustomerName($shippingAddress->name)
             ->setShippingName($shippingAddress->name)
@@ -116,6 +118,7 @@ final class OrderManager
 
         $this->promoCodeManager?->redeemForOrder($order);
         $order->markPaid($paidAt);
+        $order->getCart()?->markConverted();
         $order->getUser()?->addLoyaltyPoints($order->getLoyaltyPointsEarned());
         $activeStockSource = $this->stockSettingsManager?->activeSource() ?? StockSource::default();
         $updatedProducts = [];
@@ -140,10 +143,14 @@ final class OrderManager
         $order->markPaymentFailed($reason);
     }
 
-    public function cancel(Order $order, ?\DateTimeImmutable $cancelledAt = null): void
+    public function cancel(
+        Order $order,
+        ?\DateTimeImmutable $cancelledAt = null,
+        ?string $reason = null,
+    ): void
     {
         $this->promoCodeManager?->releaseForOrder($order);
-        $order->cancel($cancelledAt);
+        $order->cancel($cancelledAt, $reason);
     }
 
     private function createOrderItem(CartItem $cartItem): OrderItem

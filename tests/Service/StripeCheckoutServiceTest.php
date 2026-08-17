@@ -4,6 +4,7 @@ namespace App\Tests\Service;
 
 use App\Entity\Order;
 use App\Service\AssetUrlResolver;
+use App\Service\OrderPaymentLinkSigner;
 use App\Service\StripeCheckoutService;
 use App\Service\StripeConfigProvider;
 use PHPUnit\Framework\TestCase;
@@ -29,6 +30,7 @@ final class StripeCheckoutServiceTest extends TestCase
             $urlGenerator,
             $this->createStub(TranslatorInterface::class),
             new AssetUrlResolver($this->createStub(Packages::class), new RequestStack(), 'https://ultrapop.com'),
+            new OrderPaymentLinkSigner($urlGenerator, 'test-secret'),
         );
         $method = new \ReflectionMethod($service, 'checkoutSuccessUrl');
         $method->setAccessible(true);
@@ -61,6 +63,7 @@ final class StripeCheckoutServiceTest extends TestCase
             $this->createStub(UrlGeneratorInterface::class),
             $translator,
             new AssetUrlResolver($packages, $requestStack, 'https://ultrapop.com'),
+            new OrderPaymentLinkSigner($this->createStub(UrlGeneratorInterface::class), 'test-secret'),
         );
         $order = (new Order())
             ->setCurrency('EUR')

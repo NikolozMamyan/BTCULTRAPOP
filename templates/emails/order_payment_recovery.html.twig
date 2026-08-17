@@ -1,0 +1,107 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block title %}Reprends le paiement de ta commande ULTRAPOP{% endblock %}
+
+{% block content %}
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;font-family:'Segoe UI',Helvetica,Arial,sans-serif;">
+        <tr>
+            <td style="padding:0 0 28px;">
+                <p style="margin:0 0 12px;color:#e82118;font-size:12px;line-height:1.4;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">
+                    Paiement à finaliser
+                </p>
+                <h1 style="margin:0;color:#182653;font-size:30px;line-height:1.25;font-weight:750;letter-spacing:-.02em;">
+                    Ta commande est toujours là.
+                </h1>
+                <p style="margin:16px 0 0;color:#4b5874;font-size:16px;line-height:1.7;font-weight:400;">
+                    Bonjour {{ customer_name }}, le paiement de la commande <strong style="color:#182653;">{{ order_number }}</strong> n’a pas été finalisé. Aucun souci&nbsp;: tu peux le reprendre en quelques secondes.
+                </p>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="padding:0 0 14px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;border-radius:16px;background:#f5f7fb;">
+                    <tr>
+                        <td style="padding:15px 18px;color:#4b5874;font-size:13px;line-height:1.5;">
+                            Commande <strong style="color:#182653;">{{ order_number }}</strong>
+                        </td>
+                        <td align="right" style="padding:15px 18px;color:#182653;font-size:17px;font-weight:750;white-space:nowrap;">
+                            {{ total }}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="padding:10px 0 8px;color:#182653;font-size:18px;line-height:1.4;font-weight:700;">
+                Les produits de ta commande
+            </td>
+        </tr>
+
+        {% for row in products|batch(2) %}
+            <tr>
+                <td style="padding:5px 0;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="table-layout:fixed;border-collapse:collapse;">
+                        <tr>
+                            {% for product in row %}
+                                <td width="50%" valign="top" style="padding:5px;">
+                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:separate;border-spacing:0;border:1px solid #e4e8f0;border-radius:16px;background:#ffffff;overflow:hidden;">
+                                        <tr>
+                                            <td align="center" style="height:126px;padding:12px;background:#f8f9fc;">
+                                                {% if product.image %}
+                                                    <img src="{{ product.image }}" width="104" height="104" alt="{{ product.name }}" style="display:block;width:104px;max-width:100%;height:104px;object-fit:contain;border:0;margin:0 auto;">
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:14px 15px 15px;">
+                                                <p style="min-height:42px;margin:0;color:#182653;font-size:14px;line-height:1.5;font-weight:650;">
+                                                    {{ product.name }}
+                                                </p>
+                                                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:10px;border-collapse:collapse;">
+                                                    <tr>
+                                                        <td style="color:#718096;font-size:12px;line-height:1.4;">Quantité&nbsp;: {{ product.quantity }}</td>
+                                                        <td align="right" style="color:#182653;font-size:13px;line-height:1.4;font-weight:700;white-space:nowrap;">{{ product.total }}</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            {% endfor %}
+                            {% if row|length == 1 %}
+                                <td width="50%" style="padding:5px;">&nbsp;</td>
+                            {% endif %}
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        {% endfor %}
+
+        <tr>
+            <td align="center" style="padding:26px 0 0;">
+                <a href="{{ payment_url }}" style="display:block;padding:17px 24px;border-radius:14px;background:#e82118;color:#ffffff;text-decoration:none;font-size:16px;line-height:1.35;font-weight:700;text-align:center;">
+                    Reprendre mon paiement · {{ total }}
+                </a>
+                <p style="margin:14px 0 0;color:#667085;font-size:13px;line-height:1.65;">
+                    Une fois le paiement confirmé, nous lançons la préparation de ta commande pour l’expédier au plus vite.
+                </p>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="padding:24px 0 0;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;border-top:1px solid #e4e8f0;">
+                    <tr>
+                        <td style="padding:20px 0 0;color:#667085;font-size:13px;line-height:1.65;text-align:center;">
+                            Tu peux aussi retrouver ce bouton à tout moment dans<br>
+                            <a href="{{ url('app_front_profil') }}#profile-orders" style="color:#182653;font-weight:700;text-decoration:underline;">Profil → Mes commandes</a>.
+                            <br><span style="color:#98a2b3;font-size:12px;">Si tu as déjà payé, ignore simplement ce message.</span>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+{% endblock %}

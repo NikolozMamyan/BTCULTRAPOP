@@ -69,6 +69,45 @@
                         <strong>{{ order.items_count }}</strong>
                     </div>
                 </div>
+
+                <div class="admin-order-recovery">
+                    <div class="admin-order-recovery__copy">
+                        <span class="admin-order-recovery__icon">
+                            <i class="fa-solid fa-bolt"></i>
+                        </span>
+                        <div>
+                            <strong>{{ 'admin.order.recovery.title'|trans }}</strong>
+                            <small>
+                                {% if payment_recovery.last_sent_at %}
+                                    {{ 'admin.order.recovery.last_sent'|trans({
+                                        '%date%': payment_recovery.last_sent_at|date('d/m/Y à H:i')
+                                    }) }}
+                                {% else %}
+                                    {{ 'admin.order.recovery.text'|trans }}
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+
+                    {% if payment_recovery.available %}
+                        <form
+                            method="post"
+                            action="{{ path('app_admin_orders_payment_reminder', {id: order.id}) }}"
+                            onsubmit="return confirm('{{ 'admin.order.recovery.confirm'|trans|e('js') }}')"
+                        >
+                            <input type="hidden" name="_token" value="{{ csrf_token('admin_order_payment_reminder_' ~ order.id) }}">
+                            <button type="submit" class="admin-order-recovery__button">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                {{ 'admin.order.recovery.action'|trans }}
+                            </button>
+                        </form>
+                    {% else %}
+                        <span class="admin-order-recovery__unavailable">
+                            <i class="fa-solid fa-circle-info"></i>
+                            {{ payment_recovery.reason|trans }}
+                        </span>
+                    {% endif %}
+                </div>
             </article>
 
             <article class="admin-panel">
