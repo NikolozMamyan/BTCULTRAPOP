@@ -16,12 +16,31 @@
     </section>
 
     <section class="max-w-7xl mx-auto px-5 py-8">
-        {% if products|default([]) %}
+        {% if app.user and products|default([]) %}
             <div class="shop-products-grid">
                 {% for product in products %}
                     {% include 'front/boutique/_product_card.html.twig' with {product: product} only %}
                 {% endfor %}
             </div>
+            <div data-favorites-target="empty" hidden>
+                {% include 'front/components/_catalog_empty.html.twig' with {
+                    icon: 'fa-regular fa-heart',
+                    eyebrow: 'common.favorites',
+                    title: 'favorites.empty_title',
+                    text: 'favorites.empty_text',
+                    action_url: path('app_front_boutique'),
+                    action_label: 'favorites.view_shop'
+                } only %}
+            </div>
+        {% elseif not app.user %}
+            {% include 'front/components/_catalog_empty.html.twig' with {
+                icon: 'fa-solid fa-user-lock',
+                eyebrow: 'common.favorites',
+                title: 'favorites.login_title',
+                text: 'favorites.login_text',
+                action_url: path('app_front_profil', {return_to: path('app_front_favoris')}),
+                action_label: 'favorites.login_action'
+            } only %}
         {% else %}
             {% include 'front/components/_catalog_empty.html.twig' with {
                 icon: 'fa-regular fa-heart',

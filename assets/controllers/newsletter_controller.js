@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import { showStorefrontToast } from '../lib/storefront_toast.js';
 
 export default class extends Controller {
     static targets = ['button', 'email', 'form', 'message', 'messageIcon', 'messageText'];
@@ -41,14 +42,14 @@ export default class extends Controller {
             const message = payload?.message || this.errorValue;
 
             this.showMessage(message, success);
-            this.showToast(message, !success);
+            showStorefrontToast(message, { error: !success });
 
             if (success) {
                 this.emailTarget.value = '';
             }
         } catch (error) {
             this.showMessage(this.errorValue, false);
-            this.showToast(this.errorValue, true);
+            showStorefrontToast(this.errorValue, { error: true });
         } finally {
             this.setBusy(false);
         }
@@ -91,28 +92,4 @@ export default class extends Controller {
         }, 350);
     }
 
-    showToast(message, error) {
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toast-msg');
-        const toastIcon = toast?.querySelector('i');
-
-        if (!toast || !toastMessage) {
-            return;
-        }
-
-        window.clearTimeout(window.newsletterToastTimer);
-        toastMessage.textContent = message;
-        toast.classList.toggle('is-error', error);
-        toastIcon?.classList.toggle('fa-circle-check', !error);
-        toastIcon?.classList.toggle('fa-circle-exclamation', error);
-        toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-        toast.classList.add('opacity-100', 'translate-y-0');
-
-        window.newsletterToastTimer = window.setTimeout(() => {
-            toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-            toast.classList.remove('opacity-100', 'translate-y-0', 'is-error');
-            toastIcon?.classList.add('fa-circle-check');
-            toastIcon?.classList.remove('fa-circle-exclamation');
-        }, 3600);
-    }
 }

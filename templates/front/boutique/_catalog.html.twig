@@ -33,6 +33,11 @@
             data-shop-filters-all-value="{{ 'shop.filters.all'|trans }}"
             data-shop-filters-filter-field-value="{{ catalog_filter_field }}"
             data-shop-filters-page-size-value="6"
+            data-shop-filters-price-chip-value="{{ 'shop.filters.price_chip'|trans }}"
+            data-shop-filters-promo-label-value="{{ 'shop.filters.promo_only'|trans }}"
+            data-shop-filters-new-label-value="{{ 'shop.filters.new_only'|trans }}"
+            data-shop-filters-remove-filter-value="{{ 'shop.filters.remove_one'|trans }}"
+            data-shop-filters-clear-label-value="{{ 'shop.filters.clear_all'|trans }}"
             {% if catalog_show_hero %}
                 data-shop-filters-hero-all-label-value="{{ catalog_title|trans }}"
                 data-shop-filters-hero-images-value="{{ catalog_hero_images|json_encode|e('html_attr') }}"
@@ -321,7 +326,7 @@
                 class="shop-results"
                 data-shop-filters-target="results"
             >
-                <div class="shop-results-toolbar">
+                <div class="shop-results-toolbar shop-results-toolbar--contextual">
                     <div class="shop-results-summary">
                         {% if catalog_show_hero %}
                             <div class="shop-active-category" aria-live="polite">
@@ -371,6 +376,13 @@
                         <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
                     </label>
                 </div>
+
+                <div
+                    class="shop-active-filters"
+                    data-shop-filters-target="activeFilters"
+                    aria-live="polite"
+                    hidden
+                ></div>
 
                 <div class="shop-products-grid" data-shop-filters-target="grid">
                     {% for product in catalog_products %}

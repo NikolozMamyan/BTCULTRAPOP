@@ -24,18 +24,25 @@
 
 {% block body %}
     {% set promotional_popup = app.user ? null : storefront_popup() %}
+    {% set favorite_count = storefront_favorite_count() %}
     <div
         id="storefront-app"
         data-controller="cart favorites product-preview"
         {% block storefront_data %}data-page="home"{% endblock %}
         data-home-url="{{ path('app_front_home') }}"
         data-shop-url="{{ path('app_front_boutique') }}"
+        data-licenses-url="{{ path('app_front_licences') }}"
+        data-sales-url="{{ path('app_front_soldes') }}"
         data-wishlist-url="{{ path('app_front_favoris') }}"
         data-cart-url-value="{{ path('app_api_cart_show') }}"
         data-cart-add-url-value="{{ path('app_api_cart_item_add') }}"
+        data-cart-page-url-value="{{ path('app_front_cart') }}"
+        data-cart-view-label-value="{{ 'cart.view'|trans }}"
         data-cart-csrf-value="{{ csrf_token('cart_api') }}"
         data-cart-error-value="{{ 'cart.flash.error'|trans }}"
         data-favorites-toggle-url-value="{{ path('app_api_favorite_toggle', {productId: 0})|replace({'/0': '/__PRODUCT_ID__'}) }}"
+        data-favorites-login-url-value="{{ path('app_front_profil') }}"
+        data-favorites-login-label-value="{{ 'auth.login.submit'|trans }}"
         data-favorites-csrf-value="{{ csrf_token('favorite_api') }}"
         data-favorites-error-value="{{ 'favorite.flash.error'|trans }}"
         data-cart-shipping-empty="{{ 'overlay.shipping_empty'|trans }}"

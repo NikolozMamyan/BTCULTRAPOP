@@ -1,20 +1,25 @@
 import { Controller } from '@hotwired/stimulus';
 import { pushEcommerceEvent } from '../lib/ecommerce_tracking.js';
+import { showStorefrontToast } from '../lib/storefront_toast.js';
 
 export default class extends Controller {
     static values = {
         addUrl: String,
         csrf: String,
         error: String,
+        pageUrl: String,
         url: String,
+        viewLabel: String,
     };
 
     connect() {
         this.stateVersion = 0;
         this.pendingMutations = new Map();
         this.mutationQueue = Promise.resolve();
+        this.quantityAnimationTimers = new WeakMap();
         this.boundAddFromEvent = (event) => this.addFromEvent(event);
         window.addEventListener('cart:add', this.boundAddFromEvent);
+        this.initializeProductQuantities();
         this.load();
     }
 
@@ -54,7 +59,10 @@ export default class extends Controller {
     }
 
     normalizeProductQuantity(event) {
-        this.normalizeQuantityInput(event.currentTarget);
+        const input = event.currentTarget;
+        const quantity = this.normalizeQuantityInput(input);
+
+        this.renderProductQuantity(input, quantity, true);
     }
 
     async addFromEvent(event) {
@@ -96,7 +104,10 @@ export default class extends Controller {
         const response = await this.mutate('POST', this.addUrlValue, {
             productId: Number(productId),
             quantity: Number(quantity) || 1,
-        }, button);
+        }, button, {
+            label: this.viewLabelValue,
+            url: this.pageUrlValue,
+        });
 
         if (response?.analytics?.event && response.analytics.ecommerce) {
             pushEcommerceEvent(response.analytics.event, response.analytics.ecommerce);
@@ -117,7 +128,9 @@ export default class extends Controller {
         }
 
         const currentQuantity = this.normalizeQuantityInput(input);
-        this.normalizeQuantityInput(input, currentQuantity + step);
+        const quantity = this.normalizeQuantityInput(input, currentQuantity + step);
+
+        this.renderProductQuantity(input, quantity, true);
     }
 
     normalizeQuantityInput(input, requestedQuantity = Number(input.value)) {
@@ -133,7 +146,58 @@ export default class extends Controller {
         return quantity;
     }
 
-    async mutate(method, url, body = null, button = null) {
+    initializeProductQuantities() {
+        this.element.querySelectorAll('[data-product-quantity]').forEach((input) => {
+            const quantity = this.normalizeQuantityInput(input);
+
+            this.renderProductQuantity(input, quantity);
+        });
+    }
+
+    renderProductQuantity(input, quantity, animate = false) {
+        const purchase = input.closest('[data-product-purchase]');
+        const addButton = purchase?.querySelector('.shop-product-card__add');
+        const decrementButton = purchase?.querySelector('[data-action="cart#decrementProductQuantity"]');
+        const incrementButton = purchase?.querySelector('[data-action="cart#incrementProductQuantity"]');
+        const minimum = Math.max(1, Number(input.min) || 1);
+        const maximum = Math.max(minimum, Number(input.max) || 99);
+
+        if (addButton) {
+            const label = addButton.dataset.productAddLabel || addButton.textContent.trim();
+
+            addButton.setAttribute('aria-label', `${label} × ${quantity}`);
+        }
+
+        if (decrementButton) {
+            decrementButton.disabled = quantity <= minimum;
+        }
+
+        if (incrementButton) {
+            incrementButton.disabled = quantity >= maximum;
+        }
+
+        if (animate) {
+            this.animateProductQuantity([input]);
+        }
+    }
+
+    animateProductQuantity(targets) {
+        targets.forEach((target) => {
+            window.clearTimeout(this.quantityAnimationTimers.get(target));
+            target.classList.remove('is-changing');
+            void target.offsetWidth;
+            target.classList.add('is-changing');
+
+            const timer = window.setTimeout(() => {
+                target.classList.remove('is-changing');
+                this.quantityAnimationTimers.delete(target);
+            }, 260);
+
+            this.quantityAnimationTimers.set(target, timer);
+        });
+    }
+
+    async mutate(method, url, body = null, button = null, successAction = null) {
         if (!url) {
             this.showToast(this.errorValue, true);
             return;
@@ -158,7 +222,7 @@ export default class extends Controller {
 
             if (response?.cart) {
                 this.render(response.cart);
-                this.showToast(response.message || this.errorValue, false);
+                this.showToast(response.message || this.errorValue, false, successAction);
                 return response;
             }
 
@@ -262,6 +326,7 @@ export default class extends Controller {
         this.setShippingText('cart-shipping', cart);
         this.setText('cart-page-subtotal', cart.subtotalFormatted);
         this.setText('cart-page-total', cart.totalFormatted);
+        this.setText('cart-mobile-total', cart.totalFormatted);
         this.setShippingText('cart-page-shipping', cart);
         this.renderDiscount('cart-discount-row', 'cart-discount', cart);
         this.renderDiscount('cart-page-discount-row', 'cart-page-discount', cart);
@@ -271,6 +336,12 @@ export default class extends Controller {
         this.setText('cart-minimum-order-title', cart.minimumOrderTitle || '');
         this.setText('cart-minimum-order-current', cart.subtotalFormatted || '');
         this.setText('cart-checkout-label', cart.checkoutLabel || '');
+        this.setText('cart-mobile-checkout-label', cart.checkoutLabel || '');
+
+        const mobileCheckout = document.getElementById('cart-mobile-checkout');
+        if (mobileCheckout) {
+            mobileCheckout.hidden = Boolean(cart.empty);
+        }
 
         const minimumOrder = document.getElementById('cart-minimum-order');
         if (minimumOrder) {
@@ -413,7 +484,7 @@ export default class extends Controller {
                 <span class="catalog-empty__eyebrow">${this.escape(this.element.dataset.cartEmptyEyebrow)}</span>
                 <h2>${this.escape(this.element.dataset.cartEmptyTitle)}</h2>
                 <p>${this.escape(this.element.dataset.cartEmptyText)}</p>
-                <a href="${this.escapeAttribute(this.element.dataset.shopUrl)}" class="catalog-empty__action">
+                <a href="${this.escapeAttribute(this.element.dataset.shopUrl)}" class="catalog-empty__action" data-continue-shopping>
                     ${this.escape(this.element.dataset.cartEmptyAction)}
                     <i class="fa-solid fa-arrow-right"></i>
                 </a>
@@ -452,24 +523,12 @@ export default class extends Controller {
         `;
     }
 
-    showToast(message, error = false) {
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toast-msg');
-
-        if (!toast || !toastMessage) {
-            return;
-        }
-
-        window.clearTimeout(this.toastTimer);
-        toastMessage.textContent = message;
-        toast.classList.toggle('is-error', error);
-        toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-        toast.classList.add('opacity-100', 'translate-y-0');
-
-        this.toastTimer = window.setTimeout(() => {
-            toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-            toast.classList.remove('opacity-100', 'translate-y-0', 'is-error');
-        }, 2600);
+    showToast(message, error = false, action = null) {
+        showStorefrontToast(message, {
+            error,
+            actionLabel: action?.label || '',
+            actionUrl: action?.url || '',
+        });
     }
 
     setBusy(button, busy) {

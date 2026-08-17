@@ -60,7 +60,7 @@
                     </span>
                 </div>
             </div>
-            <a href="{{ path('app_front_boutique') }}" class="cart-minimum-order__action">
+            <a href="{{ path('app_front_boutique') }}" class="cart-minimum-order__action" data-continue-shopping>
                 {{ 'cart.minimum_order.action'|trans }}
                 <i class="fa-solid fa-arrow-right"></i>
             </a>
@@ -73,7 +73,7 @@
                         <span>{{ 'cart.items'|trans }}</span>
                         <strong class="cart-count">{{ cart.totalQuantity }}</strong>
                     </div>
-                    <a href="{{ path('app_front_boutique') }}">{{ 'overlay.discover_shop'|trans }}</a>
+                    <a href="{{ path('app_front_boutique') }}" data-continue-shopping>{{ 'cart.continue_shopping'|trans }}</a>
                 </div>
 
                 <div id="cart-page-items" class="cart-page__items">
@@ -84,7 +84,8 @@
                             title: 'cart.empty_title',
                             text: 'cart.empty_text',
                             action_url: path('app_front_boutique'),
-                            action_label: 'overlay.discover_shop'
+                            action_label: 'overlay.discover_shop',
+                            continue_shopping: true
                         } only %}
                     {% else %}
                         {% for item in cart.items %}
@@ -178,6 +179,7 @@
                 } only %}
                 {% if not cart.empty and checkout_form is defined %}
                     {% set checkout_form_attr = {
+                        id: 'checkout-address-form',
                         class: 'checkout-address-form',
                         'data-turbo': 'false',
                         'data-controller': 'checkout-address',
@@ -292,7 +294,7 @@
                         </p>
                     {{ form_end(checkout_form) }}
                 {% else %}
-                    <a href="{{ path('app_front_boutique') }}" class="cart-page__checkout cart-page__checkout--enabled">
+                    <a href="{{ path('app_front_boutique') }}" class="cart-page__checkout cart-page__checkout--enabled" data-continue-shopping>
                         {{ 'overlay.discover_shop'|trans }}
                         <i class="fa-solid fa-arrow-right"></i>
                     </a>
@@ -300,4 +302,23 @@
             </aside>
         </div>
     </section>
+
+    {% if not cart.empty and checkout_form is defined %}
+        <aside id="cart-mobile-checkout" class="cart-mobile-checkout" aria-label="{{ 'cart.mobile_checkout.label'|trans }}">
+            <div class="cart-mobile-checkout__total">
+                <small>{{ 'overlay.total'|trans }}</small>
+                <strong id="cart-mobile-total">{{ cart.totalFormatted }}</strong>
+            </div>
+            <button
+                type="submit"
+                form="checkout-address-form"
+                class="cart-mobile-checkout__action {{ cart.checkoutAllowed ? 'cart-page__checkout--enabled' : '' }}"
+                data-cart-checkout-button
+                {{ cart.checkoutAllowed ? '' : 'disabled' }}
+            >
+                <i class="fa-solid fa-lock"></i>
+                <span id="cart-mobile-checkout-label">{{ cart.checkoutLabel }}</span>
+            </button>
+        </aside>
+    {% endif %}
 {% endblock %}

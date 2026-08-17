@@ -43,14 +43,97 @@ function initializeStorefront() {
     const abortController = new AbortController();
     const { signal } = abortController;
     let carouselTimer;
-    let toastTimer;
     let promoPopupTimer;
     let promoPopupCloseTimer;
     let promoPopupTracking = Promise.resolve();
+    let catalogStateTimer;
     let slideIndex = 0;
+    const catalogStateKey = 'ultrapop:catalog-return';
+    const catalogRestoreKey = 'ultrapop:catalog-restore';
+    const catalogPaths = new Set([
+        app.dataset.shopUrl,
+        app.dataset.licensesUrl,
+        app.dataset.salesUrl,
+    ].filter(Boolean));
 
     const on = (target, eventName, listener, options = {}) => {
         target?.addEventListener(eventName, listener, { ...options, signal });
+    };
+
+    const relativeUrl = (url = window.location) => `${url.pathname}${url.search}${url.hash}`;
+
+    const readCatalogState = (key = catalogStateKey) => {
+        try {
+            const stored = JSON.parse(window.sessionStorage.getItem(key) || 'null');
+            const url = new URL(stored?.url || '', window.location.origin);
+
+            if (url.origin !== window.location.origin || !catalogPaths.has(url.pathname)) {
+                return null;
+            }
+
+            return {
+                url: relativeUrl(url),
+                scrollY: Math.max(0, Number(stored.scrollY) || 0),
+            };
+        } catch (error) {
+            return null;
+        }
+    };
+
+    const writeCatalogState = (key, state) => {
+        try {
+            window.sessionStorage.setItem(key, JSON.stringify(state));
+        } catch (error) {
+            // Navigation still works with the regular /boutique fallback.
+        }
+    };
+
+    const rememberCatalogState = () => {
+        if (app.dataset.page !== 'shop' || !catalogPaths.has(window.location.pathname)) {
+            return;
+        }
+
+        writeCatalogState(catalogStateKey, {
+            url: relativeUrl(),
+            scrollY: window.scrollY,
+        });
+    };
+
+    const restoreCatalogState = () => {
+        if (app.dataset.page !== 'shop') {
+            return false;
+        }
+
+        const state = readCatalogState(catalogRestoreKey);
+
+        if (!state || state.url !== relativeUrl()) {
+            return false;
+        }
+
+        try {
+            window.sessionStorage.removeItem(catalogRestoreKey);
+        } catch (error) {
+            // The scroll restoration can still continue.
+        }
+
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                window.scrollTo({ top: state.scrollY, behavior: 'auto' });
+                rememberCatalogState();
+            });
+        });
+
+        return true;
+    };
+
+    const prepareContinueShoppingLink = (link) => {
+        const state = readCatalogState();
+
+        if (state) {
+            link.href = state.url;
+        }
+
+        return state;
     };
 
     const setBodyLocked = (locked) => {
@@ -394,6 +477,27 @@ function initializeStorefront() {
     document.querySelectorAll('[data-action="carousel-prev"]').forEach((button) => on(button, 'click', () => goToSlide(slideIndex - 1)));
     document.querySelectorAll('[data-action="carousel-next"]').forEach((button) => on(button, 'click', () => goToSlide(slideIndex + 1)));
     document.querySelectorAll('[data-action="back-to-top"]').forEach((button) => on(button, 'click', () => window.scrollTo({ top: 0, behavior: 'smooth' })));
+    document.querySelectorAll('[data-continue-shopping]').forEach(prepareContinueShoppingLink);
+    on(document, 'click', (event) => {
+        const link = event.target.closest('[data-continue-shopping]');
+
+        if (!link) {
+            return;
+        }
+
+        const state = prepareContinueShoppingLink(link);
+
+        if (state
+            && event.button === 0
+            && !event.metaKey
+            && !event.ctrlKey
+            && !event.shiftKey
+            && !event.altKey
+        ) {
+            writeCatalogState(catalogRestoreKey, state);
+        }
+    });
+    on(document, 'turbo:before-visit', rememberCatalogState);
     on(document, 'keydown', (event) => {
         if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
             event.preventDefault();
@@ -410,6 +514,11 @@ function initializeStorefront() {
     on(window, 'scroll', () => {
         triggerReveals();
         updateBackToTop();
+
+        if (app.dataset.page === 'shop') {
+            window.clearTimeout(catalogStateTimer);
+            catalogStateTimer = window.setTimeout(rememberCatalogState, 160);
+        }
     }, { passive: true });
 
     bindFallbacks();
@@ -417,13 +526,18 @@ function initializeStorefront() {
     resetCarouselTimer();
     triggerReveals();
     updateBackToTop();
+    const catalogStateRestored = restoreCatalogState();
+
+    if (!catalogStateRestored) {
+        rememberCatalogState();
+    }
 
     return () => {
         abortController.abort();
         window.clearInterval(carouselTimer);
-        window.clearTimeout(toastTimer);
         window.clearTimeout(promoPopupTimer);
         window.clearTimeout(promoPopupCloseTimer);
+        window.clearTimeout(catalogStateTimer);
         setBodyLocked(false);
         document.getElementById('search-modal')?.classList.add('hidden');
         document.getElementById('product-preview')?.classList.add('hidden');

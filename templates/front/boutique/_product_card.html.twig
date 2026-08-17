@@ -111,9 +111,11 @@
                 class="shop-product-card__add cart-add-button"
                 data-action="cart#add"
                 data-cart-product-id-param="{{ product.id }}"
+                data-product-add-label="{{ 'product.add'|trans }}"
+                aria-label="{{ 'product.add'|trans }} × 1"
             >
                 <i class="fa-solid fa-bag-shopping"></i>
-                {{ 'product.add'|trans }}
+                <span>{{ 'product.add'|trans }}</span>
             </button>
         </div>
     {% else %}

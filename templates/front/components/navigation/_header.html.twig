@@ -1,15 +1,16 @@
 {% set current_route = app.request.attributes.get('_route') %}
 {% set has_sales = storefront_has_sales() %}
+{% set profile_url = path('app_front_profil', not app.user and current_route != 'app_front_profil' ? {return_to: app.request.requestUri} : {}) %}
 
 <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-border-c">
-    <div class="max-w-7xl mx-auto px-5 h-[72px] flex items-center justify-between gap-6">
+    <div class="max-w-7xl mx-auto px-5 h-[72px] flex items-center justify-between gap-2 sm:gap-6">
         <a href="{{ path('app_front_home') }}" class="flex items-center shrink-0">
-            <img src="{{ asset('img/logo/logotype.svg') }}" alt="ULTRAPOP" class="h-9 w-auto" data-logo-fallback>
+            <img src="{{ asset('img/logo/logotype.svg') }}" alt="ULTRAPOP" class="h-7 sm:h-9 w-auto" data-logo-fallback>
         </a>
 
         <nav class="hidden lg:flex items-center gap-8 font-semibold text-sm text-text-dark" aria-label="{{ 'nav.primary_label'|trans }}">
             <a href="{{ path('app_front_home') }}" class="nav-link {{ current_route == 'app_front_home' ? 'active' : '' }}">{{ 'common.home'|trans }}</a>
-            <a href="{{ path('app_front_boutique') }}" class="nav-link {{ current_route in ['app_front_boutique'] ? 'active' : '' }}">{{ 'common.shop'|trans }}</a>
+            <a href="{{ path('app_front_boutique') }}" class="nav-link {{ current_route in ['app_front_boutique', 'app_front_product'] ? 'active' : '' }}">{{ 'common.shop'|trans }}</a>
             {# <a href="{{ path('app_front_boutique', {filter: 'nouveautes'}) }}" class="nav-link">{{ 'common.new_products'|trans }}</a> #}
             <a href="{{ path('app_front_licences') }}" class="nav-link {{ current_route == 'app_front_licences' ? 'active' : '' }}">{{ 'common.licenses'|trans }}</a>
             {# <a href="{{ path('app_front_blog') }}" class="nav-link {{ current_route starts with 'app_front_blog' ? 'active' : '' }}">{{ 'common.blog'|trans }}</a> #}
@@ -27,10 +28,11 @@
                 <span>{{ 'nav.search_placeholder'|trans }}</span>
                 <kbd class="ml-auto text-[10px] bg-white border border-border-c rounded px-1.5 py-0.5">⌘K</kbd>
             </button>
-            <a href="{{ path('app_front_favoris') }}" class="hidden lg:flex w-10 h-10 rounded-full hover:bg-bg-light items-center justify-center text-text-dark transition-colors relative" aria-label="{{ 'nav.favorites_label'|trans }}">
+            <a href="{{ path('app_front_favoris') }}" class="header-favorites-link flex w-10 h-10 rounded-full hover:bg-bg-light items-center justify-center text-text-dark transition-colors relative {{ current_route == 'app_front_favoris' ? 'is-active' : '' }}" aria-label="{{ 'nav.favorites_label'|trans }}">
                 <i class="fa-regular fa-heart"></i>
+                <span class="favorites-count header-favorites-link__badge" data-favorites-target="count" aria-live="polite" {{ favorite_count > 0 ? '' : 'hidden' }}>{{ favorite_count }}</span>
             </a>
-            <a href="{{ path('app_front_profil') }}" class="header-profile-link flex w-10 h-10 rounded-full hover:bg-bg-light items-center justify-center text-text-dark transition-colors {{ current_route == 'app_front_profil' ? 'bg-bg-light text-primary' : '' }}" aria-label="{{ 'nav.profile_label'|trans }}">
+            <a href="{{ profile_url }}" class="header-profile-link flex w-10 h-10 rounded-full hover:bg-bg-light items-center justify-center text-text-dark transition-colors {{ current_route == 'app_front_profil' ? 'bg-bg-light text-primary' : '' }}" aria-label="{{ 'nav.profile_label'|trans }}">
                 {% if app.user and app.user.avatarPath %}
                     <img class="header-profile-link__avatar" src="{{ asset(app.user.avatarPath) }}" alt="">
                 {% else %}

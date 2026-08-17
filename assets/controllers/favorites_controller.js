@@ -1,9 +1,14 @@
 import { Controller } from '@hotwired/stimulus';
+import { showStorefrontToast } from '../lib/storefront_toast.js';
 
 export default class extends Controller {
+    static targets = ['count', 'empty'];
+
     static values = {
         csrf: String,
         error: String,
+        loginLabel: String,
+        loginUrl: String,
         toggleUrl: String,
     };
 
@@ -38,12 +43,25 @@ export default class extends Controller {
 
             if (!response.ok) {
                 this.applyState(button, previousState, false);
-                this.showToast(payload?.message || this.errorValue, true);
+                const loginUrl = response.status === 401 ? this.loginUrl() : '';
+
+                this.showToast(payload?.message || this.errorValue, true, loginUrl ? {
+                    label: this.loginLabelValue,
+                    url: loginUrl,
+                } : null);
                 return;
             }
 
-            this.applyState(button, Boolean(payload.favorite), false);
-            this.syncProductButtons(productId, Boolean(payload.favorite), button);
+            const favorite = Boolean(payload.favorite);
+
+            this.applyState(button, favorite, false);
+            this.syncProductButtons(productId, favorite, button);
+            this.updateCount(Number(payload.count) || 0);
+
+            if (!favorite) {
+                this.removeWishlistCard(button);
+            }
+
             this.showToast(payload?.message || this.errorValue, false);
         } catch (error) {
             this.applyState(button, previousState, false);
@@ -86,23 +104,53 @@ export default class extends Controller {
             });
     }
 
-    showToast(message, error = false) {
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toast-msg');
+    updateCount(count) {
+        this.countTargets.forEach((badge) => {
+            badge.textContent = count > 99 ? '99+' : String(count);
+            badge.hidden = count === 0;
+        });
+    }
 
-        if (!toast || !toastMessage) {
+    removeWishlistCard(button) {
+        if (this.element.dataset.page !== 'wishlist') {
             return;
         }
 
-        window.clearTimeout(this.toastTimer);
-        toastMessage.textContent = message;
-        toast.classList.toggle('is-error', error);
-        toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-        toast.classList.add('opacity-100', 'translate-y-0');
+        const card = button.closest('.shop-product-card');
 
-        this.toastTimer = window.setTimeout(() => {
-            toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-            toast.classList.remove('opacity-100', 'translate-y-0', 'is-error');
-        }, 2600);
+        if (!card) {
+            return;
+        }
+
+        card.classList.add('is-removing');
+        window.setTimeout(() => {
+            card.remove();
+
+            if (this.hasEmptyTarget && this.element.querySelectorAll('.shop-product-card').length === 0) {
+                this.emptyTarget.hidden = false;
+            }
+        }, 260);
+    }
+
+    loginUrl() {
+        if (!this.hasLoginUrlValue) {
+            return '';
+        }
+
+        const url = new URL(this.loginUrlValue, window.location.origin);
+        url.searchParams.set(
+            'return_to',
+            `${window.location.pathname}${window.location.search}${window.location.hash}`,
+        );
+
+        return `${url.pathname}${url.search}${url.hash}`;
+    }
+
+    showToast(message, error = false, action = null) {
+        showStorefrontToast(message, {
+            error,
+            actionLabel: action?.label || '',
+            actionUrl: action?.url || '',
+        });
     }
 }

@@ -167,7 +167,7 @@
 
                 <p class="product-detail__description">{{ product.description ?: 'product.description'|trans({'%name%': product.name}) }}</p>
 
-                <div class="product-detail__purchase">
+                <div class="product-detail__purchase" data-product-detail-target="purchase">
                     <div class="product-quantity" aria-label="{{ 'product.quantity'|trans }}">
                         <button type="button" data-action="product-detail#decrement" aria-label="{{ 'product.quantity_less'|trans }}">
                             <i class="fa-solid fa-minus"></i>
@@ -202,6 +202,43 @@
                 </div>
             </div>
         </article>
+
+        <aside
+            class="product-mobile-purchase {{ product.in_stock ? '' : 'product-mobile-purchase--unavailable' }}"
+            data-product-detail-target="mobileBar"
+            aria-label="{{ 'product.mobile_purchase.label'|trans }}"
+            aria-hidden="true"
+            inert
+        >
+            <div class="product-mobile-purchase__summary">
+                <small>{{ product.name }}</small>
+                <strong>{{ product.price|number_format(2, ',', ' ') }} €</strong>
+            </div>
+            {% if product.in_stock %}
+                <div class="product-mobile-purchase__quantity" aria-label="{{ 'product.quantity'|trans }}">
+                    <button type="button" data-action="product-detail#decrement" aria-label="{{ 'product.quantity_less'|trans }}">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span data-product-detail-target="quantity">1</span>
+                    <button type="button" data-action="product-detail#increment" aria-label="{{ 'product.quantity_more'|trans }}">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                <button
+                    type="button"
+                    class="product-mobile-purchase__action cart-add-button"
+                    data-action="product-detail#addToCart"
+                >
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span>{{ 'product.add'|trans }}</span>
+                </button>
+            {% else %}
+                <button type="button" class="product-mobile-purchase__action" disabled>
+                    <i class="fa-solid fa-circle-xmark"></i>
+                    <span>{{ 'product.out_of_stock'|trans }}</span>
+                </button>
+            {% endif %}
+        </aside>
 
         <section class="product-tabs">
             <div class="product-tabs__nav-wrapper" role="tablist">

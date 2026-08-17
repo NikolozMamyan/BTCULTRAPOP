@@ -12,9 +12,9 @@
         <div>
             <h4 class="font-bold mb-4 text-sm">{{ 'common.shop'|trans }}</h4>
             <ul class="space-y-2 text-sm text-white/60">
-                <li><a href="{{ path('app_front_boutique') }}" class="hover:text-secondary">{{ 'common.new_products'|trans }}</a></li>
-                <li><a href="{{ path('app_front_boutique') }}" class="hover:text-secondary">{{ 'common.best_sellers'|trans }}</a></li>
-                <li><a href="{{ path('app_front_boutique') }}" class="hover:text-secondary">{{ 'common.limited_editions'|trans }}</a></li>
+                <li><a href="{{ path('app_front_boutique') }}" class="hover:text-secondary">{{ 'common.shop'|trans }}</a></li>
+                <li><a href="{{ path('app_front_boutique', {new: 1}) }}" class="hover:text-secondary">{{ 'common.new_products'|trans }}</a></li>
+                <li><a href="{{ path('app_front_licences') }}" class="hover:text-secondary">{{ 'common.licenses'|trans }}</a></li>
                 <li><a href="{{ path('app_front_soldes') }}" class="hover:text-secondary">{{ 'common.sales'|trans }}</a></li>
                 <li><a href="{{ path('app_front_blog') }}" class="hover:text-secondary">{{ 'common.blog'|trans }}</a></li>
             </ul>

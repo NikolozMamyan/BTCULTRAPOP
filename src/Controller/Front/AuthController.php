@@ -8,6 +8,7 @@ use App\Repository\UserRepository;
 use App\Security\UserSessionManager;
 use App\Service\Mailer\SimpleMailerService;
 use App\Service\PasswordResetManager;
+use App\Service\StorefrontReturnUrlResolver;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -145,11 +146,14 @@ final class AuthController extends AbstractController
         UserRepository $users,
         UserPasswordHasherInterface $passwordHasher,
         UserSessionManager $userSessionManager,
+        StorefrontReturnUrlResolver $returnUrlResolver,
     ): RedirectResponse {
+        $returnTo = $returnUrlResolver->sanitize($request->request->getString('return_to'));
+
         if (!$this->isCsrfTokenValid('auth_login', $request->request->getString('_csrf_token'))) {
             $this->addFlash('error', 'auth.flash.invalid_csrf');
 
-            return $this->redirectToRoute('app_front_profil');
+            return $this->redirectToProfile($returnTo);
         }
 
         $user = $users->loadUserByIdentifier($request->request->getString('email'));
@@ -158,10 +162,12 @@ final class AuthController extends AbstractController
         if (!$user instanceof User || !$user->isActive() || !$passwordHasher->isPasswordValid($user, $password)) {
             $this->addFlash('error', 'auth.flash.invalid_credentials');
 
-            return $this->redirectToRoute('app_front_profil');
+            return $this->redirectToProfile($returnTo);
         }
 
-        $response = $this->redirectToRoute($this->isAdmin($user) ? 'app_admin_dashboard' : 'app_front_boutique');
+        $response = $this->isAdmin($user)
+            ? $this->redirectToRoute('app_admin_dashboard')
+            : $this->redirectToStorefrontTarget($returnTo, 'app_front_boutique');
         $response->headers->setCookie($userSessionManager->createSession($user, $request));
         $this->addFlash('success', 'auth.flash.login_success');
 
@@ -178,17 +184,20 @@ final class AuthController extends AbstractController
         ValidatorInterface $validator,
         SimpleMailerService $mailer,
         LoggerInterface $logger,
+        StorefrontReturnUrlResolver $returnUrlResolver,
     ): RedirectResponse {
+        $returnTo = $returnUrlResolver->sanitize($request->request->getString('return_to'));
+
         if (!$this->isCsrfTokenValid('auth_register', $request->request->getString('_csrf_token'))) {
             $this->addFlash('error', 'auth.flash.invalid_csrf');
 
-            return $this->redirectToRoute('app_front_profil');
+            return $this->redirectToProfile($returnTo);
         }
 
         if (!$request->request->getBoolean('accept_terms')) {
             $this->addFlash('error', 'auth.flash.terms_required');
 
-            return $this->redirectToRoute('app_front_profil');
+            return $this->redirectToProfile($returnTo);
         }
 
         $email = $request->request->getString('email');
@@ -197,13 +206,13 @@ final class AuthController extends AbstractController
         if (mb_strlen($password) < 8) {
             $this->addFlash('error', 'auth.flash.password_too_short');
 
-            return $this->redirectToRoute('app_front_profil');
+            return $this->redirectToProfile($returnTo);
         }
 
         if ($users->loadUserByIdentifier($email) instanceof User) {
             $this->addFlash('error', 'auth.flash.email_exists');
 
-            return $this->redirectToRoute('app_front_profil');
+            return $this->redirectToProfile($returnTo);
         }
 
         $user = (new User())
@@ -232,7 +241,7 @@ final class AuthController extends AbstractController
         if ([] !== $violations) {
             $this->addFlash('error', 'auth.flash.invalid_registration');
 
-            return $this->redirectToRoute('app_front_profil');
+            return $this->redirectToProfile($returnTo);
         }
 
         $entityManager->persist($user);
@@ -258,7 +267,7 @@ final class AuthController extends AbstractController
             ]);
         }
 
-        $response = $this->redirectToRoute('app_front_profil');
+        $response = $this->redirectToStorefrontTarget($returnTo, 'app_front_profil');
         $response->headers->setCookie($userSessionManager->createSession($user, $request));
         $this->addFlash('success', 'auth.flash.register_success');
 
@@ -284,5 +293,19 @@ final class AuthController extends AbstractController
     private function isAdmin(User $user): bool
     {
         return in_array('ROLE_ADMIN', $user->getRoles(), true);
+    }
+
+    private function redirectToProfile(string $returnTo): RedirectResponse
+    {
+        return $this->redirectToRoute('app_front_profil', '' === $returnTo ? [] : [
+            'return_to' => $returnTo,
+        ]);
+    }
+
+    private function redirectToStorefrontTarget(string $returnTo, string $fallbackRoute): RedirectResponse
+    {
+        return '' !== $returnTo
+            ? $this->redirect($returnTo)
+            : $this->redirectToRoute($fallbackRoute);
     }
 }

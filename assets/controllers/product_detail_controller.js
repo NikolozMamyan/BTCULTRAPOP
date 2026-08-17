@@ -1,11 +1,19 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['panel', 'quantity', 'tab', 'thumbnail', 'visualImage'];
+    static targets = ['mobileBar', 'panel', 'purchase', 'quantity', 'tab', 'thumbnail', 'visualImage'];
     static values = {
         backUrl: String,
         productId: Number,
     };
+
+    connect() {
+        this.observePurchaseActions();
+    }
+
+    disconnect() {
+        this.purchaseObserver?.disconnect();
+    }
 
     goBack(event) {
         if (window.history.length > 1) {
@@ -21,11 +29,11 @@ export default class extends Controller {
     }
 
     increment() {
-        this.quantityTarget.textContent = Math.min(this.quantity + 1, 10);
+        this.updateQuantity(Math.min(this.quantity + 1, 10));
     }
 
     decrement() {
-        this.quantityTarget.textContent = Math.max(this.quantity - 1, 1);
+        this.updateQuantity(Math.max(this.quantity - 1, 1));
     }
 
     selectTab(event) {
@@ -68,6 +76,36 @@ export default class extends Controller {
                 button: event.currentTarget,
             },
         }));
+    }
+
+    observePurchaseActions() {
+        if (!this.hasMobileBarTarget || !this.hasPurchaseTarget) {
+            return;
+        }
+
+        if (!('IntersectionObserver' in window)) {
+            this.setMobileBarVisible(true);
+            return;
+        }
+
+        this.purchaseObserver = new IntersectionObserver(([entry]) => {
+            this.setMobileBarVisible(!entry.isIntersecting);
+        }, {
+            threshold: 0.25,
+        });
+        this.purchaseObserver.observe(this.purchaseTarget);
+    }
+
+    setMobileBarVisible(visible) {
+        this.mobileBarTarget.classList.toggle('is-visible', visible);
+        this.mobileBarTarget.toggleAttribute('inert', !visible);
+        this.mobileBarTarget.setAttribute('aria-hidden', String(!visible));
+    }
+
+    updateQuantity(quantity) {
+        this.quantityTargets.forEach((target) => {
+            target.textContent = String(quantity);
+        });
     }
 
     get quantity() {

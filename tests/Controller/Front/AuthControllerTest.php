@@ -35,6 +35,28 @@ final class AuthControllerTest extends WebTestCase
         self::assertSelectorExists('[data-action="profile-auth#showLogin"]');
     }
 
+    public function testProfileKeepsOnlyASafeStorefrontReturnUrl(): void
+    {
+        $client = static::createClient();
+        $this->skipIfDatabaseIsUnavailable();
+        $crawler = $client->request('GET', '/profil?return_to=%2Flicences%3Flicense%3DNaruto');
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(
+            '/licences?license=Naruto',
+            $crawler->filter('form[action="/auth/login"] input[name="return_to"]')->attr('value'),
+        );
+        self::assertSame(
+            '/licences?license=Naruto',
+            $crawler->filter('form[action="/auth/register"] input[name="return_to"]')->attr('value'),
+        );
+
+        $client->request('GET', '/profil?return_to=https%3A%2F%2Fexample.com%2Fphishing');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorNotExists('input[name="return_to"]');
+    }
+
     public function testRegularUserIsRedirectedToShopAfterLogin(): void
     {
         $client = static::createClient();

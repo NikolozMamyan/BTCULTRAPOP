@@ -3,17 +3,23 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
     static values = {
         filterField: String,
+        clearLabel: String,
         heroAllLabel: String,
         heroImages: Object,
         heroMobileBreakpoint: String,
         heroMobileImages: Object,
+        newLabel: String,
         pageSize: { type: Number, default: 6 },
+        priceChip: String,
+        promoLabel: String,
+        removeFilter: String,
     };
 
     static targets = [
         'activeCategoryImage',
         'activeCategoryTitle',
         'activeCount',
+        'activeFilters',
         'backdrop',
         'card',
         'category',
@@ -235,6 +241,7 @@ export default class extends Controller {
 
         this.emptyTarget.hidden = matchingCards.length !== 0;
         this.updateActiveCount(maximumPrice, promoOnly, newOnly);
+        this.renderActiveFilters(maximumPrice, promoOnly, newOnly);
     }
 
     loadOnScroll() {
@@ -331,6 +338,88 @@ export default class extends Controller {
 
         this.activeCountTarget.textContent = activeFilters;
         this.activeCountTarget.hidden = activeFilters === 0;
+    }
+
+    renderActiveFilters(maximumPrice, promoOnly, newOnly) {
+        if (!this.hasActiveFiltersTarget) {
+            return;
+        }
+
+        const filters = [];
+
+        if (this.selectedCategory !== 'all') {
+            filters.push({ type: 'category', label: this.selectedCategory });
+        }
+
+        if (maximumPrice < Number(this.priceTarget.max)) {
+            filters.push({
+                type: 'price',
+                label: this.priceChipValue.replace('%price%', String(maximumPrice)),
+            });
+        }
+
+        if (promoOnly) {
+            filters.push({ type: 'promo', label: this.promoLabelValue });
+        }
+
+        if (newOnly) {
+            filters.push({ type: 'new', label: this.newLabelValue });
+        }
+
+        const buttons = filters.map((filter) => {
+            const button = document.createElement('button');
+            const label = document.createElement('span');
+            const icon = document.createElement('i');
+
+            button.type = 'button';
+            button.className = 'shop-active-filter';
+            button.dataset.action = 'shop-filters#removeFilter';
+            button.dataset.shopFiltersFilterParam = filter.type;
+            button.setAttribute(
+                'aria-label',
+                this.removeFilterValue.replace('%filter%', filter.label),
+            );
+            label.textContent = filter.label;
+            icon.className = 'fa-solid fa-xmark';
+            icon.setAttribute('aria-hidden', 'true');
+            button.append(label, icon);
+
+            return button;
+        });
+
+        if (filters.length > 1) {
+            const clearButton = document.createElement('button');
+
+            clearButton.type = 'button';
+            clearButton.className = 'shop-active-filters__clear';
+            clearButton.dataset.action = 'shop-filters#reset';
+            clearButton.textContent = this.clearLabelValue;
+            buttons.push(clearButton);
+        }
+
+        this.activeFiltersTarget.replaceChildren(...buttons);
+        this.activeFiltersTarget.hidden = filters.length === 0;
+    }
+
+    removeFilter(event) {
+        const filter = event.params.filter;
+
+        if (filter === 'category') {
+            this.selectedCategory = 'all';
+            this.syncCategoryButtons();
+            this.syncCategoryGroups();
+            this.syncHero();
+        } else if (filter === 'price') {
+            this.priceTarget.value = this.priceTarget.max;
+        } else if (filter === 'promo') {
+            this.promoTarget.checked = false;
+        } else if (filter === 'new') {
+            this.newTarget.checked = false;
+        } else {
+            return;
+        }
+
+        this.filter();
     }
 
     sortCards() {

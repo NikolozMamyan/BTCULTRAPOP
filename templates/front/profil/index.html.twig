@@ -369,6 +369,7 @@
 
                             <form class="profile-auth__form" action="{{ path('app_auth_login') }}" method="post">
                                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('auth_login') }}">
+                                {% if return_to|default('') %}<input type="hidden" name="return_to" value="{{ return_to }}">{% endif %}
                                 <label class="profile-auth__field">
                                     <span>{{ 'common.email'|trans }}</span>
                                     <span class="profile-auth__input">
@@ -406,6 +407,7 @@
 
                             <form class="profile-auth__form" action="{{ path('app_auth_register') }}" method="post">
                                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('auth_register') }}">
+                                {% if return_to|default('') %}<input type="hidden" name="return_to" value="{{ return_to }}">{% endif %}
                                 <div class="profile-auth__grid">
                                     <label class="profile-auth__field">
                                         <span>{{ 'common.first_name'|trans }}</span>

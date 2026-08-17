@@ -1,4 +1,5 @@
-<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-text-dark text-white px-6 py-3.5 rounded-full shadow-lg-c font-semibold text-sm z-[80] opacity-0 translate-y-4 pointer-events-none transition-all duration-300 flex items-center gap-2">
-    <i class="fa-solid fa-circle-check text-secondary"></i>
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-text-dark text-white px-6 py-3.5 rounded-full shadow-lg-c font-semibold text-sm z-[80] opacity-0 translate-y-4 pointer-events-none transition-all duration-300 flex items-center gap-2" role="status" aria-live="polite" aria-atomic="true">
+    <i class="fa-solid fa-circle-check text-secondary" data-toast-icon></i>
     <span id="toast-msg">{{ 'overlay.added_to_cart'|trans }}</span>
+    <a id="toast-action" href="#" hidden></a>
 </div>

@@ -8,7 +8,7 @@
     <h2>{{ (title|default('catalog.default_title'))|trans }}</h2>
     <p>{{ (text|default('catalog.default_text'))|trans }}</p>
     {% if action_url|default(null) %}
-        <a href="{{ action_url }}" class="catalog-empty__action">
+        <a href="{{ action_url }}" class="catalog-empty__action" {{ continue_shopping|default(false) ? 'data-continue-shopping' : '' }}>
             {{ (action_label|default('catalog.back_home'))|trans }}
             <i class="fa-solid fa-arrow-right"></i>
         </a>

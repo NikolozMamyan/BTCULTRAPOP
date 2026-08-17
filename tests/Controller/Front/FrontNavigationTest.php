@@ -37,6 +37,8 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('#page-transition-skeleton');
         self::assertSelectorExists('#product-preview');
         self::assertSelectorExists('.mobile-app-nav');
+        self::assertSelectorExists('.header-favorites-link[href="/favoris"] [data-favorites-target="count"]');
+        self::assertSelectorExists('#toast[role="status"][aria-live="polite"] #toast-action[hidden]');
         self::assertSelectorExists('link[rel="stylesheet"][href*="styles/app"]');
     }
 
@@ -79,6 +81,8 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorTextContains('h1', 'Mes favoris');
         self::assertSelectorNotExists('.profile-card');
         self::assertSelectorNotExists('.profile-auth');
+        self::assertSelectorTextContains('.catalog-empty', 'Connecte-toi pour retrouver tes favoris');
+        self::assertSelectorExists('.catalog-empty__action[href*="return_to="]');
     }
 
     public function testHomeUsesOfficialLicencesAndSingleSpotlight(): void
@@ -134,6 +138,7 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('.shop-product-card__quantity input[data-product-quantity][min="1"][value="1"]');
         self::assertSelectorExists('.shop-product-card__quantity button[data-action="cart#decrementProductQuantity"]');
         self::assertSelectorExists('.shop-product-card__quantity button[data-action="cart#incrementProductQuantity"]');
+        self::assertSelectorExists('.shop-product-card__add[data-product-add-label]');
         self::assertSelectorExists('.shop-product-card button[data-action="click->product-preview#open"] .fa-magnifying-glass-plus');
         self::assertSelectorTextContains('.shop-product-card:first-child', '1,31 €');
         self::assertSelectorCount(3, '.shop-filter-card');
@@ -165,6 +170,8 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('.shop-filter-trigger[aria-controls="shop-filters-modal"]');
         self::assertSelectorExists('.shop-filter-modal__footer');
         self::assertSelectorExists('.shop-sort select');
+        self::assertSelectorExists('.shop-active-filters[data-shop-filters-target="activeFilters"][aria-live="polite"][hidden]');
+        self::assertSelectorExists('[data-shop-filters-price-chip-value]');
     }
 
     public function testLicensesPageFiltersByLicense(): void
@@ -194,8 +201,13 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('[data-controller="product-detail"]');
         self::assertSelectorExists('[data-product-detail-back-url-value="/boutique"]');
         self::assertSelectorExists('.product-page__back[href="/boutique"][data-action="product-detail#goBack"]');
+        self::assertSelectorExists('.product-detail__purchase[data-product-detail-target="purchase"]');
         self::assertSelectorExists('.product-detail__primary.cart-add-button[data-action="product-detail#addToCart"]');
+        self::assertSelectorExists('.product-mobile-purchase[data-product-detail-target="mobileBar"][aria-hidden="true"][inert]');
+        self::assertSelectorExists('.product-mobile-purchase__action[data-action="product-detail#addToCart"]');
+        self::assertSelectorCount(2, '[data-product-detail-target="quantity"]');
         self::assertSelectorExists('.product-detail__secondary.favorite-button[data-action="favorites#toggle"]');
+        self::assertSelectorExists('header .nav-link.active[href="/boutique"]');
         self::assertSelectorCount(3, '.product-tabs__nav button');
         self::assertSelectorExists('.product-tabs__nav-wrapper');
         self::assertSelectorNotExists('[data-panel="specifications"]');
@@ -236,6 +248,7 @@ final class FrontNavigationTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('#cart-page-items');
         self::assertSelectorExists('.cart-page__summary');
+        self::assertSelectorExists('[data-continue-shopping]');
         self::assertSelectorTextContains('.cart-page__summary', 'Résumé');
     }
 

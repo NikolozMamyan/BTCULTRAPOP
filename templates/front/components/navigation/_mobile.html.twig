@@ -22,7 +22,10 @@
             </a>
         {% else %}
             <a href="{{ path('app_front_favoris') }}" class="mobile-app-nav__item {{ current_route == 'app_front_favoris' ? 'is-active' : '' }}">
-                <span class="mobile-app-nav__icon"><i class="fa-regular fa-heart"></i></span>
+                <span class="mobile-app-nav__icon">
+                    <i class="fa-regular fa-heart"></i>
+                    <span class="favorites-count mobile-app-nav__badge" data-favorites-target="count" aria-live="polite" {{ favorite_count > 0 ? '' : 'hidden' }}>{{ favorite_count }}</span>
+                </span>
                 <span>{{ 'common.favorites'|trans }}</span>
             </a>
         {% endif %}
