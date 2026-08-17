@@ -32,7 +32,7 @@
 
             <span class="visitor-promo-popup__offer">
                 {% if popup.percentage %}
-                    {{ 'popup.offer.percentage'|trans({'%value%': popup.value|number_format(popup.value matches '/\.00$/' ? 0 : 2, ',', ' '), '%target%': (popup.shipping ? 'popup.target.shipping' : 'popup.target.products')|trans}) }}
+                    {{ 'popup.offer.percentage'|trans({'%value%': popup.value|number_format(popup.value matches '/[.]00$/' ? 0 : 2, ',', ' '), '%target%': (popup.shipping ? 'popup.target.shipping' : 'popup.target.products')|trans}) }}
                 {% else %}
                     {{ 'popup.offer.fixed'|trans({'%value%': popup.value|number_format(2, ',', ' '), '%target%': (popup.shipping ? 'popup.target.shipping' : 'popup.target.products')|trans}) }}
                 {% endif %}
