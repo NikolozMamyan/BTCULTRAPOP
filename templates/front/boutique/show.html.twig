@@ -83,9 +83,23 @@
         class="product-page max-w-7xl mx-auto px-5"
         data-controller="product-detail ecommerce"
         data-product-detail-product-id-value="{{ product.id }}"
+        data-product-detail-back-url-value="{{ path('app_front_boutique') }}"
         data-ecommerce-event-value="view_item"
         data-ecommerce-ecommerce-value="{{ view_item_analytics|json_encode|e('html_attr') }}"
     >
+        <nav class="product-page__navigation" aria-label="{{ 'product.back_results'|trans }}">
+            <a
+                href="{{ path('app_front_boutique') }}"
+                class="product-page__back"
+                data-action="product-detail#goBack"
+            >
+                <span class="product-page__back-icon" aria-hidden="true">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </span>
+                <span>{{ 'product.back_results'|trans }}</span>
+            </a>
+        </nav>
+
         <article class="product-detail">
             <div class="product-detail__gallery">
                 <div class="product-detail__visual">

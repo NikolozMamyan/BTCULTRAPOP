@@ -20,7 +20,18 @@ export default class extends Controller {
     connect() {
         this.requestController = null;
         this.searchTimer = null;
-        this.renderInitial();
+        const query = this.inputTarget.value.trim();
+
+        this.clearTarget.hidden = query.length === 0;
+
+        if (query.length < 2) {
+            this.renderInitial();
+
+            return;
+        }
+
+        this.renderLoading();
+        this.load(query);
     }
 
     disconnect() {

@@ -3,8 +3,22 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
     static targets = ['panel', 'quantity', 'tab', 'thumbnail', 'visualImage'];
     static values = {
+        backUrl: String,
         productId: Number,
     };
+
+    goBack(event) {
+        if (window.history.length > 1) {
+            event.preventDefault();
+            window.history.back();
+
+            return;
+        }
+
+        if (this.hasBackUrlValue) {
+            event.currentTarget.href = this.backUrlValue;
+        }
+    }
 
     increment() {
         this.quantityTarget.textContent = Math.min(this.quantity + 1, 10);

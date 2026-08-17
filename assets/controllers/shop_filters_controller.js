@@ -41,15 +41,12 @@ export default class extends Controller {
         const searchParams = new URLSearchParams(window.location.search);
 
         this.selectedCategory = this.initialSelectedCategory(searchParams);
+        this.restoreControls(searchParams);
         this.handleKeydown = this.handleKeydown.bind(this);
         this.handleWindowScroll = () => this.loadOnScroll();
         document.addEventListener('keydown', this.handleKeydown);
         window.addEventListener('scroll', this.handleWindowScroll, { passive: true });
         this.setupHeroMediaQuery();
-
-        if (searchParams.get('filter') === 'nouveautes') {
-            this.newTarget.checked = true;
-        }
 
         this.syncCategoryButtons();
         this.syncCategoryGroups();
@@ -228,7 +225,10 @@ export default class extends Controller {
         this.renderedCardCount = 0;
         this.isLoadingMore = false;
         this.resultsTarget.scrollTop = 0;
-        this.revealNextBatch();
+        const restoredCardCount = this.restoredCardCount;
+
+        this.restoredCardCount = null;
+        this.revealNextBatch(restoredCardCount);
 
         this.countTarget.textContent = matchingCards.length;
         this.mobileCountTarget.textContent = matchingCards.length;
@@ -269,13 +269,16 @@ export default class extends Controller {
         }, 420);
     }
 
-    revealNextBatch() {
+    revealNextBatch(requestedCount = null) {
         if (!this.filteredCards) {
             return;
         }
 
+        const targetCount = Number.isInteger(requestedCount) && requestedCount > 0
+            ? Math.max(requestedCount, this.pageSizeValue)
+            : this.renderedCardCount + this.pageSizeValue;
         const nextCount = Math.min(
-            this.renderedCardCount + this.pageSizeValue,
+            targetCount,
             this.filteredCards.length,
         );
 
@@ -292,6 +295,7 @@ export default class extends Controller {
 
         this.remainingTarget.textContent = remaining;
         this.loaderTarget.hidden = remaining === 0;
+        this.syncUrl();
     }
 
     hydrateCardImage(card) {
@@ -371,6 +375,71 @@ export default class extends Controller {
         const requestedCategory = searchParams.get(this.currentFilterField());
 
         return requestedCategory && requestedCategory.trim() !== '' ? requestedCategory : 'all';
+    }
+
+    restoreControls(searchParams) {
+        const minimumPrice = Number(this.priceTarget.min);
+        const maximumPrice = Number(this.priceTarget.max);
+        const requestedPrice = Number(searchParams.get('price'));
+
+        if (searchParams.has('price') && Number.isFinite(requestedPrice)) {
+            this.priceTarget.value = String(Math.min(maximumPrice, Math.max(minimumPrice, requestedPrice)));
+        }
+
+        this.promoTarget.checked = searchParams.get('promo') === '1';
+        this.newTarget.checked = searchParams.get('new') === '1'
+            || searchParams.get('filter') === 'nouveautes';
+
+        const requestedSort = searchParams.get('sort');
+        const availableSorts = [...this.sortTarget.options].map((option) => option.value);
+
+        if (requestedSort && availableSorts.includes(requestedSort)) {
+            this.sortTarget.value = requestedSort;
+        }
+
+        const requestedCardCount = Number.parseInt(searchParams.get('shown') || '', 10);
+
+        this.restoredCardCount = Number.isInteger(requestedCardCount) && requestedCardCount > 0
+            ? requestedCardCount
+            : null;
+    }
+
+    syncUrl() {
+        const url = new URL(window.location.href);
+        const searchParams = url.searchParams;
+        const filterField = this.currentFilterField();
+        const maximumPrice = Number(this.priceTarget.max);
+        const selectedPrice = Number(this.priceTarget.value);
+        const defaultCardCount = Math.min(
+            this.pageSizeValue,
+            this.filteredCards?.length || 0,
+        );
+
+        this.setSearchParam(searchParams, filterField, this.selectedCategory !== 'all' ? this.selectedCategory : '');
+        this.setSearchParam(searchParams, 'price', selectedPrice < maximumPrice ? String(selectedPrice) : '');
+        this.setSearchParam(searchParams, 'promo', this.promoTarget.checked ? '1' : '');
+        this.setSearchParam(searchParams, 'new', this.newTarget.checked ? '1' : '');
+        this.setSearchParam(searchParams, 'sort', this.sortTarget.value !== 'pop' ? this.sortTarget.value : '');
+        this.setSearchParam(
+            searchParams,
+            'shown',
+            this.renderedCardCount > defaultCardCount ? String(this.renderedCardCount) : '',
+        );
+        searchParams.delete('filter');
+
+        if (url.href !== window.location.href) {
+            window.history.replaceState(window.history.state, '', url);
+        }
+    }
+
+    setSearchParam(searchParams, key, value) {
+        if (value) {
+            searchParams.set(key, value);
+
+            return;
+        }
+
+        searchParams.delete(key);
     }
 
     syncCategoryButtons() {

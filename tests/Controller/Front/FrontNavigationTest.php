@@ -192,6 +192,8 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorTextContains('.product-detail__price', '1,31 €');
         self::assertSelectorExists('.product-detail__visual img[src*="164-large_default"]');
         self::assertSelectorExists('[data-controller="product-detail"]');
+        self::assertSelectorExists('[data-product-detail-back-url-value="/boutique"]');
+        self::assertSelectorExists('.product-page__back[href="/boutique"][data-action="product-detail#goBack"]');
         self::assertSelectorExists('.product-detail__primary.cart-add-button[data-action="product-detail#addToCart"]');
         self::assertSelectorExists('.product-detail__secondary.favorite-button[data-action="favorites#toggle"]');
         self::assertSelectorCount(3, '.product-tabs__nav button');
