@@ -1352,7 +1352,6 @@
     "profile.reorder.title": "Want it again?",
     "profile.reorder.text": "Same items and shipping address, with current prices and stock, then secure payment.",
     "profile.reorder.action": "Buy again",
-    "profile.reorder.confirm": "Create a new order with the same items and open Stripe?",
     "profile.reorder.error.not_paid": "Only paid orders can be purchased again.",
     "profile.reorder.error.stripe_unavailable": "Buy again will be available as soon as Stripe is configured.",
     "profile.reorder.error.empty": "This order has no items to purchase again.",

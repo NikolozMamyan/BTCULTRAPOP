@@ -23,13 +23,7 @@
 {% endblock %}
 
 {% block body %}
-    {% set current_route = app.request.attributes.get('_route')|default('') %}
-    {% set popup_allowed = not app.user
-        and not (current_route starts with 'app_front_profil')
-        and not (current_route starts with 'app_front_profile_')
-        and not (current_route starts with 'app_auth_')
-    %}
-    {% set promotional_popup = popup_allowed ? storefront_popup() : null %}
+    {% set promotional_popup = app.user ? null : storefront_popup() %}
     {% set favorite_count = storefront_favorite_count() %}
     <div
         id="storefront-app"

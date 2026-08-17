@@ -1352,7 +1352,6 @@
     "profile.reorder.title": "Une nouvelle envie ?",
     "profile.reorder.text": "Mêmes articles et même adresse, avec les prix et stocks actuels, puis paiement sécurisé.",
     "profile.reorder.action": "Racheter",
-    "profile.reorder.confirm": "Créer une nouvelle commande avec les mêmes articles et ouvrir Stripe ?",
     "profile.reorder.error.not_paid": "Seules les commandes déjà payées peuvent être rachetées.",
     "profile.reorder.error.stripe_unavailable": "Le rachat sera disponible dès que Stripe sera configuré.",
     "profile.reorder.error.empty": "Cette commande ne contient aucun article à racheter.",
