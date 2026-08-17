@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'maintenance.page_title'|trans }}{% endblock %}
+{% block meta_description %}{{ 'maintenance.meta_description'|trans }}{% endblock %}
+{% block meta_robots %}noindex, nofollow, noarchive{% endblock %}
+{% block body_class %}maintenance-body{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" href="{{ asset('styles/app.css') }}">{% endblock %}
+{% block javascripts %}{% endblock %}
+
+{% block body %}
+    <main class="maintenance-cover">
+        <section class="maintenance-cover__content">
+            <div class="maintenance-cover__brand">
+                <img src="{{ asset('img/logo/logotype.svg') }}" alt="ULTRAPOP">
+            </div>
+
+            <div class="maintenance-cover__message">
+                <span class="maintenance-cover__eyebrow">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    {{ 'maintenance.eyebrow'|trans }}
+                </span>
+                <h1>{{ 'maintenance.title'|trans }}</h1>
+                <p>{{ 'maintenance.message'|trans }}</p>
+
+                {% if settings.maintenanceStartsAt and settings.maintenanceEndsAt %}
+                    <div class="maintenance-cover__dates" aria-label="{{ 'maintenance.dates_label'|trans }}">
+                        <article>
+                            <span>{{ 'maintenance.from'|trans }}</span>
+                            <time datetime="{{ settings.maintenanceStartsAt|date('c') }}">
+                                <strong>{{ settings.maintenanceStartsAt|date('d/m/Y', 'Europe/Paris') }}</strong>
+                                <small>{{ 'maintenance.at_time'|trans({'%time%': settings.maintenanceStartsAt|date('H:i', 'Europe/Paris')}) }}</small>
+                            </time>
+                        </article>
+                        <i class="maintenance-cover__dates-arrow fa-solid fa-arrow-right" aria-hidden="true"></i>
+                        <article>
+                            <span>{{ 'maintenance.until'|trans }}</span>
+                            <time datetime="{{ settings.maintenanceEndsAt|date('c') }}">
+                                <strong>{{ settings.maintenanceEndsAt|date('d/m/Y', 'Europe/Paris') }}</strong>
+                                <small>{{ 'maintenance.at_time'|trans({'%time%': settings.maintenanceEndsAt|date('H:i', 'Europe/Paris')}) }}</small>
+                            </time>
+                        </article>
+                    </div>
+                {% endif %}
+
+                <p class="maintenance-cover__note">
+                    <i class="fa-regular fa-heart"></i>
+                    {{ 'maintenance.note'|trans }}
+                </p>
+            </div>
+
+        </section>
+
+        <figure class="maintenance-cover__visual">
+            <img src="{{ asset('img/boutique/site_fermeture.jpg') }}" alt="{{ 'maintenance.image_alt'|trans }}">
+            <span class="maintenance-cover__visual-shade" aria-hidden="true"></span>
+            <figcaption>
+                <span>{{ 'maintenance.visual_eyebrow'|trans }}</span>
+                <strong>{{ 'maintenance.visual_title'|trans }}</strong>
+            </figcaption>
+        </figure>
+    </main>
+{% endblock %}

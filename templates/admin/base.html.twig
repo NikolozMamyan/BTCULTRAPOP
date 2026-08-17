@@ -130,6 +130,10 @@
             </nav>
 
             <div class="admin-sidebar__footer">
+                <a href="{{ path('app_admin_store_settings') }}" class="{{ current_route starts with 'app_admin_store_settings' ? 'is-active' : '' }}">
+                    <i class="fa-solid fa-gear"></i>
+                    {{ 'admin.nav.store_settings'|trans }}
+                </a>
                 <a href="{{ path('app_front_home') }}">
                     <i class="fa-solid fa-store"></i>
                     {{ 'admin.back_to_store'|trans }}

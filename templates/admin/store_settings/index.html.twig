@@ -1,0 +1,81 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.store_settings.index.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-store-settings">
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.store_settings.index.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.store_settings.index.title'|trans }}</h1>
+                <p>{{ 'admin.store_settings.index.subtitle'|trans }}</p>
+            </div>
+            <span class="admin-order-badge {{ settings.maintenanceEnabled ? 'admin-order-badge--cancelled' : 'admin-order-badge--paid' }}">
+                {{ (settings.maintenanceEnabled ? 'admin.store_settings.status.closed' : 'admin.store_settings.status.open')|trans }}
+            </span>
+        </div>
+
+        {{ form_start(form, {attr: {class: 'admin-store-settings__layout'}}) }}
+            <article class="admin-panel admin-form-card">
+                <div class="admin-form-card__heading">
+                    <span><i class="fa-solid fa-store"></i></span>
+                    <div>
+                        <strong>{{ 'admin.store_settings.form.configuration_title'|trans }}</strong>
+                        <small>{{ 'admin.store_settings.form.configuration_text'|trans }}</small>
+                    </div>
+                </div>
+
+                {{ form_errors(form) }}
+
+                <div class="admin-field admin-field--switch admin-store-settings__switch">
+                    {{ form_widget(form.maintenanceEnabled) }}
+                    {{ form_label(form.maintenanceEnabled) }}
+                    {{ form_errors(form.maintenanceEnabled) }}
+                </div>
+
+                <div class="admin-form-grid admin-form-grid--two">
+                    <div class="admin-field">
+                        {{ form_label(form.maintenanceStartsAt) }}
+                        {{ form_widget(form.maintenanceStartsAt) }}
+                        {{ form_errors(form.maintenanceStartsAt) }}
+                    </div>
+                    <div class="admin-field">
+                        {{ form_label(form.maintenanceEndsAt) }}
+                        {{ form_widget(form.maintenanceEndsAt) }}
+                        {{ form_errors(form.maintenanceEndsAt) }}
+                    </div>
+                </div>
+
+                <div class="admin-category-warning">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>{{ 'admin.store_settings.form.manual_help'|trans }}</span>
+                </div>
+
+                <div class="admin-product-form__actions">
+                    <button type="submit" class="admin-action-button">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        {{ 'admin.store_settings.form.save'|trans }}
+                    </button>
+                </div>
+            </article>
+
+            <aside class="admin-store-settings__preview" aria-label="{{ 'admin.store_settings.preview.label'|trans }}">
+                <img src="{{ asset('img/boutique/site_fermeture.jpg') }}" alt="">
+                <span class="admin-store-settings__preview-shade" aria-hidden="true"></span>
+                <div class="admin-store-settings__preview-content">
+                    <small>{{ 'admin.store_settings.preview.eyebrow'|trans }}</small>
+                    <strong>{{ 'maintenance.title'|trans }}</strong>
+                    {% if settings.maintenanceStartsAt and settings.maintenanceEndsAt %}
+                        <span>
+                            {{ settings.maintenanceStartsAt|date('d/m/Y H:i', 'Europe/Paris') }}
+                            <i class="fa-solid fa-arrow-right"></i>
+                            {{ settings.maintenanceEndsAt|date('d/m/Y H:i', 'Europe/Paris') }}
+                        </span>
+                    {% else %}
+                        <span>{{ 'admin.store_settings.preview.no_dates'|trans }}</span>
+                    {% endif %}
+                </div>
+            </aside>
+        {{ form_end(form) }}
+    </section>
+{% endblock %}

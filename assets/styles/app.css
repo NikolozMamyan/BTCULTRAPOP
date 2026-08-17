@@ -15,6 +15,359 @@
     --transition: all .3s;
 }
 
+/* Store settings and storefront maintenance */
+.admin-sidebar__footer a.is-active {
+    background: rgba(255, 204, 7, .16);
+    box-shadow: inset 3px 0 0 var(--secondary-color);
+    color: #fff;
+}
+
+.admin-store-settings {
+    padding-top: clamp(1.4rem, 3vw, 2.4rem);
+}
+
+.admin-store-settings__layout {
+    display: grid;
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, .76fr);
+    gap: 1.2rem;
+}
+
+.admin-store-settings__switch {
+    padding: 1rem;
+    background: rgba(232, 33, 24, .035);
+}
+
+.admin-store-settings__preview {
+    position: sticky;
+    top: 1.5rem;
+    min-height: 470px;
+    overflow: hidden;
+    border-radius: 28px;
+    background: #101a39;
+    box-shadow: 0 24px 54px rgba(15, 23, 48, .2);
+}
+
+.admin-store-settings__preview img,
+.admin-store-settings__preview-shade {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.admin-store-settings__preview img {
+    object-fit: cover;
+}
+
+.admin-store-settings__preview-shade {
+    background: linear-gradient(180deg, rgba(12, 20, 46, .02) 32%, rgba(12, 20, 46, .94) 100%);
+}
+
+.admin-store-settings__preview-content {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    gap: .45rem;
+    padding: 1.5rem;
+    color: #fff;
+}
+
+.admin-store-settings__preview-content small {
+    color: var(--secondary-color);
+    font-size: .66rem;
+    font-weight: 900;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}
+
+.admin-store-settings__preview-content strong {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: clamp(1.55rem, 3vw, 2.1rem);
+    font-weight: 900;
+    line-height: 1;
+}
+
+.admin-store-settings__preview-content > span {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .45rem;
+    color: rgba(255, 255, 255, .76);
+    font-size: .72rem;
+    font-weight: 800;
+}
+
+.maintenance-body {
+    min-height: 100vh;
+    background: #111a38;
+}
+
+.maintenance-cover {
+    display: grid;
+    min-height: 100vh;
+    grid-template-columns: minmax(430px, .86fr) minmax(0, 1.14fr);
+    background: #fff;
+}
+
+.maintenance-cover__content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    padding: clamp(1.5rem, 4vw, 4.5rem);
+    background:
+        radial-gradient(circle at 6% 8%, rgba(255, 204, 7, .24), transparent 25%),
+        radial-gradient(circle at 92% 88%, rgba(232, 33, 24, .08), transparent 30%),
+        #fff;
+}
+
+.maintenance-cover__brand {
+    width: max-content;
+}
+
+.maintenance-cover__brand img {
+    display: block;
+    width: clamp(170px, 16vw, 224px);
+    height: auto;
+}
+
+.maintenance-cover__message {
+    width: min(100%, 610px);
+    margin: auto 0;
+    padding: clamp(3rem, 8vh, 6rem) 0;
+}
+
+.maintenance-cover__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .55rem .8rem;
+    border-radius: 999px;
+    background: rgba(255, 204, 7, .22);
+    color: var(--text-dark);
+    font-size: .7rem;
+    font-weight: 900;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+
+.maintenance-cover__eyebrow i {
+    color: var(--primary-color);
+}
+
+.maintenance-cover__message h1 {
+    max-width: 560px;
+    margin-top: 1.35rem;
+    color: var(--text-dark);
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: clamp(3rem, 7vw, 6.3rem);
+    font-weight: 900;
+    letter-spacing: -.065em;
+    line-height: .9;
+}
+
+.maintenance-cover__message > p:not(.maintenance-cover__note) {
+    max-width: 570px;
+    margin-top: 1.35rem;
+    color: var(--text-light);
+    font-size: clamp(.95rem, 1.4vw, 1.08rem);
+    font-weight: 650;
+    line-height: 1.7;
+}
+
+.maintenance-cover__dates {
+    display: grid;
+    align-items: center;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: .8rem;
+    margin-top: 1.8rem;
+    padding: .8rem;
+    border: 1px solid rgba(32, 50, 99, .09);
+    border-radius: 24px;
+    background: rgba(249, 250, 251, .86);
+    box-shadow: 0 18px 44px rgba(32, 50, 99, .08);
+}
+
+.maintenance-cover__dates article {
+    display: grid;
+    gap: .35rem;
+    padding: .8rem;
+}
+
+.maintenance-cover__dates article > span {
+    color: var(--primary-color);
+    font-size: .65rem;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.maintenance-cover__dates time,
+.maintenance-cover__dates strong,
+.maintenance-cover__dates small {
+    display: block;
+}
+
+.maintenance-cover__dates strong {
+    color: var(--text-dark);
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: clamp(1.15rem, 2vw, 1.45rem);
+    font-weight: 900;
+}
+
+.maintenance-cover__dates small {
+    margin-top: .12rem;
+    color: var(--text-light);
+    font-size: .74rem;
+    font-weight: 750;
+}
+
+.maintenance-cover__dates-arrow {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 14px;
+    background: var(--text-dark);
+    color: var(--secondary-color);
+    font-size: .72rem;
+}
+
+.maintenance-cover__note {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    margin-top: 1.25rem;
+    color: var(--text-dark);
+    font-size: .78rem;
+    font-weight: 800;
+}
+
+.maintenance-cover__note i {
+    color: var(--primary-color);
+}
+
+.maintenance-cover__visual {
+    position: relative;
+    min-width: 0;
+    min-height: 100vh;
+    overflow: hidden;
+    background: #0d1834;
+}
+
+.maintenance-cover__visual > img,
+.maintenance-cover__visual-shade {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.maintenance-cover__visual > img {
+    object-fit: cover;
+    object-position: center;
+}
+
+.maintenance-cover__visual-shade {
+    background:
+        linear-gradient(90deg, rgba(13, 24, 52, .18), transparent 28%),
+        linear-gradient(180deg, transparent 55%, rgba(10, 19, 42, .88) 100%);
+}
+
+.maintenance-cover__visual figcaption {
+    position: absolute;
+    right: clamp(1.5rem, 4vw, 4rem);
+    bottom: clamp(1.5rem, 4vw, 4rem);
+    left: clamp(1.5rem, 4vw, 4rem);
+    z-index: 1;
+    color: #fff;
+}
+
+.maintenance-cover__visual figcaption span,
+.maintenance-cover__visual figcaption strong {
+    display: block;
+}
+
+.maintenance-cover__visual figcaption span {
+    color: var(--secondary-color);
+    font-size: .7rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.maintenance-cover__visual figcaption strong {
+    max-width: 620px;
+    margin-top: .4rem;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: clamp(1.8rem, 4vw, 3.8rem);
+    font-weight: 900;
+    letter-spacing: -.04em;
+    line-height: .95;
+}
+
+@media (max-width: 980px) {
+    .admin-store-settings__layout {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-store-settings__preview {
+        position: relative;
+        top: auto;
+        min-height: 400px;
+    }
+
+    .maintenance-cover {
+        grid-template-columns: 1fr;
+    }
+
+    .maintenance-cover__visual {
+        min-height: min(54vh, 560px);
+        grid-row: 1;
+    }
+
+    .maintenance-cover__content {
+        min-height: auto;
+        grid-row: 2;
+    }
+
+    .maintenance-cover__message {
+        margin: 0;
+        padding: clamp(3rem, 8vw, 5rem) 0;
+    }
+}
+
+@media (max-width: 620px) {
+    .admin-store-settings__layout .admin-form-grid--two {
+        grid-template-columns: 1fr;
+    }
+
+    .maintenance-cover__content {
+        padding: 1.25rem;
+    }
+
+    .maintenance-cover__message h1 {
+        font-size: clamp(3rem, 16vw, 4.5rem);
+    }
+
+    .maintenance-cover__dates {
+        grid-template-columns: 1fr;
+    }
+
+    .maintenance-cover__dates-arrow {
+        margin-left: .8rem;
+        transform: rotate(90deg);
+    }
+
+    .maintenance-cover__visual {
+        min-height: 46vh;
+    }
+}
+
 html {
     scrollbar-width: none;
 }
