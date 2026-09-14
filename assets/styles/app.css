@@ -3170,6 +3170,16 @@ body {
     font-weight: 950;
 }
 
+.admin-order-address__actions {
+    display: flex;
+    margin-top: .55rem;
+}
+
+.admin-order-address__actions .is-copied {
+    border-color: rgba(16, 185, 129, .3);
+    color: var(--success-color);
+}
+
 .admin-order-items-panel,
 .admin-order-totals-panel {
     margin-top: 1rem;

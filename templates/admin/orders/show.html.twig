@@ -142,7 +142,23 @@
                     </div>
                 </div>
 
-                <address class="admin-order-address">
+                {% set shipping_address_for_copy = order.shipping.name %}
+                {% if order.email %}
+                    {% set shipping_address_for_copy = shipping_address_for_copy ~ "\n" ~ order.email %}
+                {% endif %}
+                {% set shipping_address_for_copy = shipping_address_for_copy ~ "\n" ~ order.shipping.street ~ "\n" ~ order.shipping.postal_code ~ ' ' ~ order.shipping.city ~ "\n" ~ order.shipping.country_code %}
+                {% if order.shipping.phone %}
+                    {% set shipping_address_for_copy = shipping_address_for_copy ~ "\n" ~ order.shipping.phone %}
+                {% endif %}
+
+                <address
+                    class="admin-order-address"
+                    data-controller="admin-order-copy"
+                    data-admin-order-copy-text-value="{{ shipping_address_for_copy|e('html_attr') }}"
+                    data-admin-order-copy-copy-label-value="{{ 'admin.order.shipping.copy'|trans }}"
+                    data-admin-order-copy-copied-label-value="{{ 'admin.order.shipping.copied'|trans }}"
+                    data-admin-order-copy-copy-failed-label-value="{{ 'admin.order.shipping.copy_failed'|trans }}"
+                >
                     <strong>{{ order.shipping.name }}</strong>
                     <span>{{ order.shipping.street }}</span>
                     <span>{{ order.shipping.postal_code }} {{ order.shipping.city }}</span>
@@ -150,6 +166,17 @@
                     {% if order.shipping.phone %}
                         <span>{{ order.shipping.phone }}</span>
                     {% endif %}
+                    <div class="admin-order-address__actions">
+                        <button
+                            type="button"
+                            class="admin-secondary-button admin-secondary-button--small"
+                            data-action="admin-order-copy#copy"
+                            data-admin-order-copy-target="button"
+                        >
+                            <i class="fa-regular fa-copy"></i>
+                            <span data-admin-order-copy-target="label">{{ 'admin.order.shipping.copy'|trans }}</span>
+                        </button>
+                    </div>
                 </address>
             </article>
 
@@ -184,12 +211,42 @@
             </article>
         </div>
 
+        {% set ordered_items_for_copy = '' %}
+        {% if order.items %}
+            {% for item in order.items %}
+                {% set item_for_copy = item.name ~ ' x' ~ item.quantity %}
+                {% if item.reference %}
+                    {% set item_for_copy = item_for_copy ~ ' (' ~ item.reference ~ ')' %}
+                {% endif %}
+                {% set ordered_items_for_copy = ordered_items_for_copy ~ (loop.first ? '' : "\n") ~ item_for_copy %}
+            {% endfor %}
+        {% endif %}
+
         <article class="admin-panel admin-order-items-panel">
             <div class="admin-panel__heading">
                 <div>
                     <span>{{ 'admin.order.show.items_eyebrow'|trans }}</span>
                     <h2>{{ 'admin.order.show.items_title'|trans }}</h2>
                 </div>
+                {% if order.items %}
+                    <div
+                        data-controller="admin-order-copy"
+                        data-admin-order-copy-text-value="{{ ordered_items_for_copy|e('html_attr') }}"
+                        data-admin-order-copy-copy-label-value="{{ 'admin.order.items.copy'|trans }}"
+                        data-admin-order-copy-copied-label-value="{{ 'admin.order.shipping.copied'|trans }}"
+                        data-admin-order-copy-copy-failed-label-value="{{ 'admin.order.shipping.copy_failed'|trans }}"
+                    >
+                        <button
+                            type="button"
+                            class="admin-secondary-button admin-secondary-button--small"
+                            data-action="admin-order-copy#copy"
+                            data-admin-order-copy-target="button"
+                        >
+                            <i class="fa-regular fa-copy"></i>
+                            <span data-admin-order-copy-target="label">{{ 'admin.order.items.copy'|trans }}</span>
+                        </button>
+                    </div>
+                {% endif %}
             </div>
 
             {% if order.items %}
