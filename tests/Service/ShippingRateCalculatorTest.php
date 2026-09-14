@@ -46,6 +46,7 @@ final class ShippingRateCalculatorTest extends TestCase
         self::assertSame(49, $quote['progress']);
         self::assertSame(550, $quote['remainingToNextCents']);
         self::assertSame(420, $quote['nextShippingAmountCents']);
+        self::assertSame(350, $quote['nextShippingAmountTaxExcludedCents']);
         self::assertFalse($quote['free']);
         self::assertTrue($quote['minimumReached']);
         self::assertSame(1000, $quote['minimumOrderCents']);

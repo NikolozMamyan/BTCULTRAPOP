@@ -68,6 +68,7 @@ final class ShippingRateCalculator
      *     progress: int,
      *     freeShippingThresholdCents: int,
      *     nextShippingAmountCents: ?int,
+     *     nextShippingAmountTaxExcludedCents: ?int,
      *     remainingToNextCents: int,
      *     free: bool,
      *     checkpoints: list<array{
@@ -119,6 +120,7 @@ final class ShippingRateCalculator
                     $nextTier['shippingAmountCents'],
                     TaxAmountCalculator::SHIPPING_TAX_RATE,
                 ),
+            'nextShippingAmountTaxExcludedCents' => $nextTier['shippingAmountCents'] ?? null,
             'remainingToNextCents' => null === $nextTier
                 ? 0
                 : max(0, $nextTier['thresholdCents'] - $subtotalCents),

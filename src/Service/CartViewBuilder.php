@@ -53,9 +53,10 @@ final readonly class CartViewBuilder
             'shippingAmountCents' => $shippingAmount,
             'shippingAmountTaxExcludedCents' => $shippingAmountTaxExcluded,
             'shippingAmountFormatted' => $this->formatCents($shippingAmount),
+            'shippingAmountTaxExcludedFormatted' => $this->formatCents($shippingAmountTaxExcluded),
             'shippingDisplay' => $shipping['free']
                 ? $this->translator->trans('overlay.free')
-                : $this->formatCents($shippingAmount),
+                : $this->formatTaxExcludedCents($shippingAmountTaxExcluded),
             'shippingFree' => $shipping['free'],
             'minimumOrderCents' => $shipping['minimumOrderCents'],
             'minimumOrderFormatted' => $this->formatCents($shipping['minimumOrderCents']),
@@ -105,6 +106,7 @@ final readonly class CartViewBuilder
             'shippingAmountCents' => 0,
             'shippingAmountTaxExcludedCents' => 0,
             'shippingAmountFormatted' => $this->formatCents(0),
+            'shippingAmountTaxExcludedFormatted' => $this->formatCents(0),
             'shippingDisplay' => '—',
             'shippingFree' => false,
             'minimumOrderCents' => $shipping['minimumOrderCents'],
@@ -192,7 +194,7 @@ final readonly class CartViewBuilder
 
         return $this->translator->trans('cart.shipping.next_tier', [
             '%amount%' => $this->formatCents($shipping['remainingToNextCents']),
-            '%next%' => $this->formatCents((int) $shipping['nextShippingAmountCents']),
+            '%next%' => $this->formatTaxExcludedCents((int) $shipping['nextShippingAmountTaxExcludedCents']),
         ]);
     }
 
@@ -231,6 +233,12 @@ final readonly class CartViewBuilder
     private function formatCents(int $cents): string
     {
         return number_format($cents / 100, 2, ',', ' ') . ' €';
+    }
+
+    private function formatTaxExcludedCents(int $cents): string
+    {
+        // return $this->formatCents($cents) . ' HT';
+         return $this->formatCents($cents);
     }
 
     private function formatCompactCents(int $cents): string

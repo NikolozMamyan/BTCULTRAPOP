@@ -30,7 +30,9 @@ final class CartControllerTest extends WebTestCase
         self::assertSame(2, $payload['cart']['totalQuantity']);
         self::assertSame('2,62 €', $payload['cart']['subtotalFormatted']);
         self::assertSame(720, $payload['cart']['shippingAmountCents']);
+        self::assertSame(600, $payload['cart']['shippingAmountTaxExcludedCents']);
         self::assertSame('7,20 €', $payload['cart']['shippingAmountFormatted']);
+        self::assertSame('6,00 € HT', $payload['cart']['shippingDisplay']);
         self::assertSame('9,82 €', $payload['cart']['totalFormatted']);
         self::assertFalse($payload['cart']['checkoutAllowed']);
         self::assertSame(1000, $payload['cart']['minimumOrderCents']);

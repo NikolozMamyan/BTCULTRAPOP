@@ -1054,6 +1054,7 @@
     "cart.shipping.next_tier": "Encore %amount% pour réduire la livraison à %next%.",
     "cart.shipping.next_free": "Encore %amount% pour la livraison offerte.",
     "cart.shipping.free_unlocked": "Livraison offerte débloquée",
+    "cart.total_tax_included": "Total TTC",
     "cart.minimum_order.remaining": "Ajoute encore %amount% pour atteindre le minimum de commande de %minimum%.",
     "cart.minimum_order.eyebrow": "Commande minimum",
     "cart.minimum_order.title": "Encore %amount% pour pouvoir commander",

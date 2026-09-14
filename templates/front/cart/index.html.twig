@@ -179,7 +179,7 @@
                         <dd id="cart-page-discount">{{ cart.discountFormatted }}</dd>
                     </div>
                     <div class="cart-page__summary-total">
-                        <dt>{{ 'overlay.total'|trans }}</dt>
+                        <dt>{{ 'cart.total_tax_included'|trans }}</dt>
                         <dd id="cart-page-total">{{ cart.totalFormatted }}</dd>
                     </div>
                 </dl>
@@ -323,7 +323,7 @@
     {% if not cart.empty and checkout_form is defined %}
         <aside id="cart-mobile-checkout" class="cart-mobile-checkout" aria-label="{{ 'cart.mobile_checkout.label'|trans }}">
             <div class="cart-mobile-checkout__total">
-                <small>{{ 'overlay.total'|trans }}</small>
+                <small>{{ 'cart.total_tax_included'|trans }}</small>
                 <strong id="cart-mobile-total">{{ cart.totalFormatted }}</strong>
             </div>
             <button

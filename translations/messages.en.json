@@ -1054,6 +1054,7 @@
     "cart.shipping.next_tier": "Add %amount% to reduce shipping to %next%.",
     "cart.shipping.next_free": "Add %amount% to unlock free shipping.",
     "cart.shipping.free_unlocked": "Free shipping unlocked",
+    "cart.total_tax_included": "Total incl. tax",
     "cart.minimum_order.remaining": "Add %amount% more to reach the %minimum% minimum order.",
     "cart.minimum_order.eyebrow": "Minimum order",
     "cart.minimum_order.title": "%amount% more to place your order",
