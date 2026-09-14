@@ -27,7 +27,8 @@ final class AdminSageOrderManagerTest extends TestCase
             ->setShippingCity('Strasbourg')
             ->setShippingCountryCode('FR')
             ->setShippingPhone('0102030405')
-            ->setShippingAmountTaxIncludedCents(800);
+            ->setShippingAmountTaxExcludedCents(800)
+            ->setShippingAmountTaxIncludedCents(960);
         $order->markPaid(new \DateTimeImmutable('2026-07-07 14:00:00', new \DateTimeZone('Europe/Paris')));
         $order->addItem(
             (new OrderItem())
@@ -96,7 +97,8 @@ final class AdminSageOrderManagerTest extends TestCase
     {
         $order = (new Order())
             ->setOrderNumber('UP-20260707-003')
-            ->setDiscountAmountTaxIncludedCents(1000)
+            ->setDiscountAmountTaxExcludedCents(1000)
+            ->setDiscountAmountTaxIncludedCents(1200)
             ->setPromoCode((new PromoCode())->setCode('WELCOME10'));
         $order->markPaid(new \DateTimeImmutable('2026-07-07 14:00:00', new \DateTimeZone('Europe/Paris')));
         $order->addItem(

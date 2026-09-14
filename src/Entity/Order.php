@@ -60,9 +60,17 @@ class Order
     #[Assert\PositiveOrZero]
     private int $shippingAmountTaxIncludedCents = 0;
 
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero]
+    private ?int $shippingAmountTaxExcludedCents = null;
+
     #[ORM\Column(options: ['default' => 0])]
     #[Assert\PositiveOrZero]
     private int $discountAmountTaxIncludedCents = 0;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero]
+    private ?int $discountAmountTaxExcludedCents = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
@@ -290,6 +298,18 @@ class Order
         return $this;
     }
 
+    public function getShippingAmountTaxExcludedCents(): ?int
+    {
+        return $this->shippingAmountTaxExcludedCents;
+    }
+
+    public function setShippingAmountTaxExcludedCents(int $shippingAmountTaxExcludedCents): self
+    {
+        $this->shippingAmountTaxExcludedCents = max(0, $shippingAmountTaxExcludedCents);
+
+        return $this;
+    }
+
     public function getDiscountAmountTaxIncludedCents(): int
     {
         return $this->discountAmountTaxIncludedCents;
@@ -298,6 +318,18 @@ class Order
     public function setDiscountAmountTaxIncludedCents(int $discountAmountTaxIncludedCents): self
     {
         $this->discountAmountTaxIncludedCents = max(0, $discountAmountTaxIncludedCents);
+
+        return $this;
+    }
+
+    public function getDiscountAmountTaxExcludedCents(): ?int
+    {
+        return $this->discountAmountTaxExcludedCents;
+    }
+
+    public function setDiscountAmountTaxExcludedCents(int $discountAmountTaxExcludedCents): self
+    {
+        $this->discountAmountTaxExcludedCents = max(0, $discountAmountTaxExcludedCents);
 
         return $this;
     }
@@ -545,18 +577,13 @@ class Order
 
     public function refreshTotals(): self
     {
-        $itemsTaxExcluded = array_reduce(
-            $this->items->toArray(),
-            static fn (int $total, OrderItem $item): int => $total + $item->getTotalTaxExcludedCents(),
-            0,
-        );
-        $itemsTaxIncluded = array_reduce(
-            $this->items->toArray(),
-            static fn (int $total, OrderItem $item): int => $total + $item->getTotalTaxIncludedCents(),
-            0,
-        );
+        $itemsTaxExcluded = $this->getItemsTaxExcludedCents();
+        $itemsTaxIncluded = $this->getItemsTaxIncludedCents();
 
-        $this->totalTaxExcludedCents = $itemsTaxExcluded;
+        $this->totalTaxExcludedCents = null === $this->shippingAmountTaxExcludedCents
+            || null === $this->discountAmountTaxExcludedCents
+            ? $itemsTaxExcluded
+            : max(0, $itemsTaxExcluded + $this->shippingAmountTaxExcludedCents - $this->discountAmountTaxExcludedCents);
         $this->totalTaxIncludedCents = max(
             0,
             $itemsTaxIncluded + $this->shippingAmountTaxIncludedCents - $this->discountAmountTaxIncludedCents,
@@ -655,6 +682,29 @@ class Order
         ++$this->paymentReminderCount;
 
         return $this;
+    }
+
+    public function getItemsTaxExcludedCents(): int
+    {
+        return array_reduce(
+            $this->items->toArray(),
+            static fn (int $total, OrderItem $item): int => $total + $item->getTotalTaxExcludedCents(),
+            0,
+        );
+    }
+
+    public function getItemsTaxIncludedCents(): int
+    {
+        return array_reduce(
+            $this->items->toArray(),
+            static fn (int $total, OrderItem $item): int => $total + $item->getTotalTaxIncludedCents(),
+            0,
+        );
+    }
+
+    public function getTotalTaxCents(): int
+    {
+        return max(0, $this->totalTaxIncludedCents - $this->totalTaxExcludedCents);
     }
 
     #[ORM\PreUpdate]

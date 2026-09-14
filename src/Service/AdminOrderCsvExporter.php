@@ -11,7 +11,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class AdminOrderCsvExporter
 {
-    public function __construct(private TranslatorInterface $translator)
+    public function __construct(
+        private TranslatorInterface $translator,
+        private ?TaxAmountCalculator $taxCalculator = null,
+    )
     {
     }
 
@@ -40,9 +43,10 @@ final readonly class AdminOrderCsvExporter
                 'Adresse',
                 'Code promo',
                 'Produits',
-                'Sous-total HT',
-                'Livraison TTC',
-                'Remise TTC',
+                'Sous-total produits HT',
+                'Livraison HT',
+                'Remise HT',
+                'TVA',
                 'Total TTC',
             ], ';', '"', '\\');
 
@@ -72,9 +76,10 @@ final readonly class AdminOrderCsvExporter
                         ),
                         $order->getItems()->toArray(),
                     )),
-                    $this->amount($order->getTotalTaxExcludedCents()),
-                    $this->amount($order->getShippingAmountTaxIncludedCents()),
-                    $this->amount($order->getDiscountAmountTaxIncludedCents()),
+                    $this->amount($order->getItemsTaxExcludedCents()),
+                    $this->amount($this->shippingAmountTaxExcludedCents($order)),
+                    $this->amount($this->discountAmountTaxExcludedCents($order)),
+                    $this->amount($this->totalTaxCents($order)),
                     $this->amount($order->getTotalTaxIncludedCents()),
                 ]), ';', '"', '\\');
             }
@@ -102,5 +107,37 @@ final readonly class AdminOrderCsvExporter
         $value = (string) $value;
 
         return preg_match('/^[=+\-@]/', ltrim($value)) ? "'" . $value : $value;
+    }
+
+    private function shippingAmountTaxExcludedCents(Order $order): int
+    {
+        return $order->getShippingAmountTaxExcludedCents()
+            ?? $this->taxCalculator()->taxExcluded(
+                $order->getShippingAmountTaxIncludedCents(),
+                TaxAmountCalculator::SHIPPING_TAX_RATE,
+            );
+    }
+
+    private function discountAmountTaxExcludedCents(Order $order): int
+    {
+        return $order->getDiscountAmountTaxExcludedCents()
+            ?? $this->taxCalculator()->taxExcluded(
+                $order->getDiscountAmountTaxIncludedCents(),
+                TaxAmountCalculator::SHIPPING_TAX_RATE,
+            );
+    }
+
+    private function totalTaxCents(Order $order): int
+    {
+        return max(0, $order->getTotalTaxIncludedCents() - (
+            $order->getItemsTaxExcludedCents()
+            + $this->shippingAmountTaxExcludedCents($order)
+            - $this->discountAmountTaxExcludedCents($order)
+        ));
+    }
+
+    private function taxCalculator(): TaxAmountCalculator
+    {
+        return $this->taxCalculator ?? new TaxAmountCalculator();
     }
 }

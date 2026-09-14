@@ -232,15 +232,19 @@
                     <strong>{{ order.subtotal_tax_excluded }}</strong>
                 </div>
                 <div>
-                    <span>{{ 'overlay.delivery'|trans }}</span>
-                    <strong>{{ order.shipping_amount }}</strong>
+                    <span>{{ 'overlay.delivery'|trans }} HT</span>
+                    <strong>{{ order.shipping_amount_tax_excluded }}</strong>
                 </div>
                 <div>
-                    <span>{{ 'admin.order.discount'|trans }}</span>
+                    <span>{{ 'admin.order.discount'|trans }} HT</span>
                     <strong>
-                        {{ order.discount }}
+                        {{ order.discount_tax_excluded }}
                         {% if order.promo_code %}<small>({{ order.promo_code }})</small>{% endif %}
                     </strong>
+                </div>
+                <div>
+                    <span>TVA</span>
+                    <strong>{{ order.tax }}</strong>
                 </div>
                 <div class="admin-order-totals__grand">
                     <span>{{ 'overlay.total'|trans }}</span>

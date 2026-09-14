@@ -11,7 +11,10 @@ final class ShippingRateCalculator
      */
     public const FREE_SHIPPING_THRESHOLD_CENTS = 5000;
 
-    public function __construct(private readonly ?ShippingConfigurationProviderInterface $configurationProvider = null)
+    public function __construct(
+        private readonly ?ShippingConfigurationProviderInterface $configurationProvider = null,
+        private readonly ?TaxAmountCalculator $taxCalculator = null,
+    )
     {
     }
 
@@ -82,7 +85,11 @@ final class ShippingRateCalculator
         $configuration = $this->configuration();
         $tiers = $configuration['tiers'];
         $minimumOrderCents = $configuration['minimumOrderCents'];
-        $amountCents = $this->amountForTiers($subtotalCents, $tiers);
+        $amountTaxExcludedCents = $this->amountForTiers($subtotalCents, $tiers);
+        $amountTaxIncludedCents = $this->taxCalculator()->taxIncluded(
+            $amountTaxExcludedCents,
+            TaxAmountCalculator::SHIPPING_TAX_RATE,
+        );
         $currentIndex = 0;
 
         foreach ($tiers as $index => $tier) {
@@ -98,20 +105,32 @@ final class ShippingRateCalculator
         $freeShippingThresholdCents = $this->freeShippingThresholdCents($tiers);
 
         return [
-            'amountCents' => $amountCents,
+            'amountCents' => $amountTaxIncludedCents,
+            'amountTaxExcludedCents' => $amountTaxExcludedCents,
+            'amountTaxIncludedCents' => $amountTaxIncludedCents,
             'minimumOrderCents' => $minimumOrderCents,
             'minimumReached' => $subtotalCents >= $minimumOrderCents,
             'remainingToMinimumCents' => max(0, $minimumOrderCents - $subtotalCents),
             'progress' => min(100, (int) round(($subtotalCents / max(1, $freeShippingThresholdCents)) * 100)),
             'freeShippingThresholdCents' => $freeShippingThresholdCents,
-            'nextShippingAmountCents' => $nextTier['shippingAmountCents'] ?? null,
+            'nextShippingAmountCents' => null === $nextTier
+                ? null
+                : $this->taxCalculator()->taxIncluded(
+                    $nextTier['shippingAmountCents'],
+                    TaxAmountCalculator::SHIPPING_TAX_RATE,
+                ),
             'remainingToNextCents' => null === $nextTier
                 ? 0
                 : max(0, $nextTier['thresholdCents'] - $subtotalCents),
-            'free' => 0 === $amountCents,
+            'free' => 0 === $amountTaxIncludedCents,
             'checkpoints' => array_map(
-                static fn (array $tier): array => [
+                fn (array $tier): array => [
                     ...$tier,
+                    'shippingAmountTaxExcludedCents' => $tier['shippingAmountCents'],
+                    'shippingAmountCents' => $this->taxCalculator()->taxIncluded(
+                        $tier['shippingAmountCents'],
+                        TaxAmountCalculator::SHIPPING_TAX_RATE,
+                    ),
                     'position' => min(100, (int) round(($tier['thresholdCents'] / max(1, $freeShippingThresholdCents)) * 100)),
                     'reached' => $subtotalCents >= $tier['thresholdCents'],
                     'current' => $currentTier['thresholdCents'] === $tier['thresholdCents'],
@@ -147,5 +166,10 @@ final class ShippingRateCalculator
         }
 
         return $tiers[array_key_last($tiers)]['thresholdCents'];
+    }
+
+    private function taxCalculator(): TaxAmountCalculator
+    {
+        return $this->taxCalculator ?? new TaxAmountCalculator();
     }
 }

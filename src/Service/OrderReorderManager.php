@@ -77,7 +77,8 @@ final readonly class OrderReorderManager
                 cart: $cart,
                 shippingAddress: $address,
                 user: $user,
-                shippingAmountTaxIncludedCents: $shippingQuote['amountCents'],
+                shippingAmountTaxExcludedCents: $shippingQuote['amountTaxExcludedCents'],
+                shippingAmountTaxIncludedCents: $shippingQuote['amountTaxIncludedCents'],
             );
 
             $this->entityManager->persist($cart);

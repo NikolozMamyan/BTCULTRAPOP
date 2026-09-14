@@ -103,14 +103,16 @@ final class CheckoutController extends AbstractController
         $order = null;
 
         try {
-            $discountAmount = $promoCodeManager->discountForCart($cart, true);
+            $discountAmounts = $promoCodeManager->discountAmountsForCart($cart, true);
             $order = $orderManager->createGuestFromCart(
                 cart: $cart,
                 shippingAddress: $address,
                 user: $user,
                 customerEmail: $address->email,
-                shippingAmountTaxIncludedCents: $shippingQuote['amountCents'],
-                discountAmountTaxIncludedCents: $discountAmount,
+                shippingAmountTaxExcludedCents: $shippingQuote['amountTaxExcludedCents'],
+                shippingAmountTaxIncludedCents: $shippingQuote['amountTaxIncludedCents'],
+                discountAmountTaxExcludedCents: $discountAmounts['taxExcludedCents'],
+                discountAmountTaxIncludedCents: $discountAmounts['taxIncludedCents'],
             );
             $entityManager->persist($order);
             $entityManager->flush();

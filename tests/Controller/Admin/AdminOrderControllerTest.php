@@ -189,14 +189,15 @@ final class AdminOrderControllerTest extends WebTestCase
             self::assertResponseRedirects();
 
             $manualOrder = $connection->fetchAssociative(
-                'SELECT id, order_number, status, shipping_amount_tax_included_cents, total_tax_included_cents
+                'SELECT id, order_number, status, shipping_amount_tax_excluded_cents, shipping_amount_tax_included_cents, total_tax_included_cents
                  FROM customer_order WHERE customer_email = ?',
                 [$manualCustomerEmail],
             );
             self::assertIsArray($manualOrder);
             self::assertSame('pending_payment', $manualOrder['status']);
-            self::assertSame(600, (int) $manualOrder['shipping_amount_tax_included_cents']);
-            self::assertSame(1800, (int) $manualOrder['total_tax_included_cents']);
+            self::assertSame(600, (int) $manualOrder['shipping_amount_tax_excluded_cents']);
+            self::assertSame(720, (int) $manualOrder['shipping_amount_tax_included_cents']);
+            self::assertSame(1920, (int) $manualOrder['total_tax_included_cents']);
 
             $crawler = $client->request('GET', sprintf('/admin/orders/%d', $manualOrder['id']));
             $deleteToken = $crawler

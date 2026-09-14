@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Cart;
+use App\Entity\CartItem;
 use App\Entity\Order;
 use App\Entity\PromoCode;
 use App\Entity\User;
@@ -13,6 +14,7 @@ final readonly class PromoCodeManager
     public function __construct(
         private EntityManagerInterface $entityManager,
         private ShippingRateCalculator $shippingRateCalculator,
+        private ?TaxAmountCalculator $taxCalculator = null,
     ) {
     }
 
@@ -24,7 +26,7 @@ final readonly class PromoCodeManager
             throw new \InvalidArgumentException($error);
         }
 
-        $discount = $this->calculateDiscount($cart, $promoCode);
+        $discount = $this->calculateDiscountAmounts($cart, $promoCode)['taxIncludedCents'];
 
         if ($discount <= 0) {
             throw new \InvalidArgumentException($this->ineligibleAmountMessage($promoCode));
@@ -58,9 +60,44 @@ final readonly class PromoCodeManager
             return 0;
         }
 
-        $discount = $this->calculateDiscount($cart, $promoCode);
+        $discount = $this->calculateDiscountAmounts($cart, $promoCode)['taxIncludedCents'];
 
         if ($strict && $discount <= 0) {
+            throw new \InvalidArgumentException($this->ineligibleAmountMessage($promoCode));
+        }
+
+        return $discount;
+    }
+
+    public function discountTaxExcludedForCart(Cart $cart, bool $strict = false): int
+    {
+        return $this->discountAmountsForCart($cart, $strict)['taxExcludedCents'];
+    }
+
+    /**
+     * @return array{taxExcludedCents: int, taxIncludedCents: int}
+     */
+    public function discountAmountsForCart(Cart $cart, bool $strict = false): array
+    {
+        $promoCode = $cart->getPromoCode();
+
+        if (!$promoCode instanceof PromoCode) {
+            return ['taxExcludedCents' => 0, 'taxIncludedCents' => 0];
+        }
+
+        $error = $this->validationError($promoCode, $cart->getUser());
+
+        if (null !== $error) {
+            if ($strict) {
+                throw new \InvalidArgumentException($error);
+            }
+
+            return ['taxExcludedCents' => 0, 'taxIncludedCents' => 0];
+        }
+
+        $discount = $this->calculateDiscountAmounts($cart, $promoCode);
+
+        if ($strict && $discount['taxExcludedCents'] <= 0) {
             throw new \InvalidArgumentException($this->ineligibleAmountMessage($promoCode));
         }
 
@@ -187,14 +224,38 @@ final readonly class PromoCodeManager
         return null;
     }
 
-    private function calculateDiscount(Cart $cart, PromoCode $promoCode): int
+    /**
+     * @return array{taxExcludedCents: int, taxIncludedCents: int}
+     */
+    private function calculateDiscountAmounts(Cart $cart, PromoCode $promoCode): array
     {
-        $subtotalCents = $cart->getTotalTaxIncludedCents();
+        $shippingQuote = $this->shippingRateCalculator->quote($cart->getTotalTaxIncludedCents());
         $eligibleAmountCents = $promoCode->appliesToShipping()
-            ? $this->shippingRateCalculator->amountForSubtotal($subtotalCents)
-            : $subtotalCents;
+            ? $shippingQuote['amountTaxExcludedCents']
+            : $cart->getTotalTaxExcludedCents();
+        $discountTaxExcludedCents = $promoCode->calculateDiscountCents($eligibleAmountCents);
 
-        return $promoCode->calculateDiscountCents($eligibleAmountCents);
+        if ($discountTaxExcludedCents <= 0) {
+            return ['taxExcludedCents' => 0, 'taxIncludedCents' => 0];
+        }
+
+        $discountTaxIncludedCents = $promoCode->appliesToShipping()
+            ? $this->taxCalculator()->taxIncluded($discountTaxExcludedCents, TaxAmountCalculator::SHIPPING_TAX_RATE)
+            : $this->taxCalculator()->taxIncludedDiscount(
+                $discountTaxExcludedCents,
+                array_map(
+                    static fn (CartItem $item): array => [
+                        'taxExcludedCents' => $item->getTotalTaxExcludedCents(),
+                        'taxRate' => $item->getProduct()?->getTaxRate() ?? '0.00',
+                    ],
+                    $cart->getItems()->toArray(),
+                ),
+            );
+
+        return [
+            'taxExcludedCents' => $discountTaxExcludedCents,
+            'taxIncludedCents' => $discountTaxIncludedCents,
+        ];
     }
 
     private function ineligibleAmountMessage(PromoCode $promoCode): string
@@ -202,5 +263,10 @@ final readonly class PromoCodeManager
         return $promoCode->appliesToShipping()
             ? 'promo.flash.shipping_already_free'
             : 'promo.flash.cart_too_small';
+    }
+
+    private function taxCalculator(): TaxAmountCalculator
+    {
+        return $this->taxCalculator ?? new TaxAmountCalculator();
     }
 }

@@ -22,14 +22,15 @@ final class AdminOrderCsvExporterTest extends TestCase
             ->setShippingCity('Paris')
             ->setShippingCountryCode('FR')
             ->setShippingPhone('06 12 34 56 78')
-            ->setShippingAmountTaxIncludedCents(600);
+            ->setShippingAmountTaxExcludedCents(800)
+            ->setShippingAmountTaxIncludedCents(960);
         $order->addItem(
             (new OrderItem())
                 ->setProductName('Produit test')
                 ->setProductReference('TEST-1')
-                ->setQuantity(2)
-                ->setUnitPriceTaxExcludedCents(1000)
-                ->setUnitPriceTaxIncludedCents(1200),
+                ->setQuantity(1)
+                ->setUnitPriceTaxExcludedCents(585)
+                ->setUnitPriceTaxIncludedCents(648),
         );
         $order->refreshTotals();
 
@@ -43,8 +44,9 @@ final class AdminOrderCsvExporterTest extends TestCase
         self::assertStringContainsString("'=DANGEROUS", $content);
         self::assertStringContainsString('Email;Téléphone;Statut', $content);
         self::assertStringContainsString('06 12 34 56 78', $content);
-        self::assertStringContainsString('Produit test x2 (TEST-1)', $content);
-        self::assertStringContainsString('30,00', $content);
+        self::assertStringContainsString('Produit test x1 (TEST-1)', $content);
+        self::assertStringContainsString('"Sous-total produits HT";"Livraison HT";"Remise HT";TVA;"Total TTC"', $content);
+        self::assertStringContainsString('5,85;8,00;0,00;2,23;16,08', $content);
         self::assertSame('text/csv; charset=UTF-8', $response->headers->get('Content-Type'));
         self::assertStringContainsString('commandes-', (string) $response->headers->get('Content-Disposition'));
     }

@@ -27,7 +27,9 @@ final class OrderManager
         Cart $cart,
         User $user,
         Address $shippingAddress,
+        int $shippingAmountTaxExcludedCents = 0,
         int $shippingAmountTaxIncludedCents = 0,
+        int $discountAmountTaxExcludedCents = 0,
         int $discountAmountTaxIncludedCents = 0,
         ?string $orderNumber = null,
     ): Order {
@@ -51,7 +53,9 @@ final class OrderManager
             ->setShippingCity($shippingAddress->getCity())
             ->setShippingCountryCode($shippingAddress->getCountryCode())
             ->setShippingPhone($shippingAddress->getPhone())
+            ->setShippingAmountTaxExcludedCents($shippingAmountTaxExcludedCents)
             ->setShippingAmountTaxIncludedCents($shippingAmountTaxIncludedCents)
+            ->setDiscountAmountTaxExcludedCents($discountAmountTaxExcludedCents)
             ->setDiscountAmountTaxIncludedCents($discountAmountTaxIncludedCents)
             ->setPromoCode($discountAmountTaxIncludedCents > 0 ? $cart->getPromoCode() : null);
 
@@ -70,7 +74,9 @@ final class OrderManager
         Cart $cart,
         CheckoutAddress $shippingAddress,
         ?User $user = null,
+        int $shippingAmountTaxExcludedCents = 0,
         int $shippingAmountTaxIncludedCents = 0,
+        int $discountAmountTaxExcludedCents = 0,
         int $discountAmountTaxIncludedCents = 0,
         ?string $customerEmail = null,
         ?string $orderNumber = null,
@@ -95,7 +101,9 @@ final class OrderManager
             ->setShippingCity($shippingAddress->city)
             ->setShippingCountryCode($shippingAddress->countryCode)
             ->setShippingPhone($shippingAddress->phone)
+            ->setShippingAmountTaxExcludedCents($shippingAmountTaxExcludedCents)
             ->setShippingAmountTaxIncludedCents($shippingAmountTaxIncludedCents)
+            ->setDiscountAmountTaxExcludedCents($discountAmountTaxExcludedCents)
             ->setDiscountAmountTaxIncludedCents($discountAmountTaxIncludedCents)
             ->setPromoCode($discountAmountTaxIncludedCents > 0 ? $cart->getPromoCode() : null);
 
@@ -172,19 +180,7 @@ final class OrderManager
             ->setQuantity($cartItem->getQuantity())
             ->setUnitPriceTaxExcludedCents($cartItem->getUnitPriceTaxExcludedCents())
             ->setUnitPriceTaxIncludedCents($cartItem->getUnitPriceTaxIncludedCents())
-            ->setTaxRate($this->calculateTaxRate(
-                $cartItem->getUnitPriceTaxExcludedCents(),
-                $cartItem->getUnitPriceTaxIncludedCents(),
-            ));
-    }
-
-    private function calculateTaxRate(int $taxExcludedCents, int $taxIncludedCents): string
-    {
-        if ($taxExcludedCents <= 0 || $taxIncludedCents <= $taxExcludedCents) {
-            return '0.00';
-        }
-
-        return number_format((($taxIncludedCents - $taxExcludedCents) / $taxExcludedCents) * 100, 2, '.', '');
+            ->setTaxRate($product->getTaxRate());
     }
 
     private function reservePromotion(Order $order): void

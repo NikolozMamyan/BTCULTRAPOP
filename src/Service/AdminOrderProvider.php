@@ -10,7 +10,10 @@ use App\Repository\OrderRepository;
 
 final readonly class AdminOrderProvider
 {
-    public function __construct(private OrderRepository $orders)
+    public function __construct(
+        private OrderRepository $orders,
+        private ?TaxAmountCalculator $taxCalculator = null,
+    )
     {
     }
 
@@ -72,9 +75,11 @@ final readonly class AdminOrderProvider
 
         return [
             ...$this->presentListOrder($order),
-            'subtotal_tax_excluded' => $this->formatCents($order->getTotalTaxExcludedCents()),
-            'shipping_amount' => $this->formatCents($order->getShippingAmountTaxIncludedCents()),
-            'discount' => $this->formatCents($order->getDiscountAmountTaxIncludedCents()),
+            'subtotal_tax_excluded' => $this->formatCents($order->getItemsTaxExcludedCents()),
+            'shipping_amount_tax_excluded' => $this->formatCents($this->shippingAmountTaxExcludedCents($order)),
+            'shipping_amount_tax_included' => $this->formatCents($order->getShippingAmountTaxIncludedCents()),
+            'discount_tax_excluded' => $this->formatCents($this->discountAmountTaxExcludedCents($order)),
+            'tax' => $this->formatCents($this->totalTaxCents($order)),
             'promo_code' => $order->getPromoCodeSnapshot(),
             'loyalty_points' => $order->getLoyaltyPointsEarned(),
             'paid_at' => $order->getPaidAt(),
@@ -137,6 +142,38 @@ final readonly class AdminOrderProvider
             'unit_price' => $this->formatCents($item->getUnitPriceTaxIncludedCents()),
             'total' => $this->formatCents($item->getTotalTaxIncludedCents()),
         ];
+    }
+
+    private function shippingAmountTaxExcludedCents(Order $order): int
+    {
+        return $order->getShippingAmountTaxExcludedCents()
+            ?? $this->taxCalculator()->taxExcluded(
+                $order->getShippingAmountTaxIncludedCents(),
+                TaxAmountCalculator::SHIPPING_TAX_RATE,
+            );
+    }
+
+    private function discountAmountTaxExcludedCents(Order $order): int
+    {
+        return $order->getDiscountAmountTaxExcludedCents()
+            ?? $this->taxCalculator()->taxExcluded(
+                $order->getDiscountAmountTaxIncludedCents(),
+                TaxAmountCalculator::SHIPPING_TAX_RATE,
+            );
+    }
+
+    private function totalTaxCents(Order $order): int
+    {
+        return max(0, $order->getTotalTaxIncludedCents() - (
+            $order->getItemsTaxExcludedCents()
+            + $this->shippingAmountTaxExcludedCents($order)
+            - $this->discountAmountTaxExcludedCents($order)
+        ));
+    }
+
+    private function taxCalculator(): TaxAmountCalculator
+    {
+        return $this->taxCalculator ?? new TaxAmountCalculator();
     }
 
     private function formatCents(int $cents): string

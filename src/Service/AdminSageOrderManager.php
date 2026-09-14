@@ -30,6 +30,7 @@ final readonly class AdminSageOrderManager
         private SageOrderExportRepository $exports,
         private SageApiClient $sageApi,
         private EntityManagerInterface $entityManager,
+        private ?TaxAmountCalculator $taxCalculator = null,
     ) {
     }
 
@@ -141,14 +142,14 @@ final readonly class AdminSageOrderManager
                 'prixHT' => 0,
                 'quantite' => 1,
                 'quantitePreparee' => 1,
-                'tauxRemise' => $this->discountRateForSage($order->getDiscountAmountTaxIncludedCents()),
+                'tauxRemise' => $this->discountRateForSage($this->discountAmountTaxExcludedCents($order)),
             ];
         }
 
         $orderLines[] = [
             'reference' => self::SHIPPING_REFERENCE,
             'designation' => self::SHIPPING_DESIGNATION,
-            'prixHT' => $this->centsToAmount($order->getShippingAmountTaxIncludedCents()),
+            'prixHT' => $this->centsToAmount($this->shippingAmountTaxExcludedCents($order)),
             'quantite' => 1,
             'quantitePreparee' => 1,
         ];
@@ -231,6 +232,29 @@ final readonly class AdminSageOrderManager
         $amount = rtrim(rtrim($amount, '0'), '.');
 
         return $amount . 'F';
+    }
+
+    private function shippingAmountTaxExcludedCents(Order $order): int
+    {
+        return $order->getShippingAmountTaxExcludedCents()
+            ?? $this->taxCalculator()->taxExcluded(
+                $order->getShippingAmountTaxIncludedCents(),
+                TaxAmountCalculator::SHIPPING_TAX_RATE,
+            );
+    }
+
+    private function discountAmountTaxExcludedCents(Order $order): int
+    {
+        return $order->getDiscountAmountTaxExcludedCents()
+            ?? $this->taxCalculator()->taxExcluded(
+                $order->getDiscountAmountTaxIncludedCents(),
+                TaxAmountCalculator::SHIPPING_TAX_RATE,
+            );
+    }
+
+    private function taxCalculator(): TaxAmountCalculator
+    {
+        return $this->taxCalculator ?? new TaxAmountCalculator();
     }
 
     private function shippingInstruction(Order $order): string

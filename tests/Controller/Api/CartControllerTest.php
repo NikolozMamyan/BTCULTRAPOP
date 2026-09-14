@@ -29,9 +29,9 @@ final class CartControllerTest extends WebTestCase
         $payload = $this->jsonResponse($client->getResponse()->getContent());
         self::assertSame(2, $payload['cart']['totalQuantity']);
         self::assertSame('2,62 €', $payload['cart']['subtotalFormatted']);
-        self::assertSame(600, $payload['cart']['shippingAmountCents']);
-        self::assertSame('6,00 €', $payload['cart']['shippingAmountFormatted']);
-        self::assertSame('8,62 €', $payload['cart']['totalFormatted']);
+        self::assertSame(720, $payload['cart']['shippingAmountCents']);
+        self::assertSame('7,20 €', $payload['cart']['shippingAmountFormatted']);
+        self::assertSame('9,82 €', $payload['cart']['totalFormatted']);
         self::assertFalse($payload['cart']['checkoutAllowed']);
         self::assertSame(1000, $payload['cart']['minimumOrderCents']);
         self::assertSame(26, $payload['cart']['minimumOrderProgress']);
@@ -70,7 +70,7 @@ final class CartControllerTest extends WebTestCase
         $payload = $this->jsonResponse($client->getResponse()->getContent());
         self::assertSame(3, $payload['cart']['totalQuantity']);
         self::assertSame('3,93 €', $payload['cart']['subtotalFormatted']);
-        self::assertSame('9,93 €', $payload['cart']['totalFormatted']);
+        self::assertSame('11,13 €', $payload['cart']['totalFormatted']);
         self::assertFalse($payload['cart']['checkoutAllowed']);
 
         $removeUrl = $payload['cart']['items'][0]['removeUrl'];

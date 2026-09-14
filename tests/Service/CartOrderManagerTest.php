@@ -139,6 +139,7 @@ final class CartOrderManagerTest extends TestCase
         $product = $this->createProduct()
             ->setPriceTaxExcluded('10.000000')
             ->setPriceTaxIncluded('12.000000')
+            ->setTaxRate('20')
             ->setQuantity(5)
             ->addImage((new ProductImage())->setPath('/uploads/products/cover.webp')->setCover(true));
         $cartManager = new CartManager();
@@ -150,7 +151,9 @@ final class CartOrderManagerTest extends TestCase
             cart: $cart,
             user: $user,
             shippingAddress: $address,
+            shippingAmountTaxExcludedCents: 408,
             shippingAmountTaxIncludedCents: 490,
+            discountAmountTaxExcludedCents: 83,
             discountAmountTaxIncludedCents: 100,
             orderNumber: 'UP-TEST-0001',
         );
@@ -163,7 +166,7 @@ final class CartOrderManagerTest extends TestCase
         self::assertSame('client@example.com', $order->getCustomerEmail());
         self::assertSame('Niko Ultrapop', $order->getCustomerName());
         self::assertSame('Maison', $order->getShippingName());
-        self::assertSame(2000, $order->getTotalTaxExcludedCents());
+        self::assertSame(2325, $order->getTotalTaxExcludedCents());
         self::assertSame(2790, $order->getTotalTaxIncludedCents());
         self::assertSame(27, $order->getLoyaltyPointsEarned());
         self::assertSame(1, $order->getItems()->count());
@@ -218,13 +221,14 @@ final class CartOrderManagerTest extends TestCase
         $cart = $cartManager->createCart(token: 'guest-checkout-token');
         $cartManager->addProduct($cart, $product, 1);
 
+        $shippingQuote = (new ShippingRateCalculator())->quote($cart->getTotalTaxIncludedCents());
+
         $order = (new OrderManager())->createGuestFromCart(
             cart: $cart,
             shippingAddress: $address,
             customerEmail: $address->email,
-            shippingAmountTaxIncludedCents: (new ShippingRateCalculator())->amountForSubtotal(
-                $cart->getTotalTaxIncludedCents(),
-            ),
+            shippingAmountTaxExcludedCents: $shippingQuote['amountTaxExcludedCents'],
+            shippingAmountTaxIncludedCents: $shippingQuote['amountTaxIncludedCents'],
             orderNumber: 'UP-TEST-GUEST',
         );
 
@@ -234,9 +238,53 @@ final class CartOrderManagerTest extends TestCase
         self::assertSame('invite@example.com', $order->getCustomerEmail());
         self::assertSame('Client Invite', $order->getCustomerName());
         self::assertSame('20 rue de Lyon', $order->getShippingStreet());
-        self::assertSame(475, $order->getShippingAmountTaxIncludedCents());
-        self::assertSame(2875, $order->getTotalTaxIncludedCents());
+        self::assertSame(475, $order->getShippingAmountTaxExcludedCents());
+        self::assertSame(570, $order->getShippingAmountTaxIncludedCents());
+        self::assertSame(2970, $order->getTotalTaxIncludedCents());
         self::assertSame(PaymentStatus::PENDING, $order->getPaymentStatus());
+    }
+
+    public function testOrderTotalsCombineMixedVatProductsWithTwentyPercentShipping(): void
+    {
+        $cartManager = new CartManager();
+        $cart = $cartManager->createCart(token: 'mixed-vat-cart');
+        $cartManager->addProduct(
+            $cart,
+            $this->createProduct()
+                ->setPriceTaxExcluded('2.130000')
+                ->setPriceTaxIncluded('2.560000')
+                ->setTaxRate('20'),
+        );
+        $cartManager->addProduct(
+            $cart,
+            $this->createProduct()
+                ->setReference('ULTRA-002')
+                ->setPriceTaxExcluded('3.720000')
+                ->setPriceTaxIncluded('3.920000')
+                ->setTaxRate('5.5'),
+        );
+        $address = new CheckoutAddress();
+        $address->name = 'Client TVA';
+        $address->email = 'tva@example.com';
+        $address->street = '10 rue Test';
+        $address->postalCode = '75001';
+        $address->city = 'Paris';
+
+        $order = (new OrderManager())->createGuestFromCart(
+            cart: $cart,
+            shippingAddress: $address,
+            shippingAmountTaxExcludedCents: 800,
+            shippingAmountTaxIncludedCents: 960,
+            orderNumber: 'UP-TEST-MIXED-VAT',
+        );
+
+        self::assertSame(1385, $order->getTotalTaxExcludedCents());
+        self::assertSame(223, $order->getTotalTaxCents());
+        self::assertSame(1608, $order->getTotalTaxIncludedCents());
+        self::assertSame(['20.00', '5.50'], array_map(
+            static fn ($item): string => $item->getTaxRate(),
+            $order->getItems()->toArray(),
+        ));
     }
 
     private function createProduct(): Product

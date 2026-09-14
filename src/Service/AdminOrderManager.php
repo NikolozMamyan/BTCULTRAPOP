@@ -19,6 +19,7 @@ final readonly class AdminOrderManager
         private ShippingRateCalculator $shippingRateCalculator,
         private PromoCodeManager $promoCodeManager,
         private OrderManager $orderManager,
+        private TaxAmountCalculator $taxCalculator,
     ) {
     }
 
@@ -59,9 +60,15 @@ final readonly class AdminOrderManager
 
             $order->refreshTotals();
             $itemsSubtotalCents = $order->getTotalTaxIncludedCents();
-            $shippingAmountCents = $data->shippingAmountCents
-                ?? $this->shippingRateCalculator->amountForSubtotal($itemsSubtotalCents);
-            $discountCents = 0;
+            $shippingQuote = $this->shippingRateCalculator->quote($itemsSubtotalCents);
+            $shippingAmountTaxExcludedCents = $data->shippingAmountCents
+                ?? $shippingQuote['amountTaxExcludedCents'];
+            $shippingAmountTaxIncludedCents = $this->taxCalculator->taxIncluded(
+                $shippingAmountTaxExcludedCents,
+                TaxAmountCalculator::SHIPPING_TAX_RATE,
+            );
+            $discountAmountTaxExcludedCents = 0;
+            $discountAmountTaxIncludedCents = 0;
 
             if (null !== $data->promoCode) {
                 if (!$data->promoCode->isAvailableFor($user)) {
@@ -69,20 +76,38 @@ final readonly class AdminOrderManager
                 }
 
                 $eligibleAmountCents = $data->promoCode->appliesToShipping()
-                    ? $shippingAmountCents
-                    : $itemsSubtotalCents;
-                $discountCents = $data->promoCode->calculateDiscountCents($eligibleAmountCents);
+                    ? $shippingAmountTaxExcludedCents
+                    : $order->getItemsTaxExcludedCents();
+                $discountAmountTaxExcludedCents = $data->promoCode->calculateDiscountCents($eligibleAmountCents);
 
-                if ($discountCents <= 0) {
+                if ($discountAmountTaxExcludedCents <= 0) {
                     throw new \InvalidArgumentException('admin.order.manual.error.promo_ineligible');
                 }
+
+                $discountAmountTaxIncludedCents = $data->promoCode->appliesToShipping()
+                    ? $this->taxCalculator->taxIncluded(
+                        $discountAmountTaxExcludedCents,
+                        TaxAmountCalculator::SHIPPING_TAX_RATE,
+                    )
+                    : $this->taxCalculator->taxIncludedDiscount(
+                        $discountAmountTaxExcludedCents,
+                        array_map(
+                            static fn (OrderItem $item): array => [
+                                'taxExcludedCents' => $item->getTotalTaxExcludedCents(),
+                                'taxRate' => $item->getTaxRate(),
+                            ],
+                            $order->getItems()->toArray(),
+                        ),
+                    );
 
                 $order->setPromoCode($data->promoCode);
             }
 
             $order
-                ->setShippingAmountTaxIncludedCents($shippingAmountCents)
-                ->setDiscountAmountTaxIncludedCents($discountCents)
+                ->setShippingAmountTaxExcludedCents($shippingAmountTaxExcludedCents)
+                ->setShippingAmountTaxIncludedCents($shippingAmountTaxIncludedCents)
+                ->setDiscountAmountTaxExcludedCents($discountAmountTaxExcludedCents)
+                ->setDiscountAmountTaxIncludedCents($discountAmountTaxIncludedCents)
                 ->refreshTotals();
 
             $this->applyInitialStatus($order, $data->status);
