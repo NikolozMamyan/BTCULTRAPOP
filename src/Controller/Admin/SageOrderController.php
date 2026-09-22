@@ -42,6 +42,8 @@ final class SageOrderController extends AbstractController
         }
 
         try {
+            // dd($this->debugPayload($sageOrders->payload($order)));
+
             $sageOrders->export($order);
             $message = 'admin.sage_order.flash.sent';
 
@@ -68,6 +70,34 @@ final class SageOrderController extends AbstractController
 
         return $this->redirectToRoute('app_admin_sage_orders_index');
     }
+
+    // /**
+    //  * @param array<string, mixed> $payload
+    //  *
+    //  * @return array{referenceCommande: string, hasZRemise: bool, hasRemiseField: bool, lines: list<array<string, mixed>>, raw: array<string, mixed>}
+    //  */
+    // private function debugPayload(array $payload): array
+    // {
+    //     $lines = array_values(array_map(
+    //         static fn (array $line): array => [
+    //             'reference' => (string) ($line['reference'] ?? ''),
+    //             'designation' => (string) ($line['designation'] ?? ''),
+    //             'prixHT' => $line['prixHT'] ?? null,
+    //             'quantite' => $line['quantite'] ?? null,
+    //             'quantitePreparee' => $line['quantitePreparee'] ?? null,
+    //             'remise' => $line['remise'] ?? null,
+    //         ],
+    //         array_filter($payload['orderLines'] ?? [], 'is_array'),
+    //     ));
+
+    //     return [
+    //         'referenceCommande' => (string) ($payload['referenceCommande'] ?? ''),
+    //         'hasZRemise' => count(array_filter($lines, static fn (array $line): bool => 'ZREMISE' === $line['reference'])) > 0,
+    //         'hasRemiseField' => count(array_filter($lines, static fn (array $line): bool => null !== $line['remise'] && '' !== (string) $line['remise'])) > 0,
+    //         'lines' => $lines,
+    //         'raw' => $payload,
+    //     ];
+    // }
 
     private function wantsJson(Request $request): bool
     {

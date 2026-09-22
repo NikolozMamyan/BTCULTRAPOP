@@ -9,6 +9,7 @@ use App\Entity\OrderItem;
 use App\Entity\PromoCode;
 use App\Entity\Product;
 use App\Entity\SageOrderExport;
+use App\Enum\PromoApplicationType;
 use App\Service\AdminSageOrderManager;
 use PHPUnit\Framework\TestCase;
 
@@ -48,7 +49,7 @@ final class AdminSageOrderManagerTest extends TestCase
         $payload = $manager->payload($order);
 
         self::assertSame('9BTOC', $payload['numClient']);
-        self::assertSame('UP-20260707-001', $payload['referenceCommande']);
+        self::assertSame('UP2607070001', $payload['referenceCommande']);
         self::assertSame('Saisi', $payload['statut']);
         self::assertSame('DDP', $payload['modeExpedition']);
         self::assertSame('', $payload['modeleReglement']);
@@ -97,8 +98,8 @@ final class AdminSageOrderManagerTest extends TestCase
     {
         $order = (new Order())
             ->setOrderNumber('UP-20260707-003')
-            ->setDiscountAmountTaxExcludedCents(1000)
-            ->setDiscountAmountTaxIncludedCents(1200)
+            ->setDiscountAmountTaxExcludedCents(1050)
+            ->setDiscountAmountTaxIncludedCents(1260)
             ->setPromoCode((new PromoCode())->setCode('WELCOME10'));
         $order->markPaid(new \DateTimeImmutable('2026-07-07 14:00:00', new \DateTimeZone('Europe/Paris')));
         $order->addItem(
@@ -124,9 +125,50 @@ final class AdminSageOrderManagerTest extends TestCase
             'prixHT' => 0,
             'quantite' => 1,
             'quantitePreparee' => 1,
-            'tauxRemise' => '10F',
+            'remise' => '10,5F',
         ], $payload['orderLines'][1]);
         self::assertSame('ZTRANS', $payload['orderLines'][2]['reference']);
+    }
+
+    public function testItAppliesShippingDiscountOnTransportLine(): void
+    {
+        $order = (new Order())
+            ->setOrderNumber('UP-20260707-004')
+            ->setShippingAmountTaxExcludedCents(800)
+            ->setShippingAmountTaxIncludedCents(960)
+            ->setDiscountAmountTaxExcludedCents(500)
+            ->setDiscountAmountTaxIncludedCents(600)
+            ->setPromoCode(
+                (new PromoCode())
+                    ->setCode('SHIP5')
+                    ->setApplicationType(PromoApplicationType::SHIPPING),
+            );
+        $order->markPaid(new \DateTimeImmutable('2026-07-07 14:00:00', new \DateTimeZone('Europe/Paris')));
+        $order->addItem(
+            (new OrderItem())
+                ->setProduct($this->product())
+                ->setProductName('ULTRAPOP - Naruto - Tropical 33cl')
+                ->setProductReference('28989')
+                ->setQuantity(1)
+                ->setUnitPriceTaxExcludedCents(108)
+                ->setUnitPriceTaxIncludedCents(131),
+        );
+        $order->refreshTotals();
+
+        $manager = (new \ReflectionClass(AdminSageOrderManager::class))->newInstanceWithoutConstructor();
+        \assert($manager instanceof AdminSageOrderManager);
+
+        $payload = $manager->payload($order);
+
+        self::assertCount(2, $payload['orderLines']);
+        self::assertSame([
+            'reference' => 'ZTRANS',
+            'designation' => 'Transport Cost',
+            'prixHT' => 8.0,
+            'quantite' => 1,
+            'quantitePreparee' => 1,
+            'remise' => '5F',
+        ], $payload['orderLines'][1]);
     }
 
     private function product(): Product

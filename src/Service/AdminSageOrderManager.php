@@ -135,24 +135,30 @@ final readonly class AdminSageOrderManager
             throw new SageApiException('admin.sage_order.error.empty_order_lines');
         }
 
-        if ($order->getDiscountAmountTaxIncludedCents() > 0) {
+        if ($order->getDiscountAmountTaxIncludedCents() > 0 && !$this->discountAppliesToShipping($order)) {
             $orderLines[] = [
                 'reference' => self::DISCOUNT_REFERENCE,
                 'designation' => $this->discountDesignation($order),
                 'prixHT' => 0,
                 'quantite' => 1,
                 'quantitePreparee' => 1,
-                'tauxRemise' => $this->discountRateForSage($this->discountAmountTaxExcludedCents($order)),
+                'remise' => $this->discountForSage($this->discountAmountTaxExcludedCents($order)),
             ];
         }
 
-        $orderLines[] = [
+        $shippingLine = [
             'reference' => self::SHIPPING_REFERENCE,
             'designation' => self::SHIPPING_DESIGNATION,
             'prixHT' => $this->centsToAmount($this->shippingAmountTaxExcludedCents($order)),
             'quantite' => 1,
             'quantitePreparee' => 1,
         ];
+
+        if ($order->getDiscountAmountTaxIncludedCents() > 0 && $this->discountAppliesToShipping($order)) {
+            $shippingLine['remise'] = $this->discountForSage($this->discountAmountTaxExcludedCents($order));
+        }
+
+        $orderLines[] = $shippingLine;
 
         $orderDate = $order->getCreatedAt();
         $deliveryDate = ($order->getPaidAt() ?? $orderDate)->modify('+2 days');
@@ -161,7 +167,7 @@ final readonly class AdminSageOrderManager
             'numClient' => self::SAGE_CUSTOMER_NUMBER,
             'dateCommande' => $this->dateForSage($orderDate),
             'dateLivraison' => $this->dateForSage($deliveryDate),
-            'referenceCommande' => $order->getOrderNumber(),
+            'referenceCommande' => $this->sageOrderReference($order),
             'statut' => self::DEFAULT_STATUS,
             'modeExpedition' => self::DEFAULT_SHIPPING_MODE,
             'condLivraison' => self::DEFAULT_DELIVERY_CONDITION,
@@ -215,6 +221,17 @@ final readonly class AdminSageOrderManager
         return 'ORDERITEM-' . (string) $item->getId();
     }
 
+    private function sageOrderReference(Order $order): string
+    {
+        $orderNumber = $order->getOrderNumber();
+
+        if (1 !== preg_match('/^UP-(\d{4})(\d{2})(\d{2})-(\d+)$/', $orderNumber, $matches)) {
+            return $orderNumber;
+        }
+
+        return sprintf('UP%s%s%s%04d', substr($matches[1], -2), $matches[2], $matches[3], (int) $matches[4]);
+    }
+
     private function discountDesignation(Order $order): string
     {
         $promoCode = trim((string) $order->getPromoCodeSnapshot());
@@ -226,10 +243,15 @@ final readonly class AdminSageOrderManager
         return self::DISCOUNT_DESIGNATION . ' ' . $promoCode;
     }
 
-    private function discountRateForSage(int $discountCents): string
+    private function discountAppliesToShipping(Order $order): bool
     {
-        $amount = number_format($discountCents / 100, 2, '.', '');
-        $amount = rtrim(rtrim($amount, '0'), '.');
+        return true === $order->getPromoCode()?->appliesToShipping();
+    }
+
+    private function discountForSage(int $discountCents): string
+    {
+        $amount = number_format($discountCents / 100, 2, ',', '');
+        $amount = rtrim(rtrim($amount, '0'), ',');
 
         return $amount . 'F';
     }
