@@ -56,6 +56,10 @@ class OrderItem
 
     #[ORM\Column(options: ['default' => 0])]
     #[Assert\PositiveOrZero]
+    private int $preparedQuantity = 0;
+
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero]
     private int $unitPriceTaxExcludedCents = 0;
 
     #[ORM\Column(options: ['default' => 0])]
@@ -209,6 +213,18 @@ class OrderItem
     {
         $this->quantity = max(1, $quantity);
         $this->refreshTotals();
+
+        return $this;
+    }
+
+    public function getPreparedQuantity(): int
+    {
+        return $this->preparedQuantity;
+    }
+
+    public function setPreparedQuantity(int $preparedQuantity): self
+    {
+        $this->preparedQuantity = max(0, min($this->quantity, $preparedQuantity));
 
         return $this;
     }

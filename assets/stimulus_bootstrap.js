@@ -3,6 +3,7 @@ import AdminEmailingController from './controllers/admin_emailing_controller.js'
 import AdminManualOrderController from './controllers/admin_manual_order_controller.js';
 import AdminOrderCopyController from './controllers/admin_order_copy_controller.js';
 import AdminOrderExportController from './controllers/admin_order_export_controller.js';
+import AdminOrderPreparationController from './controllers/admin_order_preparation_controller.js';
 import AdminSageOrdersController from './controllers/admin_sage_orders_controller.js';
 import AdminShippingController from './controllers/admin_shipping_controller.js';
 import AdminProductGalleryController from './controllers/admin_product_gallery_controller.js';
@@ -30,6 +31,7 @@ app.register('admin-emailing', AdminEmailingController);
 app.register('admin-manual-order', AdminManualOrderController);
 app.register('admin-order-copy', AdminOrderCopyController);
 app.register('admin-order-export', AdminOrderExportController);
+app.register('admin-order-preparation', AdminOrderPreparationController);
 app.register('admin-sage-orders', AdminSageOrdersController);
 app.register('admin-shipping', AdminShippingController);
 app.register('admin-product-gallery', AdminProductGalleryController);

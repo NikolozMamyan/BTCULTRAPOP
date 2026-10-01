@@ -183,7 +183,7 @@ final class CartOrderManagerTest extends TestCase
 
         $orderManager->markPaid($order, new \DateTimeImmutable('2026-06-16 10:00:00'));
 
-        self::assertSame(OrderStatus::PAID, $order->getStatus());
+        self::assertSame(OrderStatus::PREPARATION, $order->getStatus());
         self::assertSame(PaymentStatus::PAID, $order->getPaymentStatus());
         self::assertSame(27, $user->getLoyaltyPoints());
         self::assertSame(3, $product->getQuantity());

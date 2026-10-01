@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\SageOrderExport;
+use App\Enum\OrderStatus;
 use App\Enum\PaymentStatus;
 use App\Exception\SageApiException;
 use App\Repository\OrderRepository;
@@ -87,6 +88,10 @@ final readonly class AdminSageOrderManager
     {
         if (PaymentStatus::PAID !== $order->getPaymentStatus()) {
             throw new SageApiException('admin.sage_order.error.order_not_paid');
+        }
+
+        if (in_array($order->getStatus(), [OrderStatus::PAID, OrderStatus::PREPARATION], true)) {
+            throw new SageApiException('admin.sage_order.error.order_not_prepared');
         }
 
         $existingExport = $this->exports->findOneBy(['customerOrder' => $order]);
@@ -196,6 +201,7 @@ final readonly class AdminSageOrderManager
             'email' => $order->getCustomerEmail(),
             'created_at' => $order->getCreatedAt(),
             'paid_at' => $order->getPaidAt(),
+            'status' => $order->getStatus()->value,
             'total' => $this->formatCents($order->getTotalTaxIncludedCents()),
             'items_count' => $order->getItems()->count(),
             'exported' => $export instanceof SageOrderExport,

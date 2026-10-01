@@ -95,6 +95,7 @@ final readonly class OrderReorderManager
             || !in_array($order->getStatus(), [
                 OrderStatus::PAID,
                 OrderStatus::PREPARATION,
+                OrderStatus::PREPARED,
                 OrderStatus::SHIPPED,
                 OrderStatus::DELIVERED,
             ], true)

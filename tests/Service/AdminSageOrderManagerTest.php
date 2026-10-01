@@ -10,11 +10,24 @@ use App\Entity\PromoCode;
 use App\Entity\Product;
 use App\Entity\SageOrderExport;
 use App\Enum\PromoApplicationType;
+use App\Exception\SageApiException;
 use App\Service\AdminSageOrderManager;
 use PHPUnit\Framework\TestCase;
 
 final class AdminSageOrderManagerTest extends TestCase
 {
+    public function testItRefusesToExportAnOrderBeforePreparationIsComplete(): void
+    {
+        $order = (new Order())->setOrderNumber('UP-20261001-001')->markPaid();
+        $manager = (new \ReflectionClass(AdminSageOrderManager::class))->newInstanceWithoutConstructor();
+        \assert($manager instanceof AdminSageOrderManager);
+
+        $this->expectException(SageApiException::class);
+        $this->expectExceptionMessage('admin.sage_order.error.order_not_prepared');
+
+        $manager->export($order);
+    }
+
     public function testItBuildsSagePayloadFromPaidOrderSnapshots(): void
     {
         $order = (new Order())

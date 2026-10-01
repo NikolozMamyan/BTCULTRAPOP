@@ -102,9 +102,13 @@
                             </span>
                             <span>{{ order.created_at|date('d/m/Y H:i') }}</span>
                             <strong>{{ order.total }}</strong>
-                            <span class="admin-order-badge admin-order-badge--{{ order.status }}">
-                                {{ order.status_key|trans }}
-                            </span>
+                            {% if order.payment_status == 'paid' and order.status in ['paid', 'preparation'] %}
+                                <a class="admin-order-badge admin-order-badge--{{ order.status }} admin-order-badge--link" href="{{ path('app_admin_orders_preparation', {id: order.id}) }}">
+                                    {{ order.status_key|trans }}
+                                </a>
+                            {% else %}
+                                <span class="admin-order-badge admin-order-badge--{{ order.status }}">{{ order.status_key|trans }}</span>
+                            {% endif %}
                             <span class="admin-order-badge admin-order-badge--payment-{{ order.payment_status }}">
                                 {{ order.payment_status_key|trans }}
                             </span>
@@ -112,9 +116,11 @@
                                 <a href="{{ path('app_admin_orders_show', {id: order.id}) }}" title="{{ 'admin.order.action.view'|trans }}">
                                     <i class="fa-solid fa-eye"></i>
                                 </a>
-                                <a href="{{ path('app_admin_orders_export', {order: order.id}) }}" title="{{ 'admin.order.action.export_one'|trans }}">
-                                    <i class="fa-solid fa-file-export"></i>
-                                </a>
+                                {% if order.payment_status == 'paid' and order.status in ['paid', 'preparation'] %}
+                                    <a href="{{ path('app_admin_orders_preparation', {id: order.id}) }}" class="admin-order-prepare-action" title="{{ 'admin.order.action.prepare'|trans }}">
+                                        <i class="fa-solid fa-box-open"></i>
+                                    </a>
+                                {% endif %}
                                 <form method="post" action="{{ path('app_admin_orders_delete', {id: order.id}) }}" onsubmit="return confirm('{{ 'admin.order.delete.confirm'|trans|e('js') }}')">
                                     <input type="hidden" name="_token" value="{{ csrf_token('admin_order_delete_' ~ order.id) }}">
                                     <button type="submit" title="{{ 'admin.order.action.delete'|trans }}">

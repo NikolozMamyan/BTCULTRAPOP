@@ -217,6 +217,7 @@ final readonly class AdminOrderManager
         return in_array($status, [
             OrderStatus::PAID,
             OrderStatus::PREPARATION,
+            OrderStatus::PREPARED,
             OrderStatus::SHIPPED,
             OrderStatus::DELIVERED,
         ], true);
@@ -231,7 +232,7 @@ final readonly class AdminOrderManager
             $order->setPaymentStatus(PaymentStatus::PAID);
         }
 
-        $order->setStatus($status);
+        $order->setStatus(OrderStatus::PAID === $status ? OrderStatus::PREPARATION : $status);
     }
 
     private function decimalToCents(string $amount): int

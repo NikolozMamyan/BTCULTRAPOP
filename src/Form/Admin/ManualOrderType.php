@@ -133,6 +133,10 @@ final class ManualOrderType extends AbstractType
         $choices = [];
 
         foreach (OrderStatus::cases() as $status) {
+            if (OrderStatus::PREPARED === $status) {
+                continue;
+            }
+
             $choices['admin.order.status.' . $status->value] = $status;
         }
 

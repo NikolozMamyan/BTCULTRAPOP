@@ -91,9 +91,9 @@ final readonly class ProfileOrderProvider
     private function statusTone(OrderStatus $status): string
     {
         return match ($status) {
-            OrderStatus::PAID, OrderStatus::DELIVERED => 'green',
+            OrderStatus::PAID, OrderStatus::PREPARED, OrderStatus::DELIVERED => 'green',
             OrderStatus::SHIPPED => 'blue',
-            OrderStatus::PREPARATION => 'yellow',
+            OrderStatus::PREPARATION => 'blue',
             OrderStatus::CANCELLED, OrderStatus::REFUNDED => 'red',
             OrderStatus::PENDING_PAYMENT => 'gray',
         };

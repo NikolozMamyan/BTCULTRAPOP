@@ -595,7 +595,7 @@ class Order
 
     public function markPaid(?\DateTimeImmutable $paidAt = null): self
     {
-        $this->status = OrderStatus::PAID;
+        $this->status = OrderStatus::PREPARATION;
         $this->paymentStatus = PaymentStatus::PAID;
         $this->paymentFailureReason = null;
         $this->paidAt = $paidAt ?? new \DateTimeImmutable();

@@ -71,7 +71,7 @@ final class StripeWebhookHandlerTest extends TestCase
         self::assertSame($order, $result);
         self::assertSame('cs_old', $order->getStripeCheckoutSessionId());
         self::assertSame('pi_paid', $order->getStripePaymentIntentId());
-        self::assertSame(OrderStatus::PAID, $order->getStatus());
+        self::assertSame(OrderStatus::PREPARATION, $order->getStatus());
         self::assertSame(PaymentStatus::PAID, $order->getPaymentStatus());
     }
 

@@ -1,0 +1,164 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.order.preparation.title'|trans({'%order%': order.number}) }}{% endblock %}
+
+{% block admin_content %}
+    <section
+        class="admin-order-preparation"
+        data-controller="admin-order-preparation"
+        data-admin-order-preparation-scan-url-value="{{ path('app_admin_orders_preparation_scan', {id: order.id}) }}"
+        data-admin-order-preparation-complete-url-value="{{ path('app_admin_orders_preparation_complete', {id: order.id}) }}"
+        data-admin-order-preparation-token-value="{{ csrf_token('admin_order_preparation_' ~ order.id) }}"
+        data-admin-order-preparation-invalid-text-value="{{ 'admin.order.preparation.error.invalid_code'|trans }}"
+        data-admin-order-preparation-camera-error-text-value="{{ 'admin.order.preparation.scanner.camera_error'|trans }}"
+        data-admin-order-preparation-ready-text-value="{{ 'admin.order.preparation.scanner.ready'|trans }}"
+        data-admin-order-preparation-scanning-text-value="{{ 'admin.order.preparation.scanner.scanning'|trans }}"
+        data-admin-order-preparation-stop-text-value="{{ 'admin.order.preparation.scanner.stop'|trans }}"
+        data-admin-order-preparation-saving-text-value="{{ 'admin.order.preparation.quantity.saving'|trans }}"
+        data-admin-order-preparation-finish-text-value="{{ 'admin.order.preparation.complete.sending'|trans }}"
+        data-admin-order-preparation-confirm-text-value="{{ 'admin.order.preparation.complete.confirm'|trans }}"
+    >
+        <div class="admin-page-heading admin-page-heading--actions">
+            <div>
+                <span>{{ 'admin.order.preparation.eyebrow'|trans }}</span>
+                <h1>{{ 'admin.order.preparation.title'|trans({'%order%': order.number}) }}</h1>
+                <p>{{ 'admin.order.preparation.subtitle'|trans }}</p>
+            </div>
+            <a href="{{ path('app_admin_orders_index') }}" class="admin-secondary-button">
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                {{ 'admin.order.back_to_list'|trans }}
+            </a>
+        </div>
+
+        <div class="admin-preparation-summary">
+            <article class="admin-preparation-progress-card">
+                <div>
+                    <span>{{ 'admin.order.preparation.progress.label'|trans }}</span>
+                    <strong data-admin-order-preparation-target="progressText">{{ order.progress }}%</strong>
+                </div>
+                <div class="admin-preparation-progress" aria-hidden="true">
+                    <span data-admin-order-preparation-target="progressBar" style="width: {{ order.progress }}%"></span>
+                </div>
+                <p>
+                    <strong data-admin-order-preparation-target="preparedTotal">{{ order.prepared_quantity }}</strong>
+                    / {{ order.expected_quantity }} {{ 'admin.order.preparation.progress.products'|trans }}
+                    · <span data-admin-order-preparation-target="remainingTotal">{{ order.remaining_quantity }}</span> {{ 'admin.order.preparation.progress.remaining'|trans }}
+                </p>
+            </article>
+            <article class="admin-preparation-customer-card">
+                <span><i class="fa-solid fa-user" aria-hidden="true"></i></span>
+                <div>
+                    <small>{{ 'admin.order.customer'|trans }}</small>
+                    <strong>{{ order.customer }}</strong>
+                </div>
+            </article>
+        </div>
+
+        <div class="admin-preparation-message" data-admin-order-preparation-target="message" role="status" aria-live="polite"></div>
+
+        <div class="admin-preparation-layout">
+            <article class="admin-panel admin-preparation-scanner">
+                <div class="admin-panel__heading">
+                    <div>
+                        <span>{{ 'admin.order.preparation.scanner.eyebrow'|trans }}</span>
+                        <h2>{{ 'admin.order.preparation.scanner.title'|trans }}</h2>
+                    </div>
+                </div>
+
+                {% if order.editable %}
+                    <div class="admin-scanner-video admin-preparation-video">
+                        <video data-admin-order-preparation-target="video" playsinline muted></video>
+                        <div class="admin-scanner-video__frame"></div>
+                        <button type="button" data-admin-order-preparation-target="cameraButton" data-action="admin-order-preparation#toggleCamera">
+                            <i class="fa-solid fa-camera" aria-hidden="true"></i>
+                            {{ 'admin.order.preparation.scanner.start'|trans }}
+                        </button>
+                    </div>
+                    <p class="admin-scanner-status" data-admin-order-preparation-target="status">{{ 'admin.order.preparation.scanner.ready'|trans }}</p>
+                    <form class="admin-scanner-manual" data-action="submit->admin-order-preparation#submitManual">
+                        <label for="order-preparation-ean">{{ 'admin.order.preparation.scanner.manual_label'|trans }}</label>
+                        <div>
+                            <input id="order-preparation-ean" data-admin-order-preparation-target="manualInput" type="text" inputmode="numeric" autocomplete="off" placeholder="3760000000000">
+                            <button type="submit"><i class="fa-solid fa-barcode" aria-hidden="true"></i> {{ 'admin.order.preparation.scanner.add'|trans }}</button>
+                        </div>
+                    </form>
+                    <small class="admin-preparation-scanner__hint"><i class="fa-solid fa-keyboard" aria-hidden="true"></i> {{ 'admin.order.preparation.scanner.hardware_hint'|trans }}</small>
+                {% else %}
+                    <div class="admin-preparation-done">
+                        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                        <strong>{{ 'admin.order.preparation.already_completed'|trans }}</strong>
+                    </div>
+                {% endif %}
+            </article>
+
+            <article class="admin-panel admin-preparation-products">
+                <div class="admin-panel__heading">
+                    <div>
+                        <span>{{ 'admin.order.preparation.products.eyebrow'|trans }}</span>
+                        <h2>{{ 'admin.order.preparation.products.title'|trans }}</h2>
+                    </div>
+                </div>
+
+                <div class="admin-preparation-list">
+                    {% for item in order.items %}
+                        <div
+                            class="admin-preparation-item {{ item.complete ? 'is-complete' : '' }}"
+                            data-admin-order-preparation-target="item"
+                            data-item-id="{{ item.id }}"
+                            data-quantity-url="{{ path('app_admin_orders_preparation_quantity', {id: order.id, itemId: item.id}) }}"
+                        >
+                            <span class="admin-preparation-item__image">
+                                {% if item.image %}
+                                    <img src="{{ asset(item.image) }}" alt="{{ item.name }}">
+                                {% else %}
+                                    <i class="fa-solid fa-box" aria-hidden="true"></i>
+                                {% endif %}
+                            </span>
+                            <span class="admin-preparation-item__info">
+                                <strong>{{ item.name }}</strong>
+                                <small>{{ item.reference ?: 'admin.order.no_reference'|trans }}</small>
+                                <em><i class="fa-solid fa-barcode" aria-hidden="true"></i> {{ item.ean ?: 'admin.order.preparation.products.no_ean'|trans }}</em>
+                            </span>
+                            <span class="admin-preparation-item__state">
+                                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                                <small data-prepared-label>{{ item.prepared_quantity }} / {{ item.quantity }}</small>
+                            </span>
+                            <div class="admin-preparation-quantity">
+                                <button type="button" data-action="admin-order-preparation#adjustQuantity" data-admin-order-preparation-step-param="-1" {{ not order.editable ? 'disabled' : '' }} aria-label="{{ 'admin.order.preparation.quantity.decrease'|trans }}">−</button>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="{{ item.quantity }}"
+                                    value="{{ item.prepared_quantity }}"
+                                    data-action="change->admin-order-preparation#changeQuantity"
+                                    {{ not order.editable ? 'disabled' : '' }}
+                                    aria-label="{{ 'admin.order.preparation.quantity.label'|trans({'%product%': item.name}) }}"
+                                >
+                                <button type="button" data-action="admin-order-preparation#adjustQuantity" data-admin-order-preparation-step-param="1" {{ not order.editable ? 'disabled' : '' }} aria-label="{{ 'admin.order.preparation.quantity.increase'|trans }}">+</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </article>
+        </div>
+
+        {% if order.editable %}
+            <div class="admin-preparation-footer">
+                <div>
+                    <strong>{{ 'admin.order.preparation.complete.title'|trans }}</strong>
+                    <small>{{ 'admin.order.preparation.complete.help'|trans }}</small>
+                </div>
+                <button
+                    type="button"
+                    class="admin-action-button"
+                    data-admin-order-preparation-target="finishButton"
+                    data-action="admin-order-preparation#complete"
+                    {{ not order.complete ? 'disabled' : '' }}
+                >
+                    <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+                    {{ 'admin.order.preparation.complete.action'|trans }}
+                </button>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

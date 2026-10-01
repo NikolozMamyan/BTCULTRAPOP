@@ -76,6 +76,11 @@
                                         <i class="fa-solid fa-check" aria-hidden="true"></i>
                                         {{ 'admin.sage_order.action.sent'|trans }}
                                     </button>
+                                {% elseif order.status in ['paid', 'preparation'] %}
+                                    <a href="{{ path('app_admin_orders_preparation', {id: order.id}) }}" class="admin-action-button admin-sage-order-send">
+                                        <i class="fa-solid fa-box-open" aria-hidden="true"></i>
+                                        {{ 'admin.sage_order.action.prepare'|trans }}
+                                    </a>
                                 {% else %}
                                     <form
                                         method="post"
