@@ -4,6 +4,7 @@ namespace App\Tests\Service;
 
 use App\Entity\Order;
 use App\Entity\OrderItem;
+use App\Entity\Product;
 use App\Service\AdminSageOrderManager;
 use App\Service\OrderPreparationManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -60,5 +61,34 @@ final class OrderPreparationManagerTest extends TestCase
         $this->expectExceptionMessage('admin.order.preparation.error.product_not_expected');
 
         $manager->scan($order, '3769999999999');
+    }
+
+    public function testItUsesTheCurrentProductEanWhenTheOrderSnapshotIsEmpty(): void
+    {
+        $product = (new Product())
+            ->setName('Bonbons Naruto')
+            ->setReference('51269')
+            ->setEan('3770030630269');
+        $item = (new OrderItem())
+            ->setProduct($product)
+            ->setProductName('Bonbons Naruto')
+            ->setProductReference('51269')
+            ->setProductEan(null);
+        $order = (new Order())
+            ->setOrderNumber('UP-20261001-3')
+            ->markPaid()
+            ->addItem($item);
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager->expects(self::once())->method('flush');
+        $sageOrders = (new \ReflectionClass(AdminSageOrderManager::class))->newInstanceWithoutConstructor();
+        \assert($sageOrders instanceof AdminSageOrderManager);
+        $manager = new OrderPreparationManager($entityManager, $sageOrders);
+
+        $view = $manager->view($order);
+        self::assertSame('3770030630269', $view['items'][0]['ean']);
+
+        $result = $manager->scan($order, '3770030630269');
+        self::assertSame(1, $result['item']['prepared_quantity']);
+        self::assertTrue($result['preparation']['complete']);
     }
 }

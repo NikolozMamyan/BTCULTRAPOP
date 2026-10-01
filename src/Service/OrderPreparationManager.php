@@ -61,7 +61,7 @@ final readonly class OrderPreparationManager
 
         $matchingItems = array_values(array_filter(
             $order->getItems()->toArray(),
-            static fn (OrderItem $item): bool => $ean === trim((string) $item->getProductEan()),
+            fn (OrderItem $item): bool => $ean === $this->itemEan($item),
         ));
 
         if ([] === $matchingItems) {
@@ -160,12 +160,23 @@ final readonly class OrderPreparationManager
             'id' => $item->getId(),
             'name' => $item->getProductName(),
             'reference' => $item->getProductReference(),
-            'ean' => $item->getProductEan(),
+            'ean' => $this->itemEan($item),
             'image' => $item->getProductImage(),
             'quantity' => $item->getQuantity(),
             'prepared_quantity' => $item->getPreparedQuantity(),
             'remaining_quantity' => max(0, $item->getQuantity() - $item->getPreparedQuantity()),
             'complete' => $item->getPreparedQuantity() === $item->getQuantity(),
         ];
+    }
+
+    private function itemEan(OrderItem $item): ?string
+    {
+        $ean = trim((string) $item->getProductEan());
+
+        if ('' === $ean) {
+            $ean = trim((string) $item->getProduct()?->getEan());
+        }
+
+        return '' === $ean ? null : $ean;
     }
 }
