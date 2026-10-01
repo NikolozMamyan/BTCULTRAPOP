@@ -17699,3 +17699,46 @@ body.is-page-loading {
         padding-inline: .45rem;
     }
 }
+
+.front-admin-shortcut {
+    position: fixed;
+    z-index: 70;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    min-height: 48px;
+    padding: .75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, .35);
+    border-radius: 999px;
+    background: #203263;
+    box-shadow: 0 14px 32px rgba(15, 23, 48, .24);
+    color: #fff;
+    font-size: .76rem;
+    font-weight: 900;
+    letter-spacing: .01em;
+    transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease;
+}
+
+.front-admin-shortcut:hover {
+    background: var(--primary-color);
+    box-shadow: 0 18px 38px rgba(232, 33, 24, .26);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.front-admin-shortcut:focus-visible {
+    outline: 3px solid rgba(255, 204, 7, .7);
+    outline-offset: 3px;
+}
+
+@media (max-width: 768px) {
+    .front-admin-shortcut {
+        bottom: calc(100px + env(safe-area-inset-bottom));
+        left: 12px;
+        min-height: 44px;
+        padding: .65rem .85rem;
+        font-size: .68rem;
+    }
+}

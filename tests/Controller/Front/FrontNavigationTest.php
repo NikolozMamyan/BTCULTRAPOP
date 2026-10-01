@@ -39,6 +39,7 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorExists('.mobile-app-nav');
         self::assertSelectorExists('.header-favorites-link[href="/favoris"] [data-favorites-target="count"]');
         self::assertSelectorExists('#toast[role="status"][aria-live="polite"] #toast-action[hidden]');
+        self::assertSelectorNotExists('.front-admin-shortcut');
         self::assertSelectorExists('link[rel="stylesheet"][href*="styles/app"]');
     }
 

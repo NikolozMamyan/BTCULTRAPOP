@@ -106,6 +106,10 @@ final class AdminOrderControllerTest extends WebTestCase
 
             self::assertResponseRedirects('/admin/dashboard');
 
+            $client->request('GET', '/');
+            self::assertResponseIsSuccessful();
+            self::assertSelectorExists('.front-admin-shortcut[href="/admin/dashboard"]');
+
             $client->request('GET', '/admin/orders');
             self::assertResponseIsSuccessful();
             self::assertSelectorTextContains('h1', 'Commandes');
