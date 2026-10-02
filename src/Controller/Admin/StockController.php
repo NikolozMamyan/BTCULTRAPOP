@@ -5,8 +5,10 @@ namespace App\Controller\Admin;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Enum\StockSource;
+use App\Exception\SageApiException;
 use App\Service\AdminStockManager;
 use App\Service\AdminStockProvider;
+use App\Service\AdminStockSynchronizer;
 use App\Service\StockSettingsManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -75,6 +77,35 @@ final class StockController extends AbstractController
         return $this->redirectToRoute('app_admin_stock_index', [
             'source' => $source->value,
         ]);
+    }
+
+    #[Route('/synchronize', name: 'app_admin_stock_synchronize', methods: ['POST'])]
+    public function synchronize(
+        Request $request,
+        AdminStockSynchronizer $stock,
+        TranslatorInterface $translator,
+    ): RedirectResponse {
+        if (!$this->resolveAdminUser() instanceof User) {
+            return $this->redirectToRoute('app_front_profil');
+        }
+
+        if (!$this->isCsrfTokenValid('admin_stock_synchronize', $request->request->getString('_csrf_token'))) {
+            $this->addFlash('error', 'admin.stock.sync.error.invalid_csrf');
+
+            return $this->redirectToRoute('app_admin_stock_index', ['source' => StockSource::BUREAU->value]);
+        }
+
+        try {
+            $result = $stock->synchronizeBureau();
+            $this->addFlash('success', $translator->trans('admin.stock.sync.success', [
+                '%updated%' => $result['updated'],
+                '%missing%' => $result['missing'],
+            ]));
+        } catch (SageApiException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('app_admin_stock_index', ['source' => StockSource::BUREAU->value]);
     }
 
     #[Route('/products/{id}', name: 'app_admin_stock_product_update', requirements: ['id' => '\d+'], methods: ['POST', 'PATCH'])]

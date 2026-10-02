@@ -11,6 +11,41 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 final class SageApiClientTest extends TestCase
 {
+    public function testItReadsAvailableStockForDepot(): void
+    {
+        $stockRequestOptions = [];
+        $httpClient = new MockHttpClient(
+            function (string $method, string $url, array $options) use (&$stockRequestOptions): MockResponse {
+                if (str_ends_with($url, '/Auth/login')) {
+                    return new MockResponse('"token-test"');
+                }
+
+                $stockRequestOptions = $options;
+
+                return new MockResponse('[{"reference":"28545","stockDispo":102}]', [
+                    'response_headers' => ['content-type: application/json'],
+                ]);
+            },
+            'https://sage.example.test',
+        );
+        $client = new SageApiClient(
+            $httpClient,
+            'https://sage.example.test',
+            'user',
+            'pass',
+            new NullLogger(),
+        );
+
+        $stock = $client->stock('Salle Echantillon');
+
+        self::assertSame([['reference' => '28545', 'stockDispo' => 102]], $stock);
+        self::assertSame('Salle Echantillon', $stockRequestOptions['query']['depot']);
+        self::assertStringContainsString(
+            'Bearer token-test',
+            json_encode($stockRequestOptions, \JSON_THROW_ON_ERROR),
+        );
+    }
+
     public function testItSendsOrderWithBearerAuthorizationHeader(): void
     {
         $requests = [];

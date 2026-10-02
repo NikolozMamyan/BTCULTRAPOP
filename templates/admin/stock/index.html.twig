@@ -40,14 +40,18 @@
                         {% endfor %}
                     </select>
                 </form>
-                <button
-                    type="button"
-                    class="admin-action-button admin-stock-sync"
-                    title="{{ 'admin.stock.sync.coming_soon'|trans }}"
-                >
-                    <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
-                    {{ 'admin.stock.sync.label'|trans }}
-                </button>
+                <form method="post" action="{{ path('app_admin_stock_synchronize') }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_stock_synchronize') }}">
+                    <button
+                        type="submit"
+                        class="admin-action-button admin-stock-sync"
+                        title="{{ (selected_stock_source == 'bureau' ? 'admin.stock.sync.title' : 'admin.stock.sync.bureau_only')|trans }}"
+                        {{ selected_stock_source != 'bureau' ? 'disabled' : '' }}
+                    >
+                        <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+                        {{ 'admin.stock.sync.label'|trans }}
+                    </button>
+                </form>
             </div>
         </div>
 

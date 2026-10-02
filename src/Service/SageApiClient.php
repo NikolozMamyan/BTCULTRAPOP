@@ -44,6 +44,39 @@ final class SageApiClient
     }
 
     /**
+     * @return list<array<string, mixed>>
+     */
+    public function stock(string $depot, ?string $reference = null): array
+    {
+        $query = ['depot' => $depot];
+
+        if (null !== $reference && '' !== trim($reference)) {
+            $query['reference'] = trim($reference);
+        }
+
+        $response = $this->authorizedRequest('GET', '/Stock', [
+            'query' => $query,
+        ]);
+        $body = $this->decodeResponse($response);
+
+        if (!is_array($body)) {
+            throw new SageApiException('admin.stock.sync.error.invalid_response');
+        }
+
+        $stock = [];
+
+        foreach ($body as $row) {
+            if (!is_array($row)) {
+                throw new SageApiException('admin.stock.sync.error.invalid_response');
+            }
+
+            $stock[] = $row;
+        }
+
+        return $stock;
+    }
+
+    /**
      * @param array<string, mixed> $options
      */
     private function authorizedRequest(string $method, string $path, array $options): ResponseInterface

@@ -67,7 +67,7 @@ final class AdminStockControllerTest extends WebTestCase
             self::assertResponseIsSuccessful();
             self::assertSelectorTextSame('h1', 'Stock');
             self::assertSelectorExists('.admin-sidebar__link.is-active[href="/admin/stock"]');
-            self::assertSelectorExists('.admin-stock-sync');
+            self::assertSelectorExists('form[action="/admin/stock/synchronize"][method="post"] .admin-stock-sync:not([disabled])');
             self::assertSelectorExists(sprintf('[data-stock-product-id="%d"]', $product->getId()));
             $csrfToken = $crawler->filter('[data-controller="admin-stock"]')->attr('data-admin-stock-token-value');
 
