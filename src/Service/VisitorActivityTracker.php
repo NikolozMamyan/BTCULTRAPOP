@@ -75,6 +75,7 @@ final readonly class VisitorActivityTracker
                     cart_id,
                     visitor_type,
                     ip_hash,
+                    ip_address,
                     user_agent_hash,
                     device_name,
                     current_path,
@@ -87,12 +88,13 @@ final readonly class VisitorActivityTracker
                     human_score,
                     suspected_bot,
                     bot_reason
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
                     user_id = VALUES(user_id),
                     cart_id = COALESCE(VALUES(cart_id), cart_id),
                     visitor_type = VALUES(visitor_type),
                     ip_hash = VALUES(ip_hash),
+                    ip_address = VALUES(ip_address),
                     user_agent_hash = VALUES(user_agent_hash),
                     device_name = VALUES(device_name),
                     current_path = VALUES(current_path),
@@ -110,6 +112,7 @@ final readonly class VisitorActivityTracker
                     $cartId,
                     $visitorType,
                     $this->hashNullable($request->getClientIp()),
+                    null === $request->getClientIp() ? null : VisitorIpManager::normalize($request->getClientIp()),
                     $this->hashNullable($request->headers->get('User-Agent')),
                     $this->deviceName($request->headers->get('User-Agent', '')),
                     $this->truncate($request->getRequestUri(), 255),

@@ -1,0 +1,22 @@
+framework:
+    rate_limiter:
+        bot_burst:
+            policy: sliding_window
+            limit: 20
+            interval: '2 seconds'
+        bot_sustained:
+            policy: sliding_window
+            limit: 180
+            interval: '1 minute'
+        bot_verified_burst:
+            policy: sliding_window
+            limit: 60
+            interval: '2 seconds'
+        bot_verified_sustained:
+            policy: sliding_window
+            limit: 600
+            interval: '1 minute'
+        bot_challenge:
+            policy: sliding_window
+            limit: 10
+            interval: '1 minute'

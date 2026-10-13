@@ -1,0 +1,74 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.viewer.history.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-customers admin-viewer">
+        <div class="admin-page-heading">
+            <div>
+                <span>{{ 'admin.customer.tabs.viewer'|trans }}</span>
+                <h1>{{ 'admin.viewer.history.title'|trans }}</h1>
+                <p>{{ 'admin.viewer.history.subtitle'|trans }}</p>
+            </div>
+        </div>
+        {% include 'admin/customers/_tabs.html.twig' %}
+        {% include 'admin/customers/_viewer_tabs.html.twig' %}
+
+        <article class="admin-panel admin-customers-panel">
+            <form class="admin-ip-filter" method="get" action="{{ path('app_admin_customers_viewer_history') }}">
+                <label for="history-ip">{{ 'admin.viewer.ip.filter'|trans }}</label>
+                <input id="history-ip" type="text" name="ip" value="{{ ip_filter }}" maxlength="45" placeholder="192.0.2.1 / 2001:db8::1">
+                <button class="admin-secondary-button" type="submit">{{ 'admin.viewer.ip.search'|trans }}</button>
+                <a href="{{ path('app_admin_customers_viewer_history') }}">{{ 'admin.viewer.ip.reset'|trans }}</a>
+            </form>
+
+            {% if ip_filter %}
+                <div class="admin-ip-summary">
+                    <strong class="admin-viewer-ip">{{ ip_filter }}</strong>
+                    <span class="admin-order-badge {{ selected_blocked ? 'admin-order-badge--cancelled' : 'admin-order-badge--paid' }}">{{ (selected_blocked ? 'admin.viewer.ip.blocked' : 'admin.viewer.ip.allowed')|trans }}</span>
+                    {% include 'admin/customers/_visitor_ip_actions.html.twig' with {ip: ip_filter, blocked: selected_blocked, view: 'history', show_history: false} only %}
+                </div>
+            {% endif %}
+
+            <p class="admin-viewer-refresh-note">{{ 'admin.viewer.history.sampling_note'|trans }}</p>
+
+            {% if events %}
+                <div class="admin-ip-table-wrap">
+                    <table class="admin-ip-table">
+                        <thead>
+                            <tr>
+                                <th>{{ 'admin.viewer.history.date'|trans }}</th>
+                                <th>{{ 'admin.viewer.ip.address'|trans }}</th>
+                                <th>{{ 'admin.viewer.history.event'|trans }}</th>
+                                <th>{{ 'admin.viewer.history.request'|trans }}</th>
+                                <th>{{ 'admin.viewer.history.status'|trans }}</th>
+                                <th>{{ 'admin.viewer.history.admin'|trans }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in events %}
+                                <tr>
+                                    <td>{{ event.occurred_at|date('d/m/Y H:i:s', 'Europe/Paris') }}</td>
+                                    <td>
+                                        <a class="admin-viewer-ip" href="{{ path('app_admin_customers_viewer_history', {ip: event.ip_address}) }}">{{ event.ip_address }}</a>
+                                        {% if event.blocked %}<small>{{ 'admin.viewer.ip.blocked'|trans }}</small>{% endif %}
+                                    </td>
+                                    <td>{{ ('admin.viewer.event.' ~ event.event_type)|trans }}</td>
+                                    <td><strong>{{ event.request_method }}</strong> {{ event.request_path ?: '—' }}</td>
+                                    <td>{{ event.http_status ?: '—' }}</td>
+                                    <td>{{ event.actor ?: '—' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="admin-empty-state"><i class="fa-solid fa-clock-rotate-left"></i><p>{{ 'admin.viewer.history.empty'|trans }}</p></div>
+            {% endif %}
+
+            {% if next_before %}
+                <a class="admin-secondary-button admin-ip-next" href="{{ path('app_admin_customers_viewer_history', {ip: ip_filter, before: next_before}) }}">{{ 'admin.viewer.history.older'|trans }}</a>
+            {% endif %}
+        </article>
+    </section>
+{% endblock %}

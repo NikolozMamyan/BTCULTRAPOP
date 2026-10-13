@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noindex, nofollow">
+        <meta name="turbo-visit-control" content="reload">
+        <title>{{ 'bot_protection.title'|trans }} | ULTRAPOP</title>
+        <link rel="stylesheet" href="{{ asset('styles/bot-challenge.css') }}">
+        <link rel="icon" href="{{ asset('img/logo/favicon.ico') }}">
+    </head>
+    <body>
+        <main class="verification-card">
+            <img class="verification-logo" src="{{ asset('img/logo/logotype.svg') }}" alt="ULTRAPOP">
+            <h1>{{ 'bot_protection.title'|trans }}</h1>
+            {% if retry_after > 0 %}
+                <p role="alert">{{ 'bot_protection.too_many_requests'|trans({'%seconds%': retry_after}) }}</p>
+            {% else %}
+                <p>{{ 'bot_protection.description'|trans }}</p>
+                {% if error %}<p class="verification-error" role="alert">{{ error|trans }}</p>{% endif %}
+                <form method="post" action="{{ path('app_bot_challenge') }}" data-turbo="false">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('bot_challenge') }}">
+                    <input type="hidden" name="return_to" value="{{ return_to }}">
+                    <img class="verification-code" src="{{ image }}" alt="{{ 'bot_protection.image_alt'|trans }}" width="240" height="90">
+                    <label for="verification-answer">{{ 'bot_protection.answer_label'|trans }}</label>
+                    <input id="verification-answer" name="answer" type="text" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="off" required autofocus>
+                    <button type="submit">{{ 'bot_protection.submit'|trans }}</button>
+                </form>
+            {% endif %}
+            <a href="{{ path('app_bot_challenge', {return_to: return_to}) }}">{{ (retry_after > 0 ? 'bot_protection.retry' : 'bot_protection.refresh')|trans }}</a>
+            <p class="verification-note">{{ 'bot_protection.note'|trans }}</p>
+        </main>
+    </body>
+</html>

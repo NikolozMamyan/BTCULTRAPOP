@@ -13,7 +13,7 @@
         <i class="fa-solid fa-cart-shopping"></i>
         {{ 'admin.customer.tabs.carts'|trans }}
     </a>
-    <a href="{{ path('app_admin_customers_viewer') }}" class="{{ current_route == 'app_admin_customers_viewer' ? 'is-active' : '' }}">
+    <a href="{{ path('app_admin_customers_viewer') }}" class="{{ current_route starts with 'app_admin_customers_viewer' ? 'is-active' : '' }}">
         <i class="fa-solid fa-signal"></i>
         {{ 'admin.customer.tabs.viewer'|trans }}
     </a>

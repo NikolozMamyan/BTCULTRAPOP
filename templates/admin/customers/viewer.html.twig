@@ -17,6 +17,7 @@
         </div>
 
         {% include 'admin/customers/_tabs.html.twig' %}
+        {% include 'admin/customers/_viewer_tabs.html.twig' %}
 
         <nav class="admin-crm-filters" aria-label="{{ 'admin.viewer.filters.label'|trans }}">
             {% for value, label in {
@@ -82,6 +83,15 @@
                                         {{ 'admin.viewer.table.guest_session'|trans({'%session%': visitor.session}) }}
                                     {% endif %}
                                 </small>
+                                {% if visitor.ip_address %}
+                                    <a class="admin-viewer-ip" href="{{ path('app_admin_customers_viewer_history', {ip: visitor.ip_address}) }}">{{ visitor.ip_address }}</a>
+                                    {% if visitor.ip_blocked %}
+                                        <em class="admin-order-badge admin-order-badge--cancelled">{{ 'admin.viewer.ip.blocked'|trans }}</em>
+                                    {% endif %}
+                                    {% include 'admin/customers/_visitor_ip_actions.html.twig' with {ip: visitor.ip_address, blocked: visitor.ip_blocked, view: 'live', filter: filter} only %}
+                                {% else %}
+                                    <small>{{ 'admin.viewer.ip.unavailable'|trans }}</small>
+                                {% endif %}
                                 {% if visitor.suspected_bot %}
                                     <em class="admin-order-badge admin-order-badge--cancelled">
                                         {{ 'admin.viewer.table.suspected_bot'|trans }}

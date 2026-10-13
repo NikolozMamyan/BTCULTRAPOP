@@ -2257,6 +2257,26 @@ body {
     grid-template-columns: minmax(185px, 1fr) minmax(210px, 1.25fr) minmax(120px, .68fr) minmax(145px, .78fr) minmax(120px, .68fr) minmax(90px, .5fr);
 }
 
+.admin-viewer-ip { overflow-wrap: anywhere; font-family: monospace; font-size: .8rem; color: var(--text-dark); }
+.admin-viewer-ip-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .35rem; }
+.admin-viewer-ip-actions form { margin: 0; }
+.admin-ip-action { display: inline-flex; align-items: center; gap: .35rem; padding: .4rem .55rem; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; color: var(--text-dark); font-size: .7rem; font-weight: 800; cursor: pointer; }
+.admin-ip-action--block { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+.admin-ip-action--allow { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.admin-ip-filter { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+.admin-ip-filter label { color: var(--text-dark); font-size: .8rem; font-weight: 800; }
+.admin-ip-filter input { flex: 1 1 220px; min-width: 0; padding: .7rem; border: 1px solid var(--border-color); border-radius: 10px; font-family: monospace; }
+.admin-ip-filter > a { font-size: .8rem; }
+.admin-ip-summary { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin: 1rem 0; }
+.admin-ip-summary .admin-viewer-ip-actions { margin-top: 0; }
+.admin-ip-table-wrap { overflow-x: auto; }
+.admin-ip-table { width: 100%; min-width: 720px; border-collapse: collapse; font-size: .8rem; }
+.admin-ip-table th, .admin-ip-table td { padding: .85rem; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: top; }
+.admin-ip-table th { background: var(--bg-light); color: var(--text-dark); }
+.admin-ip-table td { max-width: 300px; overflow-wrap: anywhere; }
+.admin-ip-table small { display: block; color: #b91c1c; margin-top: .25rem; }
+.admin-ip-next { margin-top: 1rem; }
+
 .admin-crm-products,
 .admin-crm-date,
 .admin-crm-actions,

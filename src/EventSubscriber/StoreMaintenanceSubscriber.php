@@ -18,6 +18,7 @@ use Twig\Environment;
 final readonly class StoreMaintenanceSubscriber implements EventSubscriberInterface
 {
     private const PUBLIC_ROUTES = [
+        'app_bot_challenge',
         'app_auth_forgot_password',
         'app_auth_forgot_password_submit',
         'app_auth_login',

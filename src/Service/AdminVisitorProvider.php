@@ -8,6 +8,7 @@ final readonly class AdminVisitorProvider
 {
     private const ONLINE_WINDOW = '-5 minutes';
     private const MAX_ROWS = 200;
+    private const HISTORY_PAGE_SIZE = 50;
     private const STORAGE_TIMEZONE = 'UTC';
     private const DISPLAY_TIMEZONE = 'Europe/Paris';
 
@@ -70,6 +71,94 @@ final readonly class AdminVisitorProvider
         ];
     }
 
+    public function history(string $ip = '', int $before = 0): array
+    {
+        $ip = '' === trim($ip) ? '' : VisitorIpManager::normalize($ip);
+        $threshold = new \DateTimeImmutable('-' . VisitorEventRecorder::RETENTION_DAYS . ' days', $this->storageTimezone());
+        $where = ['e.occurred_at >= ?'];
+        $parameters = [$threshold->format('Y-m-d H:i:s')];
+
+        if ('' !== $ip) {
+            $where[] = 'e.ip_address = ?';
+            $parameters[] = $ip;
+        }
+
+        if ($before > 0) {
+            $where[] = 'e.id < ?';
+            $parameters[] = $before;
+        }
+
+        $events = $this->connection->fetchAllAssociative(
+            'SELECT e.*, b.ip_address AS blocked_ip, u.first_name AS actor_first_name, u.last_name AS actor_last_name, u.email AS actor_email
+             FROM site_visitor_event e
+             LEFT JOIN visitor_ip_block b ON b.ip_address = e.ip_address
+             LEFT JOIN app_user u ON u.id = e.actor_id
+             WHERE ' . implode(' AND ', $where) . '
+             ORDER BY e.id DESC LIMIT ' . (self::HISTORY_PAGE_SIZE + 1),
+            $parameters,
+        );
+        $hasMore = count($events) > self::HISTORY_PAGE_SIZE;
+
+        if ($hasMore) {
+            array_pop($events);
+        }
+
+        foreach ($events as &$event) {
+            $event['occurred_at'] = $this->dateFromDatabase($event['occurred_at']);
+            $event['blocked'] = null !== $event['blocked_ip'];
+            $event['actor'] = trim(($event['actor_first_name'] ?? '') . ' ' . ($event['actor_last_name'] ?? '')) ?: ($event['actor_email'] ?? '');
+        }
+        unset($event);
+
+        return [
+            'events' => $events,
+            'ip_filter' => $ip,
+            'selected_blocked' => '' !== $ip && false !== $this->connection->fetchOne('SELECT id FROM visitor_ip_block WHERE ip_address = ?', [$ip]),
+            'next_before' => $hasMore ? (int) $events[array_key_last($events)]['id'] : null,
+        ];
+    }
+
+    public function blocked(string $ip = '', int $before = 0): array
+    {
+        $ip = '' === trim($ip) ? '' : VisitorIpManager::normalize($ip);
+        $where = ['1 = 1'];
+        $parameters = [];
+
+        if ('' !== $ip) {
+            $where[] = 'b.ip_address = ?';
+            $parameters[] = $ip;
+        }
+
+        if ($before > 0) {
+            $where[] = 'b.id < ?';
+            $parameters[] = $before;
+        }
+
+        $blocks = $this->connection->fetchAllAssociative(
+            'SELECT b.*, u.email AS admin_email
+             FROM visitor_ip_block b LEFT JOIN app_user u ON u.id = b.blocked_by_id
+             WHERE ' . implode(' AND ', $where) . '
+             ORDER BY b.id DESC LIMIT ' . (self::HISTORY_PAGE_SIZE + 1),
+            $parameters,
+        );
+        $hasMore = count($blocks) > self::HISTORY_PAGE_SIZE;
+
+        if ($hasMore) {
+            array_pop($blocks);
+        }
+
+        foreach ($blocks as &$block) {
+            $block['blocked_at'] = $this->dateFromDatabase($block['blocked_at']);
+        }
+        unset($block);
+
+        return [
+            'blocks' => $blocks,
+            'ip_filter' => $ip,
+            'next_before' => $hasMore ? (int) $blocks[array_key_last($blocks)]['id'] : null,
+        ];
+    }
+
     /**
      * @return list<array<string, mixed>>
      */
@@ -80,6 +169,8 @@ final readonly class AdminVisitorProvider
                 sv.id,
                 sv.visitor_token,
                 sv.visitor_type,
+                sv.ip_address,
+                b.ip_address AS blocked_ip,
                 sv.device_name,
                 sv.current_path,
                 sv.current_route,
@@ -103,11 +194,12 @@ final readonly class AdminVisitorProvider
                 COALESCE(SUM(ci.quantity), 0) AS cart_quantity,
                 COALESCE(SUM(ci.quantity * ci.unit_price_tax_included_cents), 0) AS cart_total_cents
             FROM site_visitor sv
+            LEFT JOIN visitor_ip_block b ON b.ip_address = sv.ip_address
             LEFT JOIN app_user u ON u.id = sv.user_id
             LEFT JOIN cart c ON c.id = sv.cart_id
             LEFT JOIN cart_item ci ON ci.cart_id = c.id
             WHERE sv.last_seen_at >= ?
-            GROUP BY sv.id, sv.visitor_token, sv.visitor_type, sv.device_name, sv.current_path, sv.current_route, sv.referer, sv.first_seen_at, sv.last_seen_at, sv.hit_count, sv.human_score, sv.suspected_bot, sv.bot_reason, sv.popup_promo_code, sv.popup_promo_version, sv.popup_promo_viewed_at, sv.popup_promo_copied_at, sv.user_id, u.email, u.first_name, u.last_name, c.id, c.status
+            GROUP BY sv.id, sv.visitor_token, sv.visitor_type, sv.ip_address, b.ip_address, sv.device_name, sv.current_path, sv.current_route, sv.referer, sv.first_seen_at, sv.last_seen_at, sv.hit_count, sv.human_score, sv.suspected_bot, sv.bot_reason, sv.popup_promo_code, sv.popup_promo_version, sv.popup_promo_viewed_at, sv.popup_promo_copied_at, sv.user_id, u.email, u.first_name, u.last_name, c.id, c.status
             ORDER BY sv.last_seen_at DESC, sv.id DESC
             LIMIT ' . self::MAX_ROWS,
             [$threshold->format('Y-m-d H:i:s')],
@@ -126,6 +218,8 @@ final readonly class AdminVisitorProvider
         return [
             'id' => (int) $row['id'],
             'type' => (string) $row['visitor_type'],
+            'ip_address' => $row['ip_address'],
+            'ip_blocked' => null !== $row['blocked_ip'],
             'label' => $this->label($row),
             'email' => trim((string) ($row['email'] ?? '')),
             'session' => $this->shortToken($row['visitor_token']),

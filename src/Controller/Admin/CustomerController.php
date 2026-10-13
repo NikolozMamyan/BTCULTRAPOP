@@ -14,6 +14,7 @@ use App\Service\AdminEmailVariableRenderer;
 use App\Service\AdminEmailingManager;
 use App\Service\AdminVisitorProvider;
 use App\Service\AssetUrlResolver;
+use App\Service\VisitorIpManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -232,6 +233,87 @@ final class CustomerController extends AbstractController
             'admin_user' => $adminUser,
             ...$visitors->online($request->query->getString('filter', 'humans')),
         ]);
+    }
+
+    #[Route('/viewer/historique', name: 'app_admin_customers_viewer_history', methods: ['GET'])]
+    public function visitorHistory(Request $request, AdminVisitorProvider $visitors): Response
+    {
+        $adminUser = $this->resolveAdminUser();
+
+        if (!$adminUser instanceof User) {
+            return $this->redirectToRoute('app_front_profil');
+        }
+
+        try {
+            $history = $visitors->history($request->query->getString('ip'), max(0, $request->query->getInt('before')));
+        } catch (\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+
+            return $this->redirectToRoute('app_admin_customers_viewer_history');
+        }
+
+        return $this->render('admin/customers/visitor_history.html.twig', [
+            'admin_user' => $adminUser,
+            ...$history,
+        ]);
+    }
+
+    #[Route('/viewer/ip-bloquees', name: 'app_admin_customers_viewer_blocked', methods: ['GET'])]
+    public function blockedVisitorIps(Request $request, AdminVisitorProvider $visitors): Response
+    {
+        $adminUser = $this->resolveAdminUser();
+
+        if (!$adminUser instanceof User) {
+            return $this->redirectToRoute('app_front_profil');
+        }
+
+        try {
+            $blocks = $visitors->blocked($request->query->getString('ip'), max(0, $request->query->getInt('before')));
+        } catch (\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+
+            return $this->redirectToRoute('app_admin_customers_viewer_blocked');
+        }
+
+        return $this->render('admin/customers/visitor_blocked.html.twig', [
+            'admin_user' => $adminUser,
+            ...$blocks,
+        ]);
+    }
+
+    #[Route('/viewer/blocage-ip', name: 'app_admin_customers_viewer_ip_block', methods: ['POST'])]
+    public function changeVisitorIpBlock(Request $request, VisitorIpManager $ips): Response
+    {
+        $adminUser = $this->resolveAdminUser();
+
+        if (!$adminUser instanceof User) {
+            return $this->redirectToRoute('app_front_profil');
+        }
+
+        $ip = trim($request->request->getString('ip'));
+        $view = $request->request->getString('view', 'live');
+        $route = match ($view) {
+            'history' => 'app_admin_customers_viewer_history',
+            'blocked' => 'app_admin_customers_viewer_blocked',
+            default => 'app_admin_customers_viewer',
+        };
+        $parameters = 'history' === $view ? ['ip' => $ip] : ('live' === $view ? ['filter' => $request->request->getString('filter', 'humans')] : []);
+
+        if (!$this->isCsrfTokenValid('admin_visitor_ip_' . $ip, $request->request->getString('_csrf_token'))) {
+            $this->addFlash('error', 'admin.viewer.ip.invalid_csrf');
+
+            return $this->redirectToRoute($route, $parameters);
+        }
+
+        try {
+            $action = $request->request->getString('action');
+            $ips->change($ip, $action, $adminUser, $request->getClientIp());
+            $this->addFlash('success', 'block' === $action ? 'admin.viewer.ip.blocked_success' : 'admin.viewer.ip.unblocked_success');
+        } catch (\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute($route, $parameters);
     }
 
     #[Route('/{id}/edit', name: 'app_admin_customers_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]

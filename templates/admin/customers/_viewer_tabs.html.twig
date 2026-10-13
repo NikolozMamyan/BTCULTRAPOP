@@ -1,0 +1,10 @@
+{% set viewer_route = app.request.attributes.get('_route') %}
+<nav class="admin-crm-filters" aria-label="{{ 'admin.viewer.tabs.label'|trans }}">
+    {% for route, label in {
+        app_admin_customers_viewer: 'admin.viewer.tabs.live',
+        app_admin_customers_viewer_history: 'admin.viewer.tabs.history',
+        app_admin_customers_viewer_blocked: 'admin.viewer.tabs.blocked'
+    } %}
+        <a href="{{ path(route) }}" class="{{ viewer_route == route ? 'is-active' : '' }}">{{ label|trans }}</a>
+    {% endfor %}
+</nav>

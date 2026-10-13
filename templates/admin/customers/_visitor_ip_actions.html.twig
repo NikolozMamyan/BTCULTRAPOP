@@ -1,0 +1,17 @@
+<div class="admin-viewer-ip-actions">
+    {% if show_history|default(true) %}
+        <a class="admin-ip-action" href="{{ path('app_admin_customers_viewer_history', {ip: ip}) }}">
+            <i class="fa-solid fa-clock-rotate-left"></i> {{ 'admin.viewer.tabs.history'|trans }}
+        </a>
+    {% endif %}
+    <form method="post" action="{{ path('app_admin_customers_viewer_ip_block') }}" data-turbo="false">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin_visitor_ip_' ~ ip) }}">
+        <input type="hidden" name="ip" value="{{ ip }}">
+        <input type="hidden" name="view" value="{{ view }}">
+        <input type="hidden" name="filter" value="{{ filter|default('humans') }}">
+        <button class="admin-ip-action {{ blocked ? 'admin-ip-action--allow' : 'admin-ip-action--block' }}" type="submit" name="action" value="{{ blocked ? 'unblock' : 'block' }}">
+            <i class="fa-solid {{ blocked ? 'fa-unlock' : 'fa-ban' }}"></i>
+            {{ (blocked ? 'admin.viewer.ip.unblock' : 'admin.viewer.ip.block')|trans }}
+        </button>
+    </form>
+</div>

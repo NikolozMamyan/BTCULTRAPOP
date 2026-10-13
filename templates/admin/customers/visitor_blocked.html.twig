@@ -1,0 +1,55 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block admin_title %}{{ 'admin.viewer.blocked.title'|trans }}{% endblock %}
+
+{% block admin_content %}
+    <section class="admin-customers admin-viewer">
+        <div class="admin-page-heading">
+            <div>
+                <span>{{ 'admin.customer.tabs.viewer'|trans }}</span>
+                <h1>{{ 'admin.viewer.blocked.title'|trans }}</h1>
+                <p>{{ 'admin.viewer.blocked.subtitle'|trans }}</p>
+            </div>
+        </div>
+        {% include 'admin/customers/_tabs.html.twig' %}
+        {% include 'admin/customers/_viewer_tabs.html.twig' %}
+
+        <article class="admin-panel admin-customers-panel">
+            <form class="admin-ip-filter" method="get" action="{{ path('app_admin_customers_viewer_blocked') }}">
+                <label for="blocked-ip">{{ 'admin.viewer.ip.filter'|trans }}</label>
+                <input id="blocked-ip" type="text" name="ip" value="{{ ip_filter }}" maxlength="45" placeholder="192.0.2.1 / 2001:db8::1">
+                <button class="admin-secondary-button" type="submit">{{ 'admin.viewer.ip.search'|trans }}</button>
+                <a href="{{ path('app_admin_customers_viewer_blocked') }}">{{ 'admin.viewer.ip.reset'|trans }}</a>
+            </form>
+
+            {% if blocks %}
+                <div class="admin-ip-table-wrap">
+                    <table class="admin-ip-table">
+                        <thead><tr>
+                            <th>{{ 'admin.viewer.ip.address'|trans }}</th>
+                            <th>{{ 'admin.viewer.blocked.date'|trans }}</th>
+                            <th>{{ 'admin.viewer.history.admin'|trans }}</th>
+                            <th>{{ 'admin.viewer.blocked.actions'|trans }}</th>
+                        </tr></thead>
+                        <tbody>
+                            {% for block in blocks %}
+                                <tr>
+                                    <td><a class="admin-viewer-ip" href="{{ path('app_admin_customers_viewer_history', {ip: block.ip_address}) }}">{{ block.ip_address }}</a></td>
+                                    <td>{{ block.blocked_at|date('d/m/Y H:i:s', 'Europe/Paris') }}</td>
+                                    <td>{{ block.admin_email ?: '—' }}</td>
+                                    <td>{% include 'admin/customers/_visitor_ip_actions.html.twig' with {ip: block.ip_address, blocked: true, view: 'blocked'} only %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="admin-empty-state"><i class="fa-solid fa-shield-halved"></i><p>{{ 'admin.viewer.blocked.empty'|trans }}</p></div>
+            {% endif %}
+
+            {% if next_before %}
+                <a class="admin-secondary-button admin-ip-next" href="{{ path('app_admin_customers_viewer_blocked', {ip: ip_filter, before: next_before}) }}">{{ 'admin.viewer.history.older'|trans }}</a>
+            {% endif %}
+        </article>
+    </section>
+{% endblock %}
