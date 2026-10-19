@@ -1,0 +1,19 @@
+{
+  "tool": "Built-in image_gen",
+  "date": "2026-10-19",
+  "transparent_background": false,
+  "images": [
+    {
+      "path": "assets/img/blog/one-piece-selection-2026.webp",
+      "prompt": "Create an ORIGINAL editorial illustration for a French manga lifestyle blog article about composing a pirate-themed manga gift selection. Landscape 16:9, highest native resolution, full bleed. A beautifully lit wooden reading table aboard an original sailing ship, an open illustrated adventure manga with completely abstract non-legible drawings, a plain chilled beverage can with NO LABEL, a small bowl of rice crackers, a folded nautical map, a simple straw sunhat placed beside the book; vivid turquoise ocean and warm late afternoon light beyond the ship railing. Contemporary polished anime background illustration, confident clean linework, rich painted textures, lively orange and navy accents, premium magazine cover composition. Scene fills every edge; detailed objects large in the foreground. No people, no recognizable fictional characters, no existing franchise symbols, no branded packaging, no lettering, no logos, no text, no white border, no watermark. This is original thematic editorial art, not official artwork or a product photograph."
+    },
+    {
+      "path": "assets/img/blog/naruto-soiree-anime-2026.webp",
+      "prompt": "Use case: illustration-story. Create an ORIGINAL full-bleed landscape editorial cover for a French manga lifestyle blog about preparing a cozy ninja-anime viewing evening. Highest native resolution, 16:9, no border. A warm Japanese-inspired living room at blue hour: a low wooden table in the foreground with a plain orange beverage can without labels, small bowls of rice crackers and colorful ribbon sweets, a closed manga volume with a blank cover, two floor cushions, a television showing only an ORIGINAL distant mountain and forest landscape without characters or text. Through a window, tiled red rooftops and green hills. Polished contemporary anime background illustration with fine clean linework, rich painted textures and cinematic soft light. Dominant warm orange, deep navy, leafy green accents. Large inviting objects, cohesive premium magazine illustration. No people, no recognizable fictional characters, no existing franchise symbols, no branded packaging, no lettering, no logos, no watermark, no white margins. Original thematic editorial art, not an official anime still or product photograph."
+    },
+    {
+      "path": "assets/img/blog/dragon-ball-cadeau-2026.webp",
+      "prompt": "Use case: illustration-story. Create an ORIGINAL full-bleed landscape editorial illustration for a French manga lifestyle blog about choosing a colorful anime gift selection. Highest native resolution, 16:9, no border. Close elevated three-quarter view of a tastefully arranged open gift box on a blue wooden desk. Inside: two plain unlabelled beverage cans, a small neutral paper bag of rice crackers, a modest bag of colorful ribbon sweets, folded orange tissue paper. Beside the box: a closed blank-cover manga book, a small blank gift tag, blue and orange wrapping ribbons. Background contains a soft golden sunlit mountain panorama through the window, no screen. Premium contemporary anime background art, crisp detailed linework, painted textures, lively orange and electric-blue accents with warm natural light. Gift objects fill the foreground and are clearly legible, elegant uncluttered composition. No people, no recognizable fictional characters, no franchise symbols, no product branding, no text, no logos, no watermark, no white canvas margins. It must look like an original editorial illustration, not an official product bundle or real ULTRAPOP packaging."
+    }
+  ]
+}

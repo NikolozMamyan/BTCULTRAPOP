@@ -270,8 +270,12 @@ final readonly class StorefrontProductCatalog
     {
         $products = $this->all();
         $text = $this->taxonomySlug($post->getCategory() . ' ' . $post->getTitle());
+        $category = $this->taxonomySlug($post->getCategory());
         $matching = array_values(array_filter($products, fn (array $product): bool =>
-            '' !== $product['license'] && str_contains($text, $this->taxonomySlug($product['license'])),
+            '' !== $product['license'] && (
+                str_contains($text, $this->taxonomySlug($product['license']))
+                || str_starts_with($this->taxonomySlug($product['license']), $category . '-')
+            ),
         ));
 
         return array_slice($matching ?: $products, 0, 3);

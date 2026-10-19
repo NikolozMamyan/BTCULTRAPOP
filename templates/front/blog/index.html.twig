@@ -45,8 +45,8 @@
         {% if posts %}
             {% set featured_post = posts|first %}
             <a class="blog-featured" href="{{ path('app_front_blog_show', {slug: featured_post.slug}) }}">
-                <span class="blog-featured__media">
-                    <img src="{{ featured_post.cover_image }}" alt="{{ featured_post.title }}">
+                <span class="blog-featured__media {{ featured_post.cover_has_padding ? 'is-padded' : '' }}">
+                    <img src="{{ featured_post.cover_image }}" alt="{{ featured_post.title }}" {% if featured_post.cover_width %}width="{{ featured_post.cover_width }}" height="{{ featured_post.cover_height }}"{% endif %} fetchpriority="high" decoding="async">
                 </span>
                 <span class="blog-featured__content">
                     <span class="blog-post-meta">
@@ -66,8 +66,8 @@
                 <div class="blog-grid">
                     {% for post in posts|slice(1) %}
                         <article class="blog-card">
-                            <a class="blog-card__media" href="{{ path('app_front_blog_show', {slug: post.slug}) }}">
-                                <img src="{{ post.cover_image }}" alt="{{ post.title }}" loading="lazy">
+                            <a class="blog-card__media {{ post.cover_has_padding ? 'is-padded' : '' }}" href="{{ path('app_front_blog_show', {slug: post.slug}) }}">
+                                <img src="{{ post.cover_image }}" alt="{{ post.title }}" {% if post.cover_width %}width="{{ post.cover_width }}" height="{{ post.cover_height }}"{% endif %} loading="lazy" decoding="async">
                                 <span>{{ post.category }}</span>
                             </a>
                             <div class="blog-card__content">

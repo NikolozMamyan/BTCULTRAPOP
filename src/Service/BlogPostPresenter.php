@@ -3,11 +3,21 @@
 namespace App\Service;
 
 use App\Entity\BlogPost;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final readonly class BlogPostPresenter
 {
-    public function __construct(private AssetUrlResolver $assetUrlResolver)
-    {
+    private const PADDED_COVERS = [
+        'anime.png', 'bleach.png', 'demon_slayer.png', 'fruits_basket.png',
+        'jujustu-kaisen_1.png', 'jujustu-kaisen_2.png', 'naruto_1.png',
+        'naruto_2.png', 'one_piece_1.png', 'unknown_anime.png',
+    ];
+
+    public function __construct(
+        private AssetUrlResolver $assetUrlResolver,
+        #[Autowire('%kernel.project_dir%')]
+        private string $projectDirectory,
+    ) {
     }
 
     /**
@@ -15,12 +25,18 @@ final readonly class BlogPostPresenter
      */
     public function present(BlogPost $post, bool $withContent = false): array
     {
+        $coverPath = $post->getCoverImage();
+        $coverFile = $this->projectDirectory . '/assets/' . $coverPath;
+        $dimensions = str_starts_with($coverPath, 'img/blog/') && is_file($coverFile) ? getimagesize($coverFile) : false;
         $presented = [
             'id' => $post->getId(),
             'title' => $post->getTitle(),
             'slug' => $post->getSlug(),
             'excerpt' => $post->getExcerpt(),
             'cover_image' => $this->assetUrlResolver->resolve($post->getCoverImage()),
+            'cover_has_padding' => str_starts_with($coverPath, 'img/blog/') && in_array(basename($coverPath), self::PADDED_COVERS, true),
+            'cover_width' => $dimensions[0] ?? null,
+            'cover_height' => $dimensions[1] ?? null,
             'category' => $post->getCategory(),
             'seo_title' => $post->getSeoTitle() ?: $post->getTitle() . ' | Blog ULTRAPOP',
             'seo_description' => $post->getSeoDescription() ?: $post->getExcerpt(),

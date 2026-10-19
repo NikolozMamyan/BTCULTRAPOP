@@ -57,7 +57,9 @@
         </header>
 
         <figure class="blog-article__cover max-w-6xl mx-auto px-5">
-            <img src="{{ post.cover_image }}" alt="{{ post.title }}">
+            <div class="blog-article__image-frame {{ post.cover_has_padding ? 'is-padded' : '' }}">
+                <img src="{{ post.cover_image }}" alt="{{ post.title }}" {% if post.cover_width %}width="{{ post.cover_width }}" height="{{ post.cover_height }}"{% endif %} fetchpriority="high" decoding="async">
+            </div>
         </figure>
 
         <div class="blog-article__layout max-w-5xl mx-auto px-5">
@@ -100,8 +102,8 @@
             <div class="blog-grid blog-grid--related">
                 {% for related in related_posts %}
                     <article class="blog-card">
-                        <a class="blog-card__media" href="{{ path('app_front_blog_show', {slug: related.slug}) }}">
-                            <img src="{{ related.cover_image }}" alt="{{ related.title }}" loading="lazy">
+                        <a class="blog-card__media {{ related.cover_has_padding ? 'is-padded' : '' }}" href="{{ path('app_front_blog_show', {slug: related.slug}) }}">
+                            <img src="{{ related.cover_image }}" alt="{{ related.title }}" {% if related.cover_width %}width="{{ related.cover_width }}" height="{{ related.cover_height }}"{% endif %} loading="lazy" decoding="async">
                             <span>{{ related.category }}</span>
                         </a>
                         <div class="blog-card__content">
