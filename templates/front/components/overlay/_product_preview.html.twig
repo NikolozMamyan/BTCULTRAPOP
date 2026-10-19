@@ -7,12 +7,12 @@
         <div class="product-preview__media is-image-mode" data-product-preview-target="media">
             <canvas class="product-preview__canvas" data-product-preview-target="canvas" hidden></canvas>
             <div class="product-preview__loader" data-product-preview-target="loader" hidden aria-hidden="true"></div>
-            <img id="product-preview-image" src="" alt="" data-product-preview-target="image">
+            <img id="product-preview-image" alt="" width="600" height="600" hidden data-product-preview-target="image">
             <p class="product-preview__error" data-product-preview-target="error" role="status" hidden></p>
         </div>
         <div class="product-preview__content" data-product-preview-target="content">
             <span>{{ 'product.preview_eyebrow'|trans }}</span>
-            <h2 id="product-preview-title" data-product-preview-target="title"></h2>
+            <div id="product-preview-title" data-product-preview-target="title"></div>
             <a id="product-preview-link" href="#" class="product-preview__link" data-product-preview-target="link">
                 {{ 'product.view_product'|trans }}
                 <i class="fa-solid fa-arrow-right"></i>

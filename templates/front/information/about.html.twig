@@ -1,0 +1,36 @@
+{% extends 'front/information/base.html.twig' %}
+
+{% block information_meta_title %}{{ 'about.title'|trans }} | ULTRAPOP{% endblock %}
+{% block information_meta_description %}{{ 'about.meta'|trans }}{% endblock %}
+{% block information_breadcrumb %}{{ 'about.title'|trans }}{% endblock %}
+{% block information_icon %}fa-solid fa-building{% endblock %}
+{% block information_eyebrow %}ULTRAPOP & LNS TRADE{% endblock %}
+{% block information_title %}{{ 'about.title'|trans }}{% endblock %}
+{% block information_intro %}{{ 'about.intro'|trans }}{% endblock %}
+
+{% block information_content %}
+    <section class="information-section">
+        <span class="information-section__number">01</span>
+        <div>
+            <h2>{{ 'about.company.title'|trans }}</h2>
+            <p>{{ 'about.company.text'|trans }}</p>
+            <p><a href="{{ path('app_front_legal') }}">{{ 'about.company.link'|trans }}</a></p>
+        </div>
+    </section>
+    <section class="information-section">
+        <span class="information-section__number">02</span>
+        <div>
+            <h2>{{ 'about.catalog.title'|trans }}</h2>
+            <p>{{ 'home.seo.text'|trans }}</p>
+            <p><a href="{{ path('app_front_boutique') }}">{{ 'common.shop'|trans }}</a> · <a href="{{ path('app_front_licences') }}">{{ 'common.licenses'|trans }}</a></p>
+        </div>
+    </section>
+    <section id="redaction" class="information-section">
+        <span class="information-section__number">03</span>
+        <div>
+            <h2>{{ 'about.editorial.title'|trans }}</h2>
+            <p>{{ 'about.editorial.text'|trans }}</p>
+            <p><a href="{{ path('app_front_blog') }}">{{ 'common.blog'|trans }}</a> · <a href="{{ path('app_front_contact') }}">{{ 'footer.contact'|trans }}</a></p>
+        </div>
+    </section>
+{% endblock %}

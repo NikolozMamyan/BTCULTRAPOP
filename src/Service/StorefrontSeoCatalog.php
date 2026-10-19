@@ -8,6 +8,7 @@ use App\Repository\BlogPostRepository;
 use App\Repository\ProductRepository;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 final readonly class StorefrontSeoCatalog
 {
@@ -17,6 +18,7 @@ final readonly class StorefrontSeoCatalog
         private ProductSlugger $productSlugger,
         private AssetUrlResolver $assetUrlResolver,
         private UrlGeneratorInterface $urlGenerator,
+        private SluggerInterface $slugger,
         #[Autowire('%env(SEO_ORIGIN)%')]
         private string $seoOrigin,
     ) {
@@ -57,7 +59,7 @@ final readonly class StorefrontSeoCatalog
      */
     public function publicPages(): array
     {
-        return [
+        $pages = [
             $this->page('app_front_home', 'weekly', '1.0'),
             $this->page('app_front_boutique', 'daily', '0.9'),
             $this->page('app_front_blog', 'weekly', '0.8'),
@@ -69,7 +71,32 @@ final readonly class StorefrontSeoCatalog
             $this->page('app_front_legal', 'monthly', '0.4'),
             $this->page('app_front_privacy', 'monthly', '0.4'),
             $this->page('app_front_contact', 'monthly', '0.6'),
+            $this->page('app_front_about', 'monthly', '0.7'),
+            $this->page('app_front_faq', 'monthly', '0.6'),
         ];
+
+        $taxonomies = [];
+        foreach ($this->products->findForStorefront() as $product) {
+            foreach ($product->getCategory()?->getPathNames() ?? [] as $name) {
+                if ('Tout' !== $name) {
+                    $taxonomies['app_front_category'][$name] = true;
+                }
+            }
+            if (null !== $product->getLicense()) {
+                $taxonomies['app_front_license'][$product->getLicense()->getName()] = true;
+            }
+        }
+        foreach ($taxonomies as $route => $names) {
+            foreach (array_keys($names) as $name) {
+                $pages[] = [
+                    'url' => $this->absoluteUrl($route, ['slug' => $this->slugger->slug($name, '-', 'fr')->lower()->toString()]),
+                    'changefreq' => 'weekly',
+                    'priority' => '0.8',
+                ];
+            }
+        }
+
+        return $pages;
     }
 
     /**

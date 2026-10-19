@@ -1,0 +1,20 @@
+{% set questions = [
+    {question: 'product.faq.license.question'|trans({'%name%': product.name}), answer: 'product.faq.license.answer'|trans({'%name%': product.name, '%license%': product.license})},
+    {question: 'product.faq.ingredients.question'|trans, answer: (product.ingredients ? 'product.faq.ingredients.available' : 'product.faq.ingredients.contact')|trans},
+    {question: 'product.faq.stock.question'|trans, answer: (product.in_stock ? 'product.faq.stock.available' : 'product.faq.stock.unavailable')|trans}
+] %}
+<section class="product-faq shop-seo-copy" aria-labelledby="product-faq-title">
+    <h2 id="product-faq-title">{{ 'product.faq.title'|trans }}</h2>
+    {% for item in questions %}
+        <details class="border-b py-4">
+            <summary class="font-bold cursor-pointer">{{ item.question }}</summary>
+            <p class="pt-3">{{ item.answer }}</p>
+        </details>
+    {% endfor %}
+    <p><a href="{{ path('app_front_contact') }}">{{ 'footer.contact'|trans }}</a> · <a href="{{ path('app_front_delivery') }}">{{ 'footer.delivery'|trans }}</a></p>
+</section>
+{% set entities = [] %}
+{% for item in questions %}
+    {% set entities = entities|merge([{'@type': 'Question', name: item.question, acceptedAnswer: {'@type': 'Answer', text: item.answer}}]) %}
+{% endfor %}
+<script type="application/ld+json">{{ {'@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: entities}|json_encode(constant('JSON_HEX_TAG'))|raw }}</script>

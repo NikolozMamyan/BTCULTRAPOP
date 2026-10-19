@@ -9,5 +9,14 @@
     {% include 'front/home/components/_universes.html.twig' %}
     {% include 'front/home/components/_licenses_carousel.html.twig' %}
     {% include 'front/home/components/_popular_products.html.twig' %}
+    <section class="shop-seo-copy max-w-7xl mx-auto px-5" aria-labelledby="home-seo-title">
+        {% if web_components.hero|default([]) %}
+            <h2 id="home-seo-title">{{ 'home.seo.title'|trans }}</h2>
+        {% else %}
+            <h1 id="home-seo-title">{{ 'home.seo.title'|trans }}</h1>
+        {% endif %}
+        <p>{{ 'home.seo.text'|trans }}</p>
+        <p><a href="{{ path('app_front_about') }}">{{ 'about.title'|trans }}</a> · <a href="{{ path('app_front_boutique') }}">{{ 'common.shop'|trans }}</a> · <a href="{{ path('app_front_faq') }}">{{ 'faq.title'|trans }}</a></p>
+    </section>
     {% include 'front/home/components/_newsletter.html.twig' %}
 {% endblock %}

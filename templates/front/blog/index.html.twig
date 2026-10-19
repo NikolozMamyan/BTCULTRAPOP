@@ -6,6 +6,7 @@
 {% block og_image %}{{ posts|first ? seo_origin ~ (posts|first).cover_image : seo_origin ~ asset('img/blog/demon_slayer_3.jpg') }}{% endblock %}
 {% block storefront_data %}data-page="blog"{% endblock %}
 {% block structured_data %}
+    {{ parent() }}
     {% set article_items = [] %}
     {% for post in posts %}
         {% set article_items = article_items|merge([{

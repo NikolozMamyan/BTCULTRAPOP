@@ -1,5 +1,5 @@
+/* stimulusFetch: 'lazy' */
 import { Controller } from '@hotwired/stimulus';
-import ProductModelScene from '../lib/can_product_scene.js';
 
 export default class extends Controller {
     static targets = [
@@ -118,10 +118,17 @@ export default class extends Controller {
 
     async startScene(imageUrl, shape, modelType = 'can') {
         this.disposeScene();
-        const scene = new ProductModelScene(this.canvasTarget, imageUrl, shape, modelType);
-        this.scene = scene;
+        const sceneRequest = {};
+        this.sceneRequest = sceneRequest;
+        let scene = null;
 
         try {
+            const { default: ProductModelScene } = await import('../lib/can_product_scene.js');
+            if (this.sceneRequest !== sceneRequest || this.rootTarget.getAttribute('aria-hidden') === 'true') {
+                return;
+            }
+            scene = new ProductModelScene(this.canvasTarget, imageUrl, shape, modelType);
+            this.scene = scene;
             await scene.start();
 
             if (this.scene !== scene) {
@@ -133,16 +140,21 @@ export default class extends Controller {
             this.loaderTarget.hidden = true;
             window.requestAnimationFrame(() => scene.resize());
         } catch (error) {
+            if (this.sceneRequest !== sceneRequest) {
+                scene?.dispose();
+                return;
+            }
             if (this.scene === scene) {
                 this.scene = null;
             }
 
-            scene.dispose();
+            scene?.dispose();
             this.showImage('Aperçu 3D indisponible sur ce navigateur. Image produit affichée.');
         }
     }
 
     disposeScene() {
+        this.sceneRequest = null;
         this.scene?.dispose();
         this.scene = null;
     }

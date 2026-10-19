@@ -1,3 +1,4 @@
+/* stimulusFetch: 'lazy' */
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
@@ -8,6 +9,8 @@ export default class extends Controller {
         heroImages: Object,
         heroMobileBreakpoint: String,
         heroMobileImages: Object,
+        initialCategory: { type: String, default: 'all' },
+        title: String,
         newLabel: String,
         pageSize: { type: Number, default: 6 },
         priceChip: String,
@@ -119,6 +122,11 @@ export default class extends Controller {
     }
 
     selectCategory(event) {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button > 0) {
+            return;
+        }
+
+        event.preventDefault();
         this.selectedCategory = event.params.category;
 
         this.syncCategoryButtons();
@@ -463,7 +471,7 @@ export default class extends Controller {
     initialSelectedCategory(searchParams) {
         const requestedCategory = searchParams.get(this.currentFilterField());
 
-        return requestedCategory && requestedCategory.trim() !== '' ? requestedCategory : 'all';
+        return requestedCategory && requestedCategory.trim() !== '' ? requestedCategory : this.initialCategoryValue;
     }
 
     restoreControls(searchParams) {
@@ -504,7 +512,14 @@ export default class extends Controller {
             this.filteredCards?.length || 0,
         );
 
-        this.setSearchParam(searchParams, filterField, this.selectedCategory !== 'all' ? this.selectedCategory : '');
+        const selectedLink = this.categoryTargets.find((link) => link.dataset.shopFiltersCategoryParam === this.selectedCategory);
+        if (selectedLink?.href && /^\/(?:boutique|licences)(?:\/|$)/.test(url.pathname)) {
+            url.pathname = new URL(selectedLink.href).pathname;
+            searchParams.delete(filterField);
+            this.initialCategoryValue = this.selectedCategory;
+        } else {
+            this.setSearchParam(searchParams, filterField, this.selectedCategory !== 'all' ? this.selectedCategory : '');
+        }
         this.setSearchParam(searchParams, 'price', selectedPrice < maximumPrice ? String(selectedPrice) : '');
         this.setSearchParam(searchParams, 'promo', this.promoTarget.checked ? '1' : '');
         this.setSearchParam(searchParams, 'new', this.newTarget.checked ? '1' : '');
@@ -518,6 +533,15 @@ export default class extends Controller {
 
         if (url.href !== window.location.href) {
             window.history.replaceState(window.history.state, '', url);
+            const canonical = document.querySelector('link[rel="canonical"]');
+            if (canonical) {
+                const canonicalUrl = new URL(canonical.href);
+                canonicalUrl.pathname = url.pathname;
+                canonicalUrl.search = '';
+                canonicalUrl.hash = '';
+                canonical.href = canonicalUrl.href;
+                document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonicalUrl.href);
+            }
         }
     }
 
@@ -537,6 +561,14 @@ export default class extends Controller {
                 'is-active',
                 button.dataset.shopFiltersCategoryParam === this.selectedCategory,
             );
+        });
+
+        const heading = this.element.closest('.shop-catalog')?.querySelector('h1');
+        if (heading) {
+            heading.textContent = this.selectedCategory === 'all' ? this.titleValue : this.selectedCategory;
+        }
+        this.element.closest('main')?.querySelectorAll('[data-catalog-category]').forEach((section) => {
+            section.hidden = section.dataset.catalogCategory !== this.selectedCategory;
         });
     }
 

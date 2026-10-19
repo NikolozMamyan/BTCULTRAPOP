@@ -29,6 +29,8 @@
         <aside class="information-nav" aria-label="Pages d’information">
             <p>Informations</p>
             <nav>
+                <a href="{{ path('app_front_about') }}" class="{{ current_route == 'app_front_about' ? 'is-active' : '' }}">{{ 'about.title'|trans }}</a>
+                <a href="{{ path('app_front_faq') }}" class="{{ current_route == 'app_front_faq' ? 'is-active' : '' }}">{{ 'faq.title'|trans }}</a>
                 <a href="{{ path('app_front_delivery') }}" class="{{ current_route == 'app_front_delivery' ? 'is-active' : '' }}">
                     <i class="fa-solid fa-truck-fast"></i>
                     Livraison

@@ -3,11 +3,13 @@
 namespace App\Service;
 
 use App\Entity\Category;
+use App\Entity\BlogPost;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Enum\ProductStatus;
 use App\Repository\ProductRepository;
 use App\Repository\UserFavoriteRepository;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 final readonly class StorefrontProductCatalog
 {
@@ -25,6 +27,7 @@ final readonly class StorefrontProductCatalog
         private AssetUrlResolver $assetUrlResolver,
         private ProductSlugger $productSlugger,
         private ProductModel3DResolver $productModel3DResolver,
+        private SluggerInterface $slugger,
     ) {
     }
 
@@ -200,14 +203,16 @@ final readonly class StorefrontProductCatalog
 
                 return [
                     'name' => $name,
+                    'slug' => $this->taxonomySlug($name),
                     'count' => $group['count'],
                     'image' => $group['iconImage'] ?: $group['image'],
                     'fallbackImage' => $group['fallbackImage'],
                     'rootImage' => $rootImage,
                     'rootFallbackImage' => $rootFallbackImage,
                     'children' => array_map(
-                        static fn (string $childName, array $child): array => [
+                        fn (string $childName, array $child): array => [
                             'name' => $childName,
+                            'slug' => $this->taxonomySlug($childName),
                             'count' => $child['count'],
                         ],
                         array_keys($group['children']),
@@ -238,6 +243,7 @@ final readonly class StorefrontProductCatalog
 
             $licenses[$name] ??= [
                 'name' => $name,
+                'slug' => $this->taxonomySlug($name),
                 'count' => 0,
                 'image' => '',
             ];
@@ -253,6 +259,54 @@ final readonly class StorefrontProductCatalog
         uasort($licenses, static fn (array $first, array $second): int => strnatcasecmp($first['name'], $second['name']));
 
         return array_values($licenses);
+    }
+
+    public function taxonomySlug(string $name): string
+    {
+        return $this->slugger->slug($name, '-', 'fr')->lower()->toString();
+    }
+
+    public function forBlogPost(BlogPost $post): array
+    {
+        $products = $this->all();
+        $text = $this->taxonomySlug($post->getCategory() . ' ' . $post->getTitle());
+        $matching = array_values(array_filter($products, fn (array $product): bool =>
+            '' !== $product['license'] && str_contains($text, $this->taxonomySlug($product['license'])),
+        ));
+
+        return array_slice($matching ?: $products, 0, 3);
+    }
+
+    public function landing(string $slug, string $field, ?User $user = null): ?array
+    {
+        $products = $this->all($user);
+        $items = 'license' === $field ? $this->licensesFor($products) : $this->categoriesFor($products);
+
+        foreach ($items as $item) {
+            foreach ([$item, ...($item['children'] ?? [])] as $candidate) {
+                if ($candidate['slug'] !== $slug) {
+                    continue;
+                }
+
+                $selected = array_values(array_filter($products, static fn (array $product): bool =>
+                    'license' === $field
+                        ? $product['license'] === $candidate['name']
+                        : in_array($candidate['name'], $product['category_path'], true),
+                ));
+
+                return [
+                    'name' => $candidate['name'],
+                    'slug' => $slug,
+                    'field' => $field,
+                    'products' => $selected,
+                    'all_products' => $products,
+                    'max_price' => $this->maxPriceFor($products),
+                    'items' => $items,
+                ];
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -279,11 +333,13 @@ final readonly class StorefrontProductCatalog
             'reference' => $product->getReference(),
             'ean' => $product->getEan(),
             'cat' => $category?->getName() ?? '',
+            'category_slug' => $category ? $this->taxonomySlug($category->getName()) : '',
             'category_path' => $category?->getPathNames() ?? [],
             'category_position_path' => $this->categoryPositionPath($category),
             'category_icon_path' => $this->categoryIconPath($category),
             'model_3d' => $this->productModel3DResolver->present($product),
             'license' => $license?->getName() ?? '',
+            'license_slug' => $license ? $this->taxonomySlug($license->getName()) : '',
             'license_icon' => $license?->getIconPath() ? $this->assetUrlResolver->resolve($license->getIconPath()) : '',
             'price' => $price,
             'old' => $product->hasPromoPrice() ? $regularPrice : null,

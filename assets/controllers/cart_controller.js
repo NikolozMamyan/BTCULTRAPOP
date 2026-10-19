@@ -1,3 +1,4 @@
+/* stimulusFetch: 'lazy' */
 import { Controller } from '@hotwired/stimulus';
 import { pushEcommerceEvent } from '../lib/ecommerce_tracking.js';
 import { showStorefrontToast } from '../lib/storefront_toast.js';

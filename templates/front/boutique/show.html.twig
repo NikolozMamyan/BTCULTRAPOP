@@ -6,6 +6,7 @@
 {% block og_type %}product{% endblock %}
 {% block og_image %}{{ product.img starts with 'http://' or product.img starts with 'https://' ? product.img : seo_origin ~ product.img }}{% endblock %}
 {% block structured_data %}
+    {{ parent() }}
     {% set product_schema = {
         '@context': 'https://schema.org',
         '@type': 'Product',
@@ -16,6 +17,7 @@
         category: product.cat,
         brand: {
             '@type': 'Brand',
+            '@id': seo_origin ~ '/#brand',
             name: 'ULTRAPOP'
         },
         offers: {
@@ -27,7 +29,8 @@
             itemCondition: 'https://schema.org/NewCondition',
             seller: {
                 '@type': 'Organization',
-                name: 'ULTRAPOP'
+                '@id': seo_origin ~ '/#lns-trade',
+                name: 'LNS TRADE'
             }
         }
     } %}
@@ -79,7 +82,7 @@
         </div>
     </header>
 
-    <main
+    <div
         class="product-page max-w-7xl mx-auto px-5"
         data-controller="product-detail ecommerce"
         data-product-detail-product-id-value="{{ product.id }}"
@@ -114,6 +117,7 @@
                         src="{{ product.img }}"
                         alt="{{ product.name }}"
                         data-product-detail-target="visualImage"
+                        width="600" height="600" fetchpriority="high"
                     >
                 </div>
                 <div class="product-detail__thumbnails" aria-label="{{ 'product.gallery.label'|trans }}">
@@ -127,7 +131,7 @@
                             data-product-detail-alt-param="{{ image.alt }}"
                             data-action="product-detail#selectImage"
                         >
-                            <img src="{{ image.src }}" alt="">
+                            <img src="{{ image.src }}" alt="" width="80" height="80" loading="lazy" decoding="async">
                         </button>
                     {% endfor %}
                 </div>
@@ -265,6 +269,9 @@
                         <span class="product-tab-copy__eyebrow">{{ product.license }}</span>
                         <h3>{{ 'product.description_heading'|trans }}</h3>
                         <p>{{ product.description ?: 'product.long_description'|trans({'%name%': product.name, '%category%': product.cat}) }}</p>
+                        <p>{{ 'product.seo.summary'|trans({'%name%': product.name, '%category%': product.cat, '%license%': product.license, '%reference%': product.reference}) }}</p>
+                        <p>{{ ('product.guide.' ~ (product.category_path[1]|default('') == 'Boissons' ? 'drinks' : (product.cat == 'Negisan' ? 'noodles' : 'snacks')))|trans }}</p>
+                        <p><a class="underline" href="{{ path('app_front_category', {slug: product.category_slug}) }}">{{ product.cat }}</a> · <a class="underline" href="{{ path('app_front_license', {slug: product.license_slug}) }}">{{ product.license }}</a></p>
                     </div>
                 </div>
             </div>
@@ -358,6 +365,8 @@
             </div>
         </section>
 
+        {% include 'front/boutique/_faq.html.twig' with {product: product} only %}
+
         <section class="product-related">
             <div class="product-related__heading">
                 <div>
@@ -372,5 +381,5 @@
                 {% endfor %}
             </div>
         </section>
-    </main>
+    </div>
 {% endblock %}

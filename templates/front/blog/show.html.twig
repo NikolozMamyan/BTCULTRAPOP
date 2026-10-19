@@ -9,6 +9,7 @@
 {% block og_image %}{{ absolute_cover }}{% endblock %}
 {% block storefront_data %}data-page="blog"{% endblock %}
 {% block structured_data %}
+    {{ parent() }}
     <script type="application/ld+json">{{ {
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
@@ -20,10 +21,14 @@
         mainEntityOfPage: seo_origin ~ path('app_front_blog_show', {slug: post.slug}),
         author: {
             '@type': 'Organization',
-            name: 'ULTRAPOP'
+            '@id': seo_origin ~ '/#editorial-team',
+            name: 'Rédaction ULTRAPOP',
+            parentOrganization: {'@id': seo_origin ~ '/#organization'},
+            url: seo_origin ~ path('app_front_about') ~ '#redaction'
         },
         publisher: {
             '@type': 'Organization',
+            '@id': seo_origin ~ '/#organization',
             name: 'ULTRAPOP',
             logo: {
                 '@type': 'ImageObject',
@@ -47,7 +52,7 @@
             <div class="blog-article__meta">
                 <span><i class="fa-regular fa-calendar"></i> {{ post.published_at|date('d/m/Y') }}</span>
                 <span><i class="fa-regular fa-clock"></i> {{ 'blog.reading_time'|trans({'%count%': post.reading_time}) }}</span>
-                <span><i class="fa-solid fa-pen-nib"></i> ULTRAPOP</span>
+                <a href="{{ path('app_front_about') }}#redaction"><i class="fa-solid fa-pen-nib"></i> {{ 'blog.editorial_team'|trans }}</a>
             </div>
         </header>
 
@@ -68,6 +73,17 @@
 
             <div class="blog-article__content">
                 {{ post.content|raw }}
+                {% if related_products %}
+                    <section class="blog-product-links">
+                        <h2>{{ 'blog.products.title'|trans }}</h2>
+                        <p>{{ 'blog.products.intro'|trans({'%category%': post.category}) }}</p>
+                        <ul>
+                            {% for product in related_products %}
+                                <li><a href="{{ path('app_front_product', {id: product.id, slug: product.slug}) }}">{{ product.name }}</a> — {{ product.cat }}, {{ product.license }}.</li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% endif %}
             </div>
         </div>
     </article>

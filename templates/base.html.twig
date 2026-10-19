@@ -8,7 +8,7 @@
         {% set seo_title %}{% block title %}ULTRAPOP{% endblock %}{% endset %}
         {% set seo_description %}{% block meta_description %}{{ 'meta.description'|trans }}{% endblock %}{% endset %}
         {% set seo_robots %}{% block meta_robots %}index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1{% endblock %}{% endset %}
-        {% set seo_canonical %}{% block canonical_url %}{% endblock %}{% endset %}
+        {% set seo_canonical %}{% block canonical_url %}{{ seo_origin ~ app.request.pathInfo }}{% endblock %}{% endset %}
         {% set seo_og_type %}{% block og_type %}website{% endblock %}{% endset %}
         {% set seo_og_image %}{% block og_image %}{{ seo_origin ~ asset('img/home/hero-collection.png') }}{% endblock %}{% endset %}
 
@@ -38,39 +38,7 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        colors: {
-                            primary: '#e82118',
-                            'primary-d': '#c01711',
-                            secondary: '#ffcc07',
-                            'text-dark': '#203263',
-                            'text-light': '#666',
-                            'border-c': '#e5e7eb',
-                            'bg-light': '#f9fafb',
-                            success: '#10b981',
-                        },
-                        fontFamily: {
-                            display: ['"Bricolage Grotesque"', 'sans-serif'],
-                            sans: ['Archivo', 'sans-serif'],
-                        },
-                        boxShadow: {
-                            'sm-c': '0 1px 3px rgba(0,0,0,.08)',
-                            'md-c': '0 4px 12px rgba(0,0,0,.1)',
-                            'lg-c': '0 10px 30px rgba(0,0,0,.12)',
-                        },
-                        borderRadius: {
-                            'sm-c': '8px',
-                            'md-c': '12px',
-                            'lg-c': '16px',
-                        },
-                    },
-                },
-            };
-        </script>
+        <link rel="stylesheet" href="{{ asset('styles/site.min.css') }}">
 
         {% block stylesheets %}
         {% endblock %}

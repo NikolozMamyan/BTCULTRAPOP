@@ -1,0 +1,20 @@
+<script type="application/ld+json">{{ {
+    '@context': 'https://schema.org',
+    '@graph': [
+        {
+            '@type': 'Organization', '@id': seo_origin ~ '/#organization', name: 'ULTRAPOP',
+            url: seo_origin ~ '/', logo: seo_origin ~ asset('img/logo/logotype.svg'),
+            parentOrganization: {'@id': seo_origin ~ '/#lns-trade'},
+            brand: {'@id': seo_origin ~ '/#brand'},
+            sameAs: ['https://www.instagram.com/ultrapop_/', 'https://www.tiktok.com/@ultrapop_', 'https://www.linkedin.com/company/ultrapopbylnstrade']
+        },
+        {
+            '@type': 'Organization', '@id': seo_origin ~ '/#lns-trade', name: 'LNS TRADE', legalName: 'LNS TRADE SARL',
+            url: 'https://lnstrade.fr/', identifier: {'@type': 'PropertyValue', propertyID: 'SIREN', value: '803854447'}, vatID: 'FR84803854447',
+            address: {'@type': 'PostalAddress', streetAddress: '13 quai Kléber', postalCode: '67000', addressLocality: 'Strasbourg', addressCountry: 'FR'},
+            email: 'support@ultrapop.com', telephone: '+33144882300'
+        },
+        {'@type': 'Brand', '@id': seo_origin ~ '/#brand', name: 'ULTRAPOP', url: seo_origin ~ '/'},
+        {'@type': 'WebSite', '@id': seo_origin ~ '/#website', name: 'ULTRAPOP', url: seo_origin ~ '/', publisher: {'@id': seo_origin ~ '/#organization'}}
+    ]
+}|json_encode(constant('JSON_HEX_TAG'))|raw }}</script>

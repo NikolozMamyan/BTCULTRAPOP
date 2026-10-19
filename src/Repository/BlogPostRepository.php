@@ -11,6 +11,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 final class BlogPostRepository extends ServiceEntityRepository
 {
+    public const RETIRED_ONE_PIECE_SLUG = 'le-mystere-du-one-piece-et-si-la-plus-grande-theorie-etait-vraie';
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, BlogPost::class);
@@ -59,6 +61,8 @@ final class BlogPostRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('post')
             ->andWhere('post.published = true')
+            ->andWhere('post.slug != :retiredSlug')
+            ->setParameter('retiredSlug', self::RETIRED_ONE_PIECE_SLUG)
             ->andWhere('post.publishedAt <= :now')
             ->setParameter('now', new \DateTimeImmutable());
     }

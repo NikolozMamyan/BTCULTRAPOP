@@ -1,0 +1,28 @@
+{% extends 'front/information/base.html.twig' %}
+{% block information_meta_title %}{{ 'faq.title'|trans }} | ULTRAPOP{% endblock %}
+{% block information_meta_description %}{{ 'faq.meta'|trans }}{% endblock %}
+{% block information_breadcrumb %}{{ 'faq.title'|trans }}{% endblock %}
+{% block information_icon %}fa-solid fa-circle-question{% endblock %}
+{% block information_eyebrow %}ULTRAPOP{% endblock %}
+{% block information_title %}{{ 'faq.title'|trans }}{% endblock %}
+{% block information_intro %}{{ 'faq.meta'|trans }}{% endblock %}
+{% block structured_data %}
+    {{ parent() }}
+    {% set questions = [] %}
+    {% for key in ['brand', 'licenses', 'ingredients', 'stock'] %}
+        {% set questions = questions|merge([{'@type': 'Question', name: ('faq.' ~ key ~ '.question')|trans, acceptedAnswer: {'@type': 'Answer', text: ('faq.' ~ key ~ '.answer')|trans}}]) %}
+    {% endfor %}
+    <script type="application/ld+json">{{ {'@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: questions}|json_encode(constant('JSON_HEX_TAG'))|raw }}</script>
+{% endblock %}
+{% block information_content %}
+    {% for key in ['brand', 'licenses', 'ingredients', 'stock'] %}
+        <section class="information-section">
+            <span class="information-section__number">0{{ loop.index }}</span>
+            <div>
+                <h2>{{ ('faq.' ~ key ~ '.question')|trans }}</h2>
+                <p>{{ ('faq.' ~ key ~ '.answer')|trans }}</p>
+            </div>
+        </section>
+    {% endfor %}
+    <p><a href="{{ path('app_front_boutique') }}">{{ 'common.shop'|trans }}</a> · <a href="{{ path('app_front_delivery') }}">{{ 'footer.delivery'|trans }}</a> · <a href="{{ path('app_front_contact') }}">{{ 'footer.contact'|trans }}</a></p>
+{% endblock %}

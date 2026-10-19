@@ -29,9 +29,9 @@
                         {{ duplicate == 0 ? 'data-licenses-carousel-target="group"' : 'aria-hidden="true"' }}
                     >
                         {% for license in licenses %}
-                            <a href="{{ path('app_front_licences', {license: license.filter|default(license.name)}) }}" class="license-card">
+                            <a href="{{ license.slug in license_slugs ? path('app_front_license', {slug: license.slug}) : path('app_front_licences') }}" class="license-card">
                                 <span class="license-card__visual">
-                                    <img src="{{ asset(license.image) }}" alt="{{ license.name }}" draggable="false">
+                                    <img src="{{ asset(license.image) }}" alt="{{ license.name }}" draggable="false" width="300" height="300" loading="lazy" decoding="async">
                                 </span>
                                 <span class="license-card__footer">
                                     <span>

@@ -6478,7 +6478,7 @@ body.is-page-loading {
     text-transform: uppercase;
 }
 
-.product-preview__content h2 {
+.product-preview__content #product-preview-title {
     margin-top: .75rem;
     color: var(--text-dark);
     font-family: "Bricolage Grotesque", sans-serif;

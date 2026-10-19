@@ -42,9 +42,14 @@ final class WebComponentManager
         $boutique = $this->normalizeBoutique($stored['boutique'] ?? null);
 
         return [
-            'hero' => array_key_exists('hero', $stored) ? $hero : $defaults['hero'],
+            'hero' => array_map(fn (array $slide): array => array_merge($slide, [
+                'image_meta' => $this->imageMetadata((string) ($slide['image'] ?? '')),
+                'mobile_image_meta' => $this->imageMetadata((string) ($slide['mobile_image'] ?? '')),
+            ]), array_key_exists('hero', $stored) ? $hero : $defaults['hero']),
             'hero_settings' => array_key_exists('hero_settings', $stored) ? $heroSettings : $defaults['hero_settings'],
-            'licenses' => array_key_exists('licenses', $stored) ? $licenses : $defaults['licenses'],
+            'licenses' => array_map(fn (array $license): array => array_merge($license, [
+                'slug' => $this->slugger->slug((string) ($license['filter'] ?? $license['name']), '-', 'fr')->lower()->toString(),
+            ]), array_key_exists('licenses', $stored) ? $licenses : $defaults['licenses']),
             'newsletter' => array_key_exists('newsletter', $stored) ? $newsletter : $defaults['newsletter'],
             'boutique' => array_key_exists('boutique', $stored) ? $boutique : $defaults['boutique'],
         ];
@@ -511,6 +516,8 @@ final class WebComponentManager
 
         $file->move($this->uploadDirectory, $filename);
 
+        $this->optimizeImage(self::UPLOAD_PREFIX . '/' . $filename);
+
         return self::UPLOAD_PREFIX . '/' . $filename;
     }
 
@@ -527,6 +534,84 @@ final class WebComponentManager
         if ($this->filesystem->exists($absolutePath)) {
             $this->filesystem->remove($absolutePath);
         }
+        foreach ([640, 1280, 1920] as $width) {
+            $this->filesystem->remove($absolutePath . '.' . $width . '.webp');
+        }
+    }
+
+    public function optimizeImages(): int
+    {
+        $paths = [];
+        foreach ([self::defaultHome(), $this->home()] as $home) {
+            foreach ($home['hero'] as $slide) {
+                $paths[] = $slide['image'];
+                $paths[] = $slide['mobile_image'] ?? '';
+            }
+        }
+        foreach (array_unique($paths) as $path) {
+            if ('' !== $path) {
+                $this->optimizeImage($path);
+            }
+        }
+
+        return count(array_filter(array_unique($paths)));
+    }
+
+    private function imageMetadata(string $path): array
+    {
+        $file = $this->imageFile($path);
+        $size = null !== $file && is_file($file) ? getimagesize($file) : false;
+        $variants = [];
+        foreach ([640, 1280, 1920] as $width) {
+            if (null !== $file && is_file($file . '.' . $width . '.webp')) {
+                $variants[] = ['path' => $path . '.' . $width . '.webp', 'width' => $width];
+            }
+        }
+
+        return ['width' => $size[0] ?? null, 'height' => $size[1] ?? null, 'variants' => $variants];
+    }
+
+    private function optimizeImage(string $path): void
+    {
+        $file = $this->imageFile($path);
+        if (null === $file || !is_file($file)) {
+            return;
+        }
+        $image = imagecreatefromstring(file_get_contents($file));
+        if (false === $image) {
+            throw new \RuntimeException('Cannot decode banner image: ' . $path);
+        }
+        foreach ([640, 1280, 1920] as $width) {
+            if ($width > imagesx($image)) {
+                continue;
+            }
+            $target = $file . '.' . $width . '.webp';
+            if (is_file($target) && filemtime($target) >= filemtime($file)) {
+                continue;
+            }
+            $height = max(1, (int) round(imagesy($image) * $width / imagesx($image)));
+            $resized = imagecreatetruecolor($width, $height);
+            imagealphablending($resized, false);
+            imagesavealpha($resized, true);
+            imagecopyresampled($resized, $image, 0, 0, 0, 0, $width, $height, imagesx($image), imagesy($image));
+            if (!imagewebp($resized, $target, 80)) {
+                throw new \RuntimeException('Cannot write optimized banner: ' . $path);
+            }
+            imagedestroy($resized);
+        }
+        imagedestroy($image);
+    }
+
+    private function imageFile(string $path): ?string
+    {
+        if (str_starts_with($path, self::UPLOAD_PREFIX . '/') && basename($path) === substr($path, strlen(self::UPLOAD_PREFIX) + 1)) {
+            return $this->uploadDirectory . '/' . basename($path);
+        }
+        if (preg_match('~^img/home/[^/\\\\]+\.(?:png|jpe?g|webp)$~i', $path)) {
+            return dirname($this->uploadDirectory, 3) . '/assets/' . $path;
+        }
+
+        return null;
     }
 
     /**

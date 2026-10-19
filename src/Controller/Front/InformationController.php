@@ -15,6 +15,18 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class InformationController extends AbstractController
 {
+    #[Route('/notre-histoire', name: 'app_front_about', methods: ['GET'])]
+    public function about(): Response
+    {
+        return $this->render('front/information/about.html.twig');
+    }
+
+    #[Route('/faq', name: 'app_front_faq', methods: ['GET'])]
+    public function faq(): Response
+    {
+        return $this->render('front/information/faq.html.twig');
+    }
+
     #[Route('/livraison', name: 'app_front_delivery', methods: ['GET'])]
     public function delivery(): Response
     {

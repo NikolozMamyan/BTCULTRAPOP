@@ -253,13 +253,13 @@ final class FrontNavigationTest extends WebTestCase
         self::assertSelectorTextContains('.cart-page__summary', 'Résumé');
     }
 
-    public function testUnknownPageRedirectsToShop(): void
+    public function testUnknownPageReturns404(): void
     {
         $client = static::createClient();
 
         $client->request('GET', '/page-inconnue-ultrapop');
 
-        self::assertResponseRedirects('/boutique', 302);
+        self::assertResponseStatusCodeSame(404);
     }
 
     public function testApiNotFoundIsNotRedirected(): void
@@ -271,13 +271,13 @@ final class FrontNavigationTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
-    public function testUnknownProductRedirectsToShop(): void
+    public function testUnknownProductReturns404(): void
     {
         $client = static::createClient();
         $this->skipIfDatabaseIsUnavailable();
         $client->request('GET', '/boutique/product/999');
 
-        self::assertResponseRedirects('/boutique', 302);
+        self::assertResponseStatusCodeSame(404);
     }
 
     public function testLocaleCookieRendersTheStorefrontInEnglish(): void

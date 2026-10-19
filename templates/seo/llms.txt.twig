@@ -25,12 +25,10 @@
 
 ## Catalogue
 
-{% for product in products -%}
-- [{{ product.name }}]({{ product.url }}) — {{ product.category }}{% if product.license %}, licence {{ product.license }}{% endif %}{% if product.description %}. {{ product.description }}{% endif %}
-{% endfor %}
+{% for product in products %}
+- [{{ product.name }}]({{ product.url }}) — {{ product.category }}{% if product.license %}, licence {{ product.license }}{% endif %}{% if product.description %}. {{ product.description }}{% endif %}{{ '\n' }}{% endfor %}
 
 ## Blog
 
-{% for post in blog_posts -%}
-- [{{ post.title }}]({{ post.url }}) — {{ post.category }}. {{ post.description }}
-{% endfor %}
+{% for post in blog_posts %}
+- [{{ post.title }}]({{ post.url }}) — {{ post.category }}. {{ post.description }}{{ '\n' }}{% endfor %}

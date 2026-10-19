@@ -2,6 +2,10 @@
 
 {% block body_class %}font-sans antialiased overflow-x-hidden{% endblock %}
 
+{% block structured_data %}
+    {% include 'seo/_organization.html.twig' %}
+{% endblock %}
+
 {% block head_tracking %}
     {% set gtm_id = gtm_container_id|default('')|trim %}
     {% if gtm_id %}

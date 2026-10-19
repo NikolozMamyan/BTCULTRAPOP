@@ -4,6 +4,7 @@ namespace App\Controller\Front;
 
 use App\Repository\BlogPostRepository;
 use App\Service\BlogPostPresenter;
+use App\Service\StorefrontProductCatalog;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -23,7 +24,12 @@ final class BlogController extends AbstractController
         string $slug,
         BlogPostRepository $posts,
         BlogPostPresenter $presenter,
+        StorefrontProductCatalog $catalog,
     ): Response {
+        if (BlogPostRepository::RETIRED_ONE_PIECE_SLUG === $slug) {
+            return $this->redirectToRoute('app_front_license', ['slug' => 'one-piece'], Response::HTTP_MOVED_PERMANENTLY);
+        }
+
         $post = $posts->findPublishedBySlug($slug);
 
         if (null === $post) {
@@ -33,6 +39,7 @@ final class BlogController extends AbstractController
         return $this->render('front/blog/show.html.twig', [
             'post' => $presenter->present($post, true),
             'related_posts' => $presenter->presentMany($posts->findRelated($post)),
+            'related_products' => $catalog->forBlogPost($post),
         ]);
     }
 }

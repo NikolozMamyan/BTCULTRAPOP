@@ -27,6 +27,8 @@ final class InformationControllerTest extends WebTestCase
 
     public static function provideInformationPages(): iterable
     {
+        yield 'about' => ['/notre-histoire', 'Notre histoire'];
+        yield 'faq' => ['/faq', 'Questions fréquentes'];
         yield 'delivery' => ['/livraison', 'Livraison'];
         yield 'returns' => ['/retours-et-retractation', 'Retours et rétractation'];
         yield 'terms' => ['/conditions-generales-de-vente', 'Conditions générales de vente'];

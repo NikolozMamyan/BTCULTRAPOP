@@ -7,6 +7,8 @@
 {% set catalog_max_price = max_price|default(120) %}
 {% set catalog_breadcrumb = breadcrumb|default('shop.breadcrumb') %}
 {% set catalog_title = title|default('shop.title') %}
+{% set catalog_initial_category = initial_category|default('all') %}
+{% set catalog_product_count = selected_count|default(catalog_products|length) %}
 {% set catalog_show_hero = show_hero|default(false) %}
 {% set catalog_hero_image_paths = hero_images|default({}) %}
 {% set catalog_hero_mobile_image_paths = hero_mobile_images|default({}) %}
@@ -26,10 +28,12 @@
 
 {% if catalog_products %}
     <section class="shop-catalog {{ catalog_show_hero ? 'shop-catalog--with-hero' : '' }}">
-        <h1 class="sr-only">{{ catalog_title|trans }}</h1>
+        <h1 class="sr-only">{{ catalog_initial_category == 'all' ? catalog_title|trans : catalog_initial_category }}</h1>
         <div
             class="shop-layout max-w-7xl mx-auto px-5"
             data-controller="shop-filters"
+            data-shop-filters-initial-category-value="{{ catalog_initial_category }}"
+            data-shop-filters-title-value="{{ catalog_title|trans }}"
             data-shop-filters-all-value="{{ 'shop.filters.all'|trans }}"
             data-shop-filters-filter-field-value="{{ catalog_filter_field }}"
             data-shop-filters-page-size-value="6"
@@ -125,9 +129,8 @@
                         : first_filter_group.fallbackImage|default(catalog_products|first.img|default('')) %}
 
                     <div class="shop-category-list">
-                        <button
-                            type="button"
-                            class="shop-category-button shop-category-button--root is-active"
+                        <a href="{{ path(catalog_filter_field == 'license' ? 'app_front_licences' : 'app_front_boutique') }}"
+                            class="shop-category-button shop-category-button--root {{ catalog_initial_category == 'all' ? 'is-active' : '' }}"
                             data-shop-filters-target="category"
                             data-shop-filters-category-param="all"
                             data-shop-filters-hero-key-param="all"
@@ -154,7 +157,7 @@
                                 <strong>{{ 'shop.filters.all'|trans }}</strong>
                             </span>
                             <span class="shop-category-button__count">{{ catalog_products|length }}</span>
-                        </button>
+                        </a>
                         {% if catalog_filter_field == 'category' %}
                             {% for filter_group in catalog_filter_items %}
                                 {% set group_hero_key = filter_group.name == 'Boissons'
@@ -197,9 +200,8 @@
                                         <i class="shop-category-group__chevron fa-solid fa-chevron-down"></i>
                                     </summary>
                                     <div class="shop-category-group__panel">
-                                        <button
-                                            type="button"
-                                            class="shop-category-button shop-category-button--parent"
+                                        <a href="{{ path('app_front_category', {slug: filter_group.slug}) }}"
+                                            class="shop-category-button shop-category-button--parent {{ catalog_initial_category == filter_group.name ? 'is-active' : '' }}"
                                             data-shop-filters-target="category"
                                             data-shop-filters-category-param="{{ filter_group.name }}"
                                             data-shop-filters-hero-key-param="{{ group_hero_key }}"
@@ -210,11 +212,10 @@
                                                 <strong>{{ 'shop.filters.view_group_short'|trans }}</strong>
                                             </span>
                                             <span class="shop-category-button__count">{{ filter_group.count }}</span>
-                                        </button>
+                                        </a>
                                         {% for filter_item in filter_group.children %}
-                                            <button
-                                                type="button"
-                                                class="shop-category-button shop-category-button--child"
+                                            <a href="{{ path('app_front_category', {slug: filter_item.slug}) }}"
+                                                class="shop-category-button shop-category-button--child {{ catalog_initial_category == filter_item.name ? 'is-active' : '' }}"
                                                 data-shop-filters-target="category"
                                                 data-shop-filters-category-param="{{ filter_item.name }}"
                                                 data-shop-filters-hero-key-param="{{ group_hero_key }}"
@@ -226,7 +227,7 @@
                                                     <span>{{ filter_item.name }}</span>
                                                 </span>
                                                 <span class="shop-category-button__count">{{ filter_item.count }}</span>
-                                            </button>
+                                            </a>
                                         {% endfor %}
                                     </div>
                                 </details>
@@ -235,9 +236,8 @@
                             {% for filter_item in catalog_filter_items %}
                                 {% set filter_item_name = filter_item.name|default(filter_item) %}
                                 {% set filter_item_image = filter_item.image|default('') %}
-                                <button
-                                    type="button"
-                                    class="shop-category-button"
+                                <a href="{{ path('app_front_license', {slug: filter_item.slug}) }}"
+                                    class="shop-category-button {{ catalog_initial_category == filter_item_name ? 'is-active' : '' }}"
                                     data-shop-filters-target="category"
                                     data-shop-filters-category-param="{{ filter_item_name }}"
                                     data-action="shop-filters#selectCategory"
@@ -263,7 +263,7 @@
                                     {% if filter_item.count|default(null) is not null %}
                                         <span class="shop-category-button__count">{{ filter_item.count }}</span>
                                     {% endif %}
-                                </button>
+                                </a>
                             {% endfor %}
                         {% endif %}
                     </div>
@@ -342,14 +342,14 @@
                                         {{ catalog_title|trans }}
                                     </strong>
                                     <small>
-                                        <b data-shop-filters-target="count">{{ catalog_products|length }}</b>
+                                        <b data-shop-filters-target="count">{{ catalog_product_count }}</b>
                                         {{ 'shop.products'|trans }}
                                     </small>
                                 </span>
                             </div>
                         {% else %}
                             <p>
-                                <strong data-shop-filters-target="count">{{ catalog_products|length }}</strong>
+                                <strong data-shop-filters-target="count">{{ catalog_product_count }}</strong>
                                 {{ 'shop.products'|trans }}
                             </p>
                         {% endif %}
@@ -388,6 +388,7 @@
                     {% for product in catalog_products %}
                         {% include 'front/boutique/_product_card.html.twig' with {
                             product: product,
+                            initially_hidden: catalog_initial_category != 'all' and (catalog_filter_field == 'license' ? product.license != catalog_initial_category : catalog_initial_category not in product.category_path),
                             defer_image: true,
                             quantity_selector: true
                         } only %}

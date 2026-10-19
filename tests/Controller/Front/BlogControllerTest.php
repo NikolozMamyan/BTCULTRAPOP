@@ -16,12 +16,12 @@ final class BlogControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('link[rel="canonical"][href$="/blog"]');
-        self::assertSelectorCount(11, '.blog-featured, .blog-card');
+        self::assertSelectorCount(10, '.blog-featured, .blog-card');
         self::assertSelectorTextContains('h1', 'Le blog ULTRAPOP');
         self::assertSelectorTextContains('.blog-index', 'Demon Slayer: Kimetsu No Yaiba');
         self::assertSelectorTextContains('.blog-index', 'Naruto');
         self::assertSelectorTextContains('.blog-index', 'Jujutsu Kaisen');
-        self::assertSelectorExists('header a[href="/blog"]');
+        self::assertSelectorNotExists('header nav a[href="/blog"]');
         self::assertSelectorExists('footer a[href="/blog"]');
     }
 
@@ -42,6 +42,8 @@ final class BlogControllerTest extends WebTestCase
         self::assertSelectorTextContains('.blog-article__content', 'Sorti le 18 juillet 2025');
         self::assertSelectorNotExists('.blog-article__content script');
         self::assertSelectorNotExists('.blog-article__content [style]');
+        self::assertSelectorCount(3, '.blog-product-links a[href^="/boutique/produit/"]');
+        self::assertSelectorExists('.blog-article__meta a[href="/notre-histoire#redaction"]');
         self::assertStringContainsString('"@type":"BlogPosting"', $client->getResponse()->getContent());
     }
 

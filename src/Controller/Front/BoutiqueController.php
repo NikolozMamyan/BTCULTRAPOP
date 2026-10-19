@@ -15,6 +15,23 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class BoutiqueController extends AbstractController
 {
+    #[Route('/boutique/{slug}', name: 'app_front_category', requirements: ['slug' => '[a-z0-9]+(?:-[a-z0-9]+)*'], methods: ['GET'])]
+    public function category(string $slug, StorefrontProductCatalog $catalog, WebComponentManager $webComponents): Response
+    {
+        $landing = $catalog->landing($slug, 'category', $this->getAuthenticatedUser());
+
+        if (null === $landing) {
+            throw $this->createNotFoundException();
+        }
+
+        return $this->render('front/boutique/landing.html.twig', [
+            'landing' => $landing,
+            'boutique_hero_images' => $webComponents->boutiqueHeroImages(),
+            'boutique_hero_mobile_images' => $webComponents->boutiqueHeroMobileImages(),
+            'boutique_hero_mobile_breakpoint' => $webComponents->boutiqueHeroMobileBreakpoint(),
+        ]);
+    }
+
     #[Route('/boutique', name: 'app_front_boutique', methods: ['GET'])]
     public function index(StorefrontProductCatalog $catalog, WebComponentManager $webComponents): Response
     {

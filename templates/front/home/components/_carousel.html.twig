@@ -29,16 +29,33 @@
 
                     <div class="home-hero__slide carousel-slide relative">
                         <picture class="home-hero__picture">
+                            {% set desktop_srcset = [] %}
+                            {% for variant in slide.image_meta.variants %}
+                                {% set desktop_srcset = desktop_srcset|merge([asset(variant.path) ~ ' ' ~ variant.width ~ 'w']) %}
+                            {% endfor %}
+                            {% set mobile_srcset = [] %}
+                            {% for variant in slide.mobile_image_meta.variants %}
+                                {% set mobile_srcset = mobile_srcset|merge([asset(variant.path) ~ ' ' ~ variant.width ~ 'w']) %}
+                            {% endfor %}
                             {% if slide.mobile_image|default('') %}
                                 <source
                                     media="(max-width: {{ hero_mobile_breakpoint }})"
-                                    srcset="{{ asset(slide.mobile_image) }}"
+                                    srcset="{{ mobile_srcset ? mobile_srcset|join(', ') : asset(slide.mobile_image) }}"
+                                    {% if mobile_srcset %}type="image/webp" sizes="100vw"{% endif %}
+                                    {% if slide.mobile_image_meta.width %}width="{{ slide.mobile_image_meta.width }}" height="{{ slide.mobile_image_meta.height }}"{% endif %}
                                 >
+                            {% endif %}
+                            {% if desktop_srcset %}
+                                <source type="image/webp" srcset="{{ desktop_srcset|join(', ') }}" sizes="(min-width: 1280px) 1280px, 100vw">
                             {% endif %}
                             <img
                                 src="{{ asset(slide.image) }}"
                                 alt="{{ slide_alt }}"
                                 class="home-hero__image w-full h-[300px] md:h-[480px] object-cover"
+                                {% if slide.image_meta.width %}width="{{ slide.image_meta.width }}" height="{{ slide.image_meta.height }}"{% endif %}
+                                loading="{{ loop.first ? 'eager' : 'lazy' }}"
+                                fetchpriority="{{ loop.first ? 'high' : 'low' }}"
+                                decoding="async"
                                 data-banner-fallback="{{ slide_fallback }}"
                                 data-fallback-color="{{ slide.fallback_color|default(loop.first ? '#e82118' : '#203263') }}"
                             >

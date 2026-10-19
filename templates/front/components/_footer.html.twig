@@ -22,6 +22,8 @@
         <div>
             <h4 class="font-bold mb-4 text-sm">{{ 'footer.help'|trans }}</h4>
             <ul class="space-y-2 text-sm text-white/60">
+                <li><a href="{{ path('app_front_about') }}" class="hover:text-secondary">{{ 'about.title'|trans }}</a></li>
+                <li><a href="{{ path('app_front_faq') }}" class="hover:text-secondary">{{ 'faq.title'|trans }}</a></li>
                 <li><a href="{{ path('app_front_delivery') }}" class="hover:text-secondary">{{ 'footer.delivery'|trans }}</a></li>
                 <li><a href="{{ path('app_front_returns') }}" class="hover:text-secondary">{{ 'footer.returns'|trans }}</a></li>
                 <li><a href="{{ path('app_front_profil') }}" class="hover:text-secondary">{{ 'footer.order_tracking'|trans }}</a></li>
